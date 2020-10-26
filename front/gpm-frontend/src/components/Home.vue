@@ -42,7 +42,9 @@
         <div class="layout">
             <Layout>
                 <Header style="display: flex;justify-content:  flex-start ;align-items: center;">
-                    <font color="#f5deb3" size="20">文档管理系统</font>
+                   <img src="img/log.png" style="padding-left: -100px">
+                   <img src="img/logfont.png" style="padding-left: -100px">
+<!--                    <font color="#f5deb3" size="20">文档管理系统</font>-->
                 </Header>
                 <Layout style="height: 85%">
                     <Sider :style="{background: '#fff',maxWidth:'300px',flex:'0 0 300px'}"
