@@ -22,6 +22,9 @@
                 <DropdownItem @click.native="handleContextMenuCreateFlow" style="color: #ed4014"
                               v-if="selectNode!=null && selectNode.isDir">新建flow
                 </DropdownItem>
+                <DropdownItem @click.native="handleContextMenuCreateSnow" style="color: #ed4014"
+                              v-if="selectNode!=null && selectNode.isDir">新建思维导图
+                </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuCreateFile" style="color: #ed4014"
                               v-if="selectNode!=null && selectNode.isDir">新建文件
                 </DropdownItem>
@@ -286,6 +289,9 @@
              */
             handleContextMenuCreateFlow() {
                 this.handleContextMenuCreateText("请输入flow名称：",".flow");
+            },
+            handleContextMenuCreateSnow(){
+                this.handleContextMenuCreateText("请输入思维导图：",".mind");
             },
             /**
              * 检查是否是vuepress项目
