@@ -31,5 +31,5 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
  1. [用户操作手册](doc/user.md)
  2. [运维手册](doc/oper.md)
  3. [二次开发引导手册](doc/dev.md)
- 
+ 4. [参数配置手册](doc/conf.md)
  
