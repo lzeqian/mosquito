@@ -21,8 +21,19 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
 - 思维导图编辑器
 - 在线作图编辑器（流程图 ，活动图，类图，时序图等）
 
+效果图：
+
+1.流程图：
+![](doc/images/flow.png)
+
+2.思维导图：
+![](doc/images/nao.png)
+
+3.vuepress
+![](doc/images/vuepress.png)
+
  ## 系统架构
- ![系统拓扑图](doc/topology.png)
+ ![系统拓扑图](doc/images/topology.png)
  ### 前端依赖插件
  - pdfjs（pdf预览器）[教程](http://mozilla.github.io/pdf.js/)
  - mavon-editor（markdown编辑器）[教程](https://github.com/hinesboy/mavonEditor)
