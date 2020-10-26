@@ -41,7 +41,7 @@
 <template>
         <div class="layout">
             <Layout>
-                <Header style="display: flex;justify-content:  flex-start ;align-items: center;">
+                <Header style="display: flex;justify-content:  flex-start ;align-items: center;padding-left: 10px">
                    <img src="img/log.png" style="padding-left: -100px">
                    <img src="img/logfont.png" style="padding-left: -100px">
 <!--                    <font color="#f5deb3" size="20">文档管理系统</font>-->
