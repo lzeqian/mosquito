@@ -25,8 +25,8 @@ func main() {
 			beego.SetStaticPath(mapping, maps[mapping].(string))
 		}
 	}
-	beego.InsertFilter("/file/*",beego.BeforeRouter,service.FilterUser)
-	beego.InsertFilter("/md/*",beego.BeforeRouter,service.FilterUser)
+	beego.InsertFilter("/file/*", beego.BeforeRouter, service.FilterUser)
+	beego.InsertFilter("/md/*", beego.BeforeRouter, service.FilterUser)
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -34,6 +34,5 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		AllowCredentials: true,
 	}))
-	beego.Run(":8089")
+	beego.Run()
 }
-
