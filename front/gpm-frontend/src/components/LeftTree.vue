@@ -121,7 +121,7 @@
                     this.$Message.error("不允许直接下载目录，请选择文件");
                     return;
                 }
-                window.location = "http://localhost:8089/file/download?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title
+                window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title
             },
             /**
              * 从跟节点遍历获取当前节点父节点
@@ -156,7 +156,7 @@
                     return;
                 }
                 let {index, parentNode} = this.getParent(this.$refs.tree.data[0], selectNode)
-                this.$axios.delete("http://localhost:8089/file/delete?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title).then((response) => {
+                this.$axios.delete(this.$globalConfig.goServer + "file/delete?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title).then((response) => {
                     parentNode.children.splice(index, 1)
                     this.$set(parentNode, 'selected', true)
                     // vueThis.selectNode=parentNode;
@@ -245,9 +245,9 @@
                     selectNode.expand = true;
                     var code = prompt(title);
                     if (code != null && code.trim() != "") {
-                        let suffixRe=/^.+(\.txt|\.md|\.flow|\.html|\.js|\.css|\.json|\.yaml|\.yml|\.xml|\.java|\.py|\.vue|\.mind)$/
+                        let suffixRe=this.$globalConfig.supportFile
                         if(!suffix && !suffixRe.test(code)){
-                            vueThis.$Message.error("目前只支持(\\.txt|\\.md|\\.flow|\\.html|\\.js|\\.css|\\.json|\\.yaml|\\.yml|\\.xml|\\.java|\\.py|\\.vue)")
+                            vueThis.$Message.error("该文件目不支持创建,只支持:"+suffixRe)
                             return;
                         }
                         if (suffix && !code.endsWith(suffix)) {
@@ -472,21 +472,12 @@
                             node.expand = true    //展开子节点
                         })
                     } else {
-                        let mapping={
-                            "\\.md|\\.markdown":[node,'/mdeditor',"markdown编辑器"],
-                            "\\.fl|\\.flow":[node,'/floweditor',"流程编辑器"],
-                            "\\.xls|\\.xlsx":[node,'/exceleditor',"excel编辑器"],
-                            "\\.html|\\.txt":[node,'/htmleditor',"html编辑器"],
-                            "\\.json|\\.js|\\.py|\\.css|\\.java|\\.vue|\\.yml|\\.yaml|\\.xml":[node,'/codeeditor',"html编辑器"],
-                            "\\.pdf|\\.doc|\\.docx|\\.ppt\\.pptx":[node,'/pdfeditor',"pdf预览器"],
-                            "\\.png|\\.PNG|\\.JPG|\\.jpg\\.JPEG\\.jpeg|\\.gif\\.GIF":[node,'/imageviewer',"pdf预览器"],
-                            "\\.mind":[node,'/mindeditor',"pdf预览器"],
-                        }
+                        let mapping=this.$globalConfig.editorMapping
                         for(let key in mapping){
                             let re;
                             eval("re=/^.+("+key+")$/")
                             if (re.test(node.title) ) {
-                                this.routePush(...mapping[key])
+                                this.routePush(node,...mapping[key])
                                 return;
                             }
                         }
