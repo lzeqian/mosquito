@@ -3,7 +3,7 @@ module.exports = {
     devServer: {
         // open: process.platform === 'demo',
         // host: 'localhost',
-        port: 8080,
+        port: 8085,
         open: true, //配置自动启动浏览器
         proxy: {
             "/opAdmin": {
