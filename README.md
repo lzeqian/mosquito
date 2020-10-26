@@ -49,7 +49,7 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
  - goftp [教程](https://github.com/dutchcoders/goftp)
  ## 版本更新
  1. 1.0.0：版本支持全局的文档管理基建。
- 2. 1.0.1：权限+个人文档在+在线photoshop作图（暂未开发）。
+ 2. 1.0.1：权限+个人文档+在线photoshop作图（暂未开发）+showdoc集成+docker简易部署。
  ## 相关文档
  1. [用户操作手册](doc/user.md)
  2. [运维手册](doc/oper.md)
