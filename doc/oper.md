@@ -74,9 +74,9 @@ http://localhost:8080/home/tree
 ```$xslt
  npm i && npm run serve
 ```
->上述用于测试，实际生产可以使用 npm run build 将生成dist目录内容部署在nginx中。
+>上述方式用于开发测试，实际生产可以使用 npm run build 将生成dist目录内容部署在nginx中。
 >
 #### 配置
-- 开发运行端口位于： vue.config.js，port: 8085 部分。
+- 开发测试运行端口位于： vue.config.js，port: 8085 部分。
 - 前端调用后端服务器地址：src/utils/env.js中。
 
