@@ -7,7 +7,7 @@
  - wookteam：支持在线文档（markdown+流程图），不支持其他文档，不支持备份导出转换，[文档](https://gitee.com/aipaw/wookteam)。
  - wiki(confluence+MediaWiki+Docsify+vuepress)：支持富客户端+markdown，不支持其他文档管理[文档](https://www.jianshu.com/p/f79236289793)。
  - showdoc:支持在线接口api定制，markdown格式，无法支持其他文档[文档](https://www.showdoc.com.cn/demo?page_id=7)。
- - vuepress: 支持markdown写作，需要安装辅助和熟悉前端语言，必须线下操作，部署麻烦。
+ - vuepress: 支持markdown写作，需要安装辅助和熟悉前端语言，必须线下操作，部署麻烦[文档](https://www.vuepress.cn/guide/getting-started.html)。
 ## 简介
 mosquito是一款以文件系统作为基础的在线文档管理系统，
 在线文档管理系统功能包括：
