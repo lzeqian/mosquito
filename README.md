@@ -23,7 +23,19 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
 
  ## 系统架构
  ![系统拓扑图](doc/topology.png)
- 
+ ### 前端依赖插件
+ - pdfjs（pdf预览器）[教程](http://mozilla.github.io/pdf.js/)
+ - mavon-editor（markdown编辑器）[教程](https://github.com/hinesboy/mavonEditor)
+ - codemirror（代码编辑工具）[教程](https://github.com/surmon-china/vue-codemirror)
+ - wangeditor（html文本编辑器）[教程](http://www.wangeditor.com/)
+ - x-data-spreadsheet（excel预览工具）[教程](https://github.com/myliang/x-spreadsheet)
+ - mxgraph(废弃，流程图，无导出功能) [教程](https://jgraph.github.io/mxgraph/javascript/examples/grapheditor/www/index.html)
+ - 乐吾乐 Topology（正方形错误，其他图形待绘制）[教程](https://www.yuque.com/alsmile/topology/make-shape)
+ - kityminder-core（思维导图）[教程](https://github.com/fex-team/kityminder-core/wiki/command)
+### 后端依赖插件
+ - beego [教程](https://beego.me/docs/intro/)
+ - go-smb2 [教程](https://github.com/hirochachacha/go-smb2)
+ - goftp [教程](https://github.com/dutchcoders/goftp)
  ## 版本更新
  1. 1.0.0：版本支持全局的文档管理基建。
  2. 1.0.1：权限+个人文档在+在线photoshop作图（暂未开发）。
