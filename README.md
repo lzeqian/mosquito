@@ -23,13 +23,13 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
 
 效果图：
 
-1.流程图：
+<b>1.流程图：</b>
 ![](doc/images/flow.png)
 
-2.思维导图：
+<b>2.思维导图：</b>
 ![](doc/images/nao.png)
 
-3.vuepress
+<b>3.vuepress</b>
 ![](doc/images/vuepress.png)
 
  ## 系统架构
