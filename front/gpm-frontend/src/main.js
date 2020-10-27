@@ -27,6 +27,34 @@ Vue.prototype.loadEditorContent=function(func){
     func(vueThis,response.data.data)
   })
 }
+Vue.prototype.saveEditorContent=function(data,func){
+    let vueThis = this;
+    vueThis.$axios({
+        url: vueThis.$globalConfig.goServer+"file/save",
+        method: 'post',
+        data: {
+            ...data,
+            dirPath: vueThis.$route.query.dirPath,
+            fileName: vueThis.$route.query.fileName
+        },
+        header: {
+            'Content-Type': 'application/json'  //如果写成contentType会报错
+        }
+    }).then((response) => {
+        vueThis.$Message.info("保存成功")
+        if(func) {
+            func(response)
+        }
+    }).catch((err)=>{
+        vueThis.$Message.info("保存失败"+err)
+    });
+}
+Vue.prototype.registerRouteChange =function(callbackFun){
+  if(!Vue.prototype.callbackFunArray){
+      Vue.prototype.callbackFunArray={}
+  }
+  Vue.prototype.callbackFunArray.push(callbackFun)
+}
 Vue.prototype.$axios.interceptors.request.use(
     config => {
       if (config.method == 'get') {
@@ -55,12 +83,16 @@ Vue.prototype.$axios.interceptors.response.use(
 
 
 Vue.prototype.$globalConfig= GlobalConfig
-
 router.beforeEach((to, from, next)=>{
   if(!to.meta.title){
     document.title="文档管理系统"
   }
   next()
+})
+router.afterEach((to, from)=>{
+    if(!to.meta.title){
+        document.title="文档管理系统"
+    }
 })
 Vue.use(ViewUI);
 new Vue({

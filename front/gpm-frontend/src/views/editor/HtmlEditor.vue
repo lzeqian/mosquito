@@ -27,21 +27,9 @@
             // 做任何你想做的事情
             // 可参考【常用 API】文档，来操作编辑器
             let html=this.editor.txt.html()
-            vueThis.$axios({
-                url: vueThis.$globalConfig.goServer+"file/save",
-                method: 'post',
-                data: {
-                    value: html,
-                    html: '',
-                    dirPath: vueThis.$route.query.dirPath,
-                    fileName: vueThis.$route.query.fileName
-                },
-                header: {
-                    'Content-Type': 'application/json'  //如果写成contentType会报错
-                }
-            }).then((response) => {
-                vueThis.$Message.info("保存成功")
-            });
+            vueThis.saveEditorContent({
+                value: html,
+            })
         }
         // 菜单是否被激活（如果不需要，这个函数可以空着）
         // 1. 激活是什么？光标放在一段加粗、下划线的文本时，菜单栏里的 B 和 U 被激活，如下图
@@ -73,28 +61,25 @@
         },
         watch:{
             content(n,o){
-                this.editor.txt.html(n)
+                if(this.editor)
+                    this.editor.txt.html(n)
             },
             routeQueryContent(newVal, oldVal) {
-                this.initData()
-                this.editor.config.uploadImgParams = {
-                    projectName:this.$route.query.fileName
-                }
+                if(this.editor)
+                    this.editor.config.uploadImgParams = {
+                        projectName:this.$route.query.fileName
+                    }
             }
         },
         components: {
 
         },
         methods: {
-            initData() {
-                this.loadEditorContent((vueThis,data)=>{
-                    vueThis.content = data
-                })
+            initData(data) {
+                vueThis.content = data
             },
         },
         created(){
-
-
         },
         mounted() {
             vueThis=this;
@@ -113,7 +98,8 @@
                 editor.config.uploadFileName = 'myfile'
                 editor.config.menus = editor.config.menus.concat(menuKey)
                 editor.create();
-                vueThis.initData()
+                if(vueThis.content && vueThis.content!="")
+                    vueThis.editor.txt.html(vueThis.content)
             },1000)
         }
     }

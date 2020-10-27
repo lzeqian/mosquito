@@ -72,40 +72,19 @@
             codemirror
         },
         computed:{
-            routeQueryContent() {
-                return this.$route.query.dirPath+
-                    this.$route.query.fileName
-            }
         },
         watch:{
-            routeQueryContent(newVal, oldVal) {
-                this.initData()
-            }
         },
         methods: {
             keyHandled(){
                 if(event.code=="KeyS"){
-                    var vueThis = this;
-                    this.$axios({
-                        url: this.$globalConfig.goServer+"file/save",
-                        method: 'post',
-                        data: {
-                            value: vueThis.mirrorCode,
-                            dirPath: this.$route.query.dirPath,
-                            fileName: this.$route.query.fileName
-                        },
-                        header: {
-                            'Content-Type': 'application/json'  //如果写成contentType会报错
-                        }
-                    }).then((response) => {
-                        this.$Message.info("保存成功")
-                    });
+                    this.saveEditorContent({
+                        value: this.mirrorCode,
+                    })
                 }
             },
-            initData() {
-                this.loadEditorContent((vueThis,data)=>{
-                    vueThis.mirrorCode = data
-                })
+            initData(data) {
+                this.mirrorCode = data
             },
         },
         created(){
@@ -131,7 +110,6 @@
             }
         },
         mounted() {
-            this.initData()
         }
     }
 </script>

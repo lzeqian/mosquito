@@ -455,22 +455,9 @@
                 );
             },
             handle_save(data) {
-                var vueThis=this;
-                vueThis.$axios({
-                    url: vueThis.$globalConfig.goServer+"file/save",
-                    method: 'post',
-                    data: {
-                        value: JSON.stringify(canvas.data),
-                        html: '',
-                        dirPath: vueThis.$route.query.dirPath,
-                        fileName: vueThis.$route.query.fileName
-                    },
-                    header: {
-                        'Content-Type': 'application/json'  //如果写成contentType会报错
-                    }
-                }).then((response) => {
-                    vueThis.$Message.info("保存成功")
-                });
+                this.saveEditorContent({
+                    value: JSON.stringify(canvas.data),
+                })
             },
             handle_savePng(data) {
                 let fileName=this.$route.query.fileName;

@@ -85,15 +85,8 @@
             }
         },
         computed:{
-            routeQueryContent() {
-                    return  this.$route.query.dirPath+
-                    this.$route.query.fileName
-            }
         },
         watch: {
-            routeQueryContent(newVal, oldVal) {
-                    this.initData();
-            }
         },
         methods: {
             downloadFile(){
@@ -118,27 +111,13 @@
              * @param value 原始markdown文件
              * @param render 解析的html文件
              */
-            saveCode(value, render) {
-                this.$axios({
-                    url: this.$globalConfig.goServer+"file/save",
-                    method: 'post',
-                    data: {
-                        value: value,
-                        html: render,
-                        dirPath: this.$route.query.dirPath,
-                        fileName: this.$route.query.fileName
-                    },
-                    header: {
-                        'Content-Type': 'application/json'  //如果写成contentType会报错
-                    }
-                }).then((response) => {
-                    this.$Message.info("保存成功")
-                });
-            },
-            initData(){
-                this.loadEditorContent((vueThis,data)=>{
-                    vueThis.content = data
+            saveCode(saveVaue, render) {
+                this.saveEditorContent({
+                    value: saveVaue,
                 })
+            },
+            initData(data){
+                this.content = data
             }
         },
         mounted() {
@@ -148,7 +127,6 @@
             toolbar_left.$el.append(diy);
             var transDoc = this.$refs.transDoc;
             toolbar_left.$el.append(transDoc);
-            this.initData()
         }
     }
 </script>
