@@ -64,21 +64,23 @@
       }
     },
     methods:{
-      initData(){
-          let vueThis=this;
-          if(localStorage.getItem("token")){
-            this.$store.state.isLogin=true
-          }
-          if(vueThis.$route && vueThis.$route.matched && vueThis.$route.matched.length>0) {
-            let vueRouteComponents = vueThis.$route.matched[0].instances.default
-            if (vueRouteComponents) {
-              vueThis.loadEditorContent((vueThis, data) => {
-                if (vueRouteComponents.initData) {
-                  vueRouteComponents.initData(data)
-                }
-              })
+      initData() {
+        let vueThis = this;
+        if (localStorage.getItem("token")) {
+          this.$store.state.isLogin = true
+        }
+        if (vueThis.$route.name != "blankViewer"){
+            if (vueThis.$route && vueThis.$route.matched && vueThis.$route.matched.length > 0) {
+              let vueRouteComponents = vueThis.$route.matched[0].instances.default
+              if (vueRouteComponents) {
+                vueThis.loadEditorContent((vueThis, data) => {
+                  if (vueRouteComponents.initData) {
+                    vueRouteComponents.initData(data)
+                  }
+                })
+              }
             }
-          }
+        }
       }
 
     },

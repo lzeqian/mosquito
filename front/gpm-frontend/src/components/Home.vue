@@ -93,6 +93,7 @@
                 if (localStorage.getItem("token")) {
                     localStorage.removeItem("token")
                     this.$store.state.isLogin = false
+                    this.$router.push("/")
                 }
             }
         },
