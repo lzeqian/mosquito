@@ -1,27 +1,23 @@
 roles:
   "*":
-    -
-    path: '/.+'
-    act:
-      - 'read'
+    - path: '/.+'
+      act:
+        - 'read'
   admin:
-    -
-    path: '/.+'
-    act:
-      - 'read'
-      - 'write'
+    - path: '/.+'
+      act:
+        - 'read'
+        - 'write'
   dev-tmp-test:
-    -
-    path: '03\.研发共享'
-    act:
-      - 'read'
-      - 'write'
+    - path: '03\.研发共享'
+      act:
+        - 'read'
+        - 'write'
   product-market:
-    -
-    path: '05\.产品基础资料库'
-    act:
-      - 'read'
-      - 'write'
+    - path: '05\.产品基础资料库'
+      act:
+        - 'read'
+        - 'write'
 userGroups:
 - groupCode: artemisdev
   groupName: Artemis开发部

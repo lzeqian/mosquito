@@ -7,6 +7,7 @@ export default new Vuex.Store({
   state: {
     isSpinShow: false,
     selectedNode:null,
+    isLogin:false,
     data: {
       scale: 1,
       lineName: 'curve',
@@ -89,6 +90,10 @@ export default new Vuex.Store({
 
   },
   mutations: {
+    login(state,token){
+      state.isLogin=true
+      localStorage.setItem("token",token)
+    },
     showLoading(state){
       state.isSpinShow = true
     },

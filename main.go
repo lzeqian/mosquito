@@ -6,7 +6,7 @@ import (
 	"github.com/astaxie/beego/plugins/cors"
 	"github.com/astaxie/beego/utils"
 	_ "gpm/routers"
-	"gpm/service"
+	"gpm/tools"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -25,8 +25,6 @@ func main() {
 			beego.SetStaticPath(mapping, maps[mapping].(string))
 		}
 	}
-	beego.InsertFilter("/file/*", beego.BeforeRouter, service.FilterUser)
-	beego.InsertFilter("/md/*", beego.BeforeRouter, service.FilterUser)
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -34,5 +32,6 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		AllowCredentials: true,
 	}))
+	beego.InsertFilter("*", beego.BeforeRouter, tools.FilterUser)
 	beego.Run()
 }

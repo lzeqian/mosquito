@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <Home></Home>
+    <Login v-if="!$store.state.isLogin"></Login>
+    <Home  v-if="$store.state.isLogin"></Home>
     <Spin fix :style="{zIndex:1000}" v-show="$store.state.isSpinShow">
       <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
       <div style="color: red">编译中，请稍后。。。</div>
@@ -29,9 +30,11 @@
 
 <script>
   import Home from "./components/Home";
+  import Login from "./components/Login";
   export default {
     components:{
-       Home
+      Login,
+      Home
     },
     computed:{
       routeQueryContent() {
@@ -63,18 +66,24 @@
     methods:{
       initData(){
           let vueThis=this;
-          let vueRouteComponents=vueThis.$route.matched[0].instances.default
-          if(vueRouteComponents) {
-            vueThis.loadEditorContent((vueThis, data) => {
-              if(vueRouteComponents.initData){
-                vueRouteComponents.initData(data)
-              }
-            })
+          if(localStorage.getItem("token")){
+            this.$store.state.isLogin=true
+          }
+          if(vueThis.$route && vueThis.$route.matched && vueThis.$route.matched.length>0) {
+            let vueRouteComponents = vueThis.$route.matched[0].instances.default
+            if (vueRouteComponents) {
+              vueThis.loadEditorContent((vueThis, data) => {
+                if (vueRouteComponents.initData) {
+                  vueRouteComponents.initData(data)
+                }
+              })
+            }
           }
       }
 
     },
     mounted() {
+      window.vueComponents=this;
       this.initData()
     }
   }
