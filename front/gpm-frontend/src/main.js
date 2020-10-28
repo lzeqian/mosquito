@@ -48,6 +48,11 @@ Vue.prototype.$axios.interceptors.response.use(
         const status = response.status
         if (status === 200) {
             if (response.data.code != 0) {
+                //token验证失败后需要清空token，让登录失败
+                if(response.data.code==3 || response.data.code==4){
+                    window.vueComponents.$store.state.isLogin=false;
+                    localStorage.removeItem("token")
+                }
                 Vue.prototype.$Message.error(response.data.data)
                 return Promise.reject(response.data.data);
             }

@@ -58,21 +58,27 @@ func RefreshToken(tokenString string) (string, error) {
 	return tokenStr, err
 }
 
-func ValidateToken(tokenString string) error {
+func ValidateToken(tokenString string) (*MyCustomClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenString,
 		&MyCustomClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return []byte(KEY), nil
 		})
+	if err != nil {
+		return nil, err
+	}
+	var returnClaims *MyCustomClaims
 	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
 		fmt.Printf("%v %v", claims.User, claims.StandardClaims.ExpiresAt)
 		fmt.Println("token will be expired at ", time.Unix(claims.StandardClaims.ExpiresAt, 0))
+		returnClaims = claims
 	} else {
 		fmt.Println("validate tokenString failed !!!", err)
-		return err
+		return nil, err
 	}
-	return nil
+
+	return returnClaims, nil
 }
 
 func GenerateToken(user User, expiredSeconds int) (tokenString string) {

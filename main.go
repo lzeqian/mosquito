@@ -6,7 +6,7 @@ import (
 	"github.com/astaxie/beego/plugins/cors"
 	"github.com/astaxie/beego/utils"
 	_ "gpm/routers"
-	"gpm/tools"
+	"gpm/web"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -32,6 +32,6 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
 		AllowCredentials: true,
 	}))
-	beego.InsertFilter("*", beego.BeforeRouter, tools.FilterUser)
+	beego.InsertFilter("*", beego.BeforeRouter, web.FilterUser)
 	beego.Run()
 }
