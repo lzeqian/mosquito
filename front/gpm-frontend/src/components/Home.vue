@@ -94,7 +94,7 @@
             return {
                 isCollapsed: false,
                 contentTitle: 'hello',
-                split1:0.2
+                split1:0.15
             }
         },
         computed: {
