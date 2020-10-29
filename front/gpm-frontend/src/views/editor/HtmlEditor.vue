@@ -3,7 +3,7 @@
 </style>
 <template>
 
-    <div ref="element" style="height: 100%">
+    <div ref="element" style="height: 100%;padding-left: 5px">
         <div  id="div1" style="height: 100%"></div>
     </div>
 

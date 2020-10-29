@@ -40,7 +40,9 @@
         overflow-x: hidden;
     }
 
-
+    .rotate-icon{
+        transform: rotate(-90deg);
+    }
 </style>
 <template>
     <div class="layout">
@@ -59,20 +61,26 @@
 
             </Header>
             <Layout style="height: 85%">
-                <Sider :style="{background: '#fff',maxWidth:'300px',flex:'0 0 300px'}"
-                       :collapsedWidth="300">
-                    <LeftTree></LeftTree>
+                <Split v-model="split1">
+                <Sider slot="left" ref="leftSider" style="width: 100%" :style="{background: '#fff',minWidth:'0px',maxWidth:'auto',flex:'0 0 auto'}"
+                       :collapsedWidth="0" v-model="isCollapsed" hide-trigger collapsible  :collapsed-width="0">
+                    <LeftTree :isCollapsed="isCollapsed"></LeftTree>
                 </Sider>
-                <Layout :style="{padding: '0 0px 0px',zIndex: 10}" style="height: 99%">
-                    <Breadcrumb :style="{margin: '0px 0'}" v-if="contentTitle!=''">
-                        <BreadcrumbItem>Home</BreadcrumbItem>
-                        <BreadcrumbItem>Components</BreadcrumbItem>
-                        <BreadcrumbItem>{{contentTitle}}</BreadcrumbItem>
-                    </Breadcrumb>
+                <Layout slot="right" :style="{padding: '0 0px 0px',zIndex: 10}" style="height: 99%">
+<!--                    <Header :style="{padding: 0}" class="layout-header-bar">-->
+<!--                        <Icon @click.native="collapsedSider" :class="rotateIcon" :style="{margin: '0 20px'}" type="md-menu" size="24"></Icon>-->
+<!--                       <Icon style="position: absolute;top:0;left:10px;z-index: 1000" :style="{margin: '0 2px'}" type="md-menu" size="24"></Icon>-->
+<!--                    </Header>-->
+<!--                    <Breadcrumb v-if="contentTitle!=''">-->
+<!--                        <BreadcrumbItem>Home</BreadcrumbItem>-->
+<!--                        <BreadcrumbItem>Components</BreadcrumbItem>-->
+<!--                        <BreadcrumbItem>{{contentTitle}}</BreadcrumbItem>-->
+<!--                    </Breadcrumb>-->
                     <Content :style="{padding: '5 0 0 0', background: '#fff'}" style="height: 100%">
                         <router-view></router-view>
                     </Content>
                 </Layout>
+                </Split>
             </Layout>
         </Layout>
     </div>
@@ -85,7 +93,22 @@
         data() {
             return {
                 isCollapsed: false,
-                contentTitle: ''
+                contentTitle: 'hello',
+                split1:0.2
+            }
+        },
+        computed: {
+            rotateIcon () {
+                return [
+                    'menu-icon',
+                    this.isCollapsed ? 'rotate-icon' : ''
+                ];
+            },
+            menuitemClasses () {
+                return [
+                    'menu-item',
+                    this.isCollapsed ? 'collapsed-menu' : ''
+                ]
             }
         },
         methods: {
@@ -95,6 +118,10 @@
                     this.$store.state.isLogin = false
                     this.$router.push("/")
                 }
+            },
+            collapsedSider () {
+                debugger
+                this.$refs.leftSider.toggleCollapse();
             }
         },
         components: {

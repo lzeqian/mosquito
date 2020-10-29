@@ -1,6 +1,6 @@
 <template>
     <div id="area">
-        <Tree :data="data5" ref="tree" :render="renderContent" @on-select-change="selectChange"
+        <Tree :data="data5" ref="tree" :render="renderContent" @on-select-change="selectChange" v-if="!isCollapsed"
               class="demo-tree-render" @on-contextmenu="handleContextMenu">
             <template slot="contextMenu">
                 <DropdownItem @click.native="handleContextMenuEdit" v-if="selectNode!=null && !selectNode.isDir">重命名
@@ -46,10 +46,15 @@
 <script>
     export default {
         name: 'LeftTree',
+        props:{
+            isCollapsed: {
+                type: Boolean,
+                default: false
+            },
+        },
         data() {
             return {
                 isSpinShow: false,
-                isCollapsed: false,
                 isImgShow: false,
                 data5: [],
             }
@@ -594,8 +599,6 @@
                 }
             }
         }
-        ,
-        props: {}
         ,
         mounted() {
             var vueThis = this;

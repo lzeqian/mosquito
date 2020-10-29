@@ -64,7 +64,7 @@
 </style>
 <template>
 
-    <div style="height: 100%">
+    <div style="height: 100%;padding-left: 7px">
         <mavon-editor v-model="content" ref="md" :style="{height:'100%',maxHeight:'100%'}" @save="saveCode"  @imgAdd="handleEditorImgAdd"/>
         <button ref="diy" type="button" @click="downloadFile"
                 class="op-icon fa fa-mavon-floppy-o"
@@ -100,8 +100,7 @@
                 const param = new FormData();
                 param.append('myfile', $file)
                 param.append('projectName', this.$route.query.fileName)
-                this.$axios.post(this.$globalConfig.goServer + "/file/uploadToServer", param).then(res => {
-                    debugger
+                this.$axios.post(this.$globalConfig.goServer + "file/uploadToServer", param).then(res => {
                     let imageData=res.data.data;
                     _this.$refs.md.$imglst2Url([[pos, imageData]])
                 })

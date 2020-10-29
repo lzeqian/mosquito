@@ -60,8 +60,6 @@ Vue.prototype.$axios.interceptors.response.use(
         return response;
     }
 )
-
-
 Vue.prototype.$globalConfig = GlobalConfig
 router.beforeEach((to, from, next) => {
     if (!to.meta.title) {

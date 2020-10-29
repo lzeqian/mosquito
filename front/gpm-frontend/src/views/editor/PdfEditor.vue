@@ -42,7 +42,7 @@
                     this.$Message.error("文件名中存在空格，无法转换，请重命名后尝试");
                     return;
                 }
-                let path=fileName.endsWith(".pdf")?"/file/download":"/file/transPdf";
+                let path=fileName.endsWith(".pdf")?"file/download":"file/transPdf";
                 path = encodeURIComponent(this.$globalConfig.goServer + path+"?fileDir=" + dirPath + "&fileName=" + fileName, "utf-8");
                 this.pdfSrc='/pdf/web/viewer.html?file='+path
             }
