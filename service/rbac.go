@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 )
-import "github.com/chenhg5/collection"
 
 /**
   读取rbac配置文件"conf/rbac.yaml"
@@ -37,7 +36,7 @@ var rbacDict map[string]interface{}
 /**
   当前文本缓存过期时间，单位s。
 */
-var maxExpire int64 = 60
+var maxExpire int64 = 5
 
 func GetCachedRbacContent() map[string]interface{} {
 	if rbacDict == nil {
@@ -46,12 +45,12 @@ func GetCachedRbacContent() map[string]interface{} {
 	_, ok := rbacDict["contentKey"]
 	if !ok {
 		rbacDict["contentKey"] = getRbacContent()
-		rbacDict["expire"] = time.Now().UnixNano() / 1000
+		rbacDict["expire"] = time.Now().UnixNano() / 1000000000
 	} else {
 		expire := rbacDict["expire"].(int64)
-		if (time.Now().UnixNano()/1000 - expire) > maxExpire {
+		if (time.Now().UnixNano()/1000000000 - expire) > maxExpire {
 			rbacDict["contentKey"] = getRbacContent()
-			rbacDict["expire"] = time.Now().UnixNano() / 1000
+			rbacDict["expire"] = time.Now().UnixNano() / 1000000000
 		}
 	}
 	return rbacDict
@@ -86,19 +85,19 @@ func GetUser(userName string) map[interface{}]interface{} {
     - 'read'}])
 */
 func GetUserRoles(userName string) *list.List {
-	rbacContent := GetCachedRbacContent()
-	users := rbacContent["users"].([]map[string]interface{})
-	roles := rbacContent["roles"].(map[string]interface{})
+	rbacContent := GetCachedRbacContent()["contentKey"].(map[string]interface{})
+	users := rbacContent["users"].([]interface{})
+	roles := rbacContent["roles"].(map[interface{}]interface{})
 	userList := list.New()
 	var curRole string
 	for _, user := range users {
-		if user["userName"] == userName {
-			curRole = user["role"].(string)
+		if user.(map[interface{}]interface{})["userName"].(string) == userName {
+			curRole = user.(map[interface{}]interface{})["role"].(string)
 			break
 		}
 	}
 	for roleName, roleInfo := range roles {
-		roleArray := strings.Split(roleName, "-")
+		roleArray := strings.Split(roleName.(string), "-")
 		for _, role := range roleArray {
 			if role == "*" {
 				userList.PushBack(roleInfo)
@@ -110,6 +109,24 @@ func GetUserRoles(userName string) *list.List {
 		}
 	}
 	return userList
+}
+func GetPathRequirePerm(curPath string) *list.List {
+	permList := list.New()
+	fileSystemPermMappingObj := GetCachedRbacContent()["contentKey"].(map[string]interface{})["fileSystemPermMapping"]
+	fileSystemPermMapping := fileSystemPermMappingObj.([]interface{})
+	for _, v := range fileSystemPermMapping {
+		fmt.Println(v)
+		pathActMap := v.(map[interface{}]interface{})
+		path := pathActMap["path"].(string)
+		if curPath == path {
+			acts := pathActMap["act"].([]interface{})
+			for _, a := range acts {
+				permList.PushBack(a)
+			}
+			break
+		}
+	}
+	return permList
 }
 
 /**
@@ -130,23 +147,55 @@ func CheckUserPassword(userName string, password string) bool {
 }
 
 /**
+    获取某个用户在某个路径下拥有的权限列表
+	@userName 用戶名
+	@inputPath 輸入的文件系統路徑
+	@return ["read","write"]。
+*/
+func GetUserPathAccess(userName string, inputPath string) *list.List {
+	roleArray := GetUserRoles(userName)
+	actList := list.New()
+	for i := roleArray.Front(); i != nil; i = i.Next() {
+		for _, v := range i.Value.([]interface{}) {
+			pathActV := v.(map[interface{}]interface{})
+			path := pathActV["path"].(string)
+			act := pathActV["act"].([]interface{})
+			ifMatch, _ := regexp.Match(path, []byte(inputPath))
+			if ifMatch {
+				for _, v1 := range act {
+					actList.PushBack(v1)
+				}
+			}
+		}
+	}
+	return actList
+}
+
+/**
 檢查當前用戶名對於某個路徑是否有操作的權限
 @userName 用戶名
 @inputPath 輸入的文件系統路徑
 @inputAct 權限
 @return true表示驗證通過，false表示驗證失敗。
 */
-func CheckUserAccess(userName string, inputPath string, inputAct string) bool {
-	roleArray := GetUserRoles(userName)
-	for i := roleArray.Front(); i != nil; i = i.Next() {
-		for _, v := range i.Value.([]map[string]interface{}) {
-			path := v["path"].(string)
-			act := v["act"].([]string)
-			ifMatch, _ := regexp.Match(path, []byte(inputPath))
-			if ifMatch && collection.Collect(act).Contains(inputAct) {
-				return true
+func CheckUserAct(userName string, inputPath string, inputAct string) bool {
+	return CheckUserMulAct(userName, inputPath, []string{inputAct})
+}
+func CheckUserMulAct(userName string, inputPath string, inputAct []string) bool {
+	//当前用户拥有的权限
+	actsList := GetUserPathAccess(userName, inputPath)
+	haveCount := 0
+	//循环询问当前用户是否拥有权限
+	for _, v := range inputAct {
+		for a := actsList.Front(); a != nil; a = a.Next() {
+			if v == a.Value || a.Value == "*" {
+				haveCount++
+				break
 			}
 		}
+	}
+	if haveCount == len(inputAct) {
+		return true
 	}
 	return false
 }
@@ -167,8 +216,8 @@ const (
 @inputPath 輸入的文件系統路徑
 @return true表示驗證通過，false表示驗證失敗。
 */
-func CheckUserRead(userName string, inputPath string) bool {
-	return CheckUserAccess(userName, inputPath, ActRead)
+func CheckUserActRead(userName string, inputPath string) bool {
+	return CheckUserAct(userName, inputPath, ActRead)
 }
 
 /**
@@ -177,6 +226,6 @@ func CheckUserRead(userName string, inputPath string) bool {
 @inputPath 輸入的文件系統路徑
 @return true表示驗證通過，false表示驗證失敗。
 */
-func CheckUserWrite(userName string, inputPath string) bool {
-	return CheckUserAccess(userName, inputPath, ActWrite)
+func CheckUserActWrite(userName string, inputPath string) bool {
+	return CheckUserAct(userName, inputPath, ActWrite)
 }

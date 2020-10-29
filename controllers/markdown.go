@@ -7,6 +7,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/utils"
+	"gpm/models"
 	"gpm/tools"
 	"io/ioutil"
 	"os"
@@ -31,8 +32,11 @@ func (c *MarkDownController) Init(ctx *context.Context, controllerName, actionNa
    :param fileName 当前文件名。
 */
 func (c *MarkDownController) CreateVuePress() {
-	fileDir := c.GetString("fileDir")
-	fileName := c.GetString("fileName")
+	markdown := models.Markdown{}
+	data := c.Ctx.Input.RequestBody
+	json.Unmarshal(data, &markdown)
+	fileDir := markdown.FileDir
+	fileName := markdown.FileName
 	destPath := fileDir + tools.PathSeparator + fileName
 	//创建目录
 	err := fileSystem.Mkdir(fileDir, fileName)
@@ -83,8 +87,11 @@ func copyRemoteToLocal(remoteDir string, localDir string) {
   构建vuepress
 */
 func (c *MarkDownController) BuildVuePress() {
-	fileDir := c.GetString("fileDir")
-	fileName := c.GetString("fileName")
+	markdown := models.Markdown{}
+	requestBody := c.Ctx.Input.RequestBody
+	json.Unmarshal(requestBody, &markdown)
+	fileDir := markdown.FileDir
+	fileName := markdown.FileName
 	user, _ := user.Current()
 	homeDir := user.HomeDir
 	//将当前项目copy到本地用户目录.vphome

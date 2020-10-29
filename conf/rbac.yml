@@ -1,19 +1,20 @@
 roles:
-  "*":
-    - path: '/.+'
-      act:
-        - 'read'
-        - listDir
   admin:
-    - path: '/.+'
+    - path: '/.*'
       act:
-        - 'read'
-        - 'write'
+        - read
+        - listDir
+        - write
   dev-tmp-test:
-    - path: '03\.研发共享'
+    - path: '/.*'
       act:
+        - listDir
         - 'read'
+    - path: '/个人文档'
+      act:
         - 'write'
+        - createDir
+        - createFile
   product-market:
     - path: '05\.产品基础资料库'
       act:

@@ -53,7 +53,11 @@ Vue.prototype.$axios.interceptors.response.use(
                     window.vueComponents.$store.state.isLogin=false;
                     localStorage.removeItem("token")
                 }
-                Vue.prototype.$Message.error(response.data.data)
+                Vue.prototype.$Message.error({
+                    content: response.data.data,
+                    duration: 2,
+                    closable: true
+                });
                 return Promise.reject(response.data.data);
             }
         }

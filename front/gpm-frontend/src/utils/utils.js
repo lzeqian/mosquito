@@ -14,7 +14,7 @@ export function saveEditorContent (data, func) {
         method: 'post',
         data: {
             ...data,
-            dirPath: vueThis.$route.query.dirPath,
+            fileDir: vueThis.$route.query.dirPath,
             fileName: vueThis.$route.query.fileName
         },
         header: {
@@ -26,6 +26,6 @@ export function saveEditorContent (data, func) {
             func(response)
         }
     }).catch((err) => {
-        vueThis.$Message.info("保存失败" + err)
+        // vueThis.$Message.info("保存失败" + err)
     });
 }

@@ -108,7 +108,7 @@
                 let code = prompt("请输入名称：",selectNode.title);
                 var _this=this;
                 if (code != null && code.trim() != "") {
-                    this.$axios.post(this.$globalConfig.goServer + "file/rename?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title+ "&newFileName=" + code).then((response) => {
+                    this.$axios.post(this.$globalConfig.goServer + "file/rename?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title+ "&newFileName=" + code,).then((response) => {
                         _this.$set(selectNode, 'title', code)
                     });
                 }
@@ -185,7 +185,7 @@
                 }
                 var selectNode = selectNodes[0];
                 if (selectNode.isDir) {
-                    this.$axios.post(this.$globalConfig.goServer + "md/buildVp?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title).then((response) => {
+                    this.$axios.post(this.$globalConfig.goServer + "md/buildVp",{fileDir:selectNode.dirPath,fileName:selectNode.title}).then((response) => {
                         window.open(this.$globalConfig.goServer + response.data.data)
                         vueThis.$store.commit('hideLoading')
                     }).catch(()=>{
@@ -208,7 +208,7 @@
                     var code = prompt("请输入vuepress名称：");
                     if (code != null && code.trim() != "") {
                         var fileDir = selectNode.dirPath + "/" + selectNode.title;
-                        this.$axios.post(this.$globalConfig.goServer + "md/createVp?fileDir=" + fileDir + "&fileName=" + code).then((response) => {
+                        this.$axios.post(this.$globalConfig.goServer + "md/createVp",{fileDir:fileDir,fileName:code}).then((response) => {
                             selectNode.children.push({
                                 title: code,
                                 dirPath: fileDir,
@@ -263,8 +263,7 @@
                             code = code + suffix;
                         }
                         var fileDir = selectNode.dirPath + "/" + selectNode.title;
-                        this.$axios.post(this.$globalConfig.goServer + "file/create?fileDir=" + fileDir + "&fileName=" + code).then((response) => {
-                            debugger
+                        this.$axios.post(this.$globalConfig.goServer + "file/create",{fileDir:fileDir,fileName:code}).then((response) => {
                             selectNode.children.push({
                                 title: code,
                                 dirPath: fileDir,
@@ -528,7 +527,7 @@
                     })
                 }else{
                     //服务器创建目录
-                    await this.$axios.post(this.$globalConfig.goServer + "file/mkdir?fileDir=" + parentDir + "&fileName=" + name).then((response) => {
+                    await this.$axios.post(this.$globalConfig.goServer + "file/mkdir" ,{fileDir:parentDir,fileName:name}).then((response) => {
                     });
                     let dirReader=entry.createReader()
                     dirReader.readEntries(async function (entries) {
