@@ -33,7 +33,8 @@
             initData() {
                 let dirName=this.$route.query.dirPath;
                 let fileName=this.$route.query.fileName;
-                this.imgSrc=this.$globalConfig.goServer+'/file/download?fileDir='+dirName+'&fileName='+fileName;
+                let token=localStorage.getItem("token")
+                this.imgSrc=this.$globalConfig.goServer+'/file/download?fileDir='+dirName+'&fileName='+fileName+(token?"&token="+token:"");
             },
         },
         created(){

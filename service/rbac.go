@@ -39,7 +39,7 @@ var rbacDict map[string]interface{}
 */
 var maxExpire int64 = 60
 
-func getCachedRbacContent() map[string]interface{} {
+func GetCachedRbacContent() map[string]interface{} {
 	if rbacDict == nil {
 		rbacDict = make(map[string]interface{})
 	}
@@ -63,7 +63,7 @@ func getCachedRbacContent() map[string]interface{} {
   @return 用户详情
 */
 func GetUser(userName string) map[interface{}]interface{} {
-	rbacContent := getCachedRbacContent()
+	rbacContent := GetCachedRbacContent()
 	contentKey := rbacContent["contentKey"].(map[string]interface{})
 	users := contentKey["users"]
 	userArray := users.([]interface{})
@@ -86,7 +86,7 @@ func GetUser(userName string) map[interface{}]interface{} {
     - 'read'}])
 */
 func GetUserRoles(userName string) *list.List {
-	rbacContent := getCachedRbacContent()
+	rbacContent := GetCachedRbacContent()
 	users := rbacContent["users"].([]map[string]interface{})
 	roles := rbacContent["roles"].(map[string]interface{})
 	userList := list.New()
@@ -155,6 +155,7 @@ const (
 	ActRead       string = "read"
 	ActWrite      string = "write"
 	ActCreateDir  string = "createDir"
+	ActListDir    string = "listDir"
 	ActCreateFile string = "createFile"
 	ActDeleteDir  string = "deleteDir"
 	ActDeleteFile string = "deleteFile"

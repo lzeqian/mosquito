@@ -35,7 +35,8 @@
                 var dirPath = this.$route.query.dirPath
                 var fileName = this.$route.query.fileName
                 let vm=this;
-                vm.wordURL =  this.$globalConfig.goServer+"/file/download?fileDir="+dirPath+"&fileName="+fileName;
+                let token=localStorage.getItem("token")
+                vm.wordURL =  this.$globalConfig.goServer+"/file/download?fileDir="+dirPath+"&fileName="+fileName+(token?"&token="+token:"");
                 const xhr = new XMLHttpRequest();
                 xhr.open("get", this.wordURL, true);
                 xhr.responseType = "arraybuffer";

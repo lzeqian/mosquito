@@ -129,7 +129,8 @@
                     this.$Message.error("不允许直接下载目录，请选择文件");
                     return;
                 }
-                window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title
+                let token=localStorage.getItem("token")
+                window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title+(token?"&token="+token:"")
             },
             /**
              * 从跟节点遍历获取当前节点父节点

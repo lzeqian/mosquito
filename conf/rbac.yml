@@ -3,6 +3,7 @@ roles:
     - path: '/.+'
       act:
         - 'read'
+        - listDir
   admin:
     - path: '/.+'
       act:
@@ -18,6 +19,52 @@ roles:
       act:
         - 'read'
         - 'write'
+fileSystemPermMapping:
+  - path: /md/createVp
+    act:
+      - createDir
+      - createFile
+      - write
+  - path: /md/buildVp
+    act:
+      - read
+      - listDir
+  - path: /home/listSub
+    act:
+      - listDir
+  - path: /home/tree
+    act:
+      - listDir
+  - path: /file/download
+    act:
+      - read
+  - path: /file/upload
+    act:
+      - write
+  - path: /file/save
+    act:
+      - write
+  - path: /file/delete
+    act:
+      - deleteFile
+  - path: /file/query
+    act:
+      - read
+  - path: /file/create
+    act:
+      - createFile
+  - path: /file/mkdir
+    act:
+      - createDir
+  - path: /file/rename
+    act:
+      - write
+  - path: /file/transDoc
+    act:
+      - read
+  - path: /file/transPdf
+    act:
+      - read
 userGroups:
 - groupCode: artemisdev
   groupName: Artemis开发部

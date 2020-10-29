@@ -90,10 +90,12 @@
         },
         methods: {
             downloadFile(){
-                window.location=this.$globalConfig.goServer+"file/download?fileDir=" + this.$route.query.dirPath + "&fileName=" + this.$route.query.fileName
+                let token=localStorage.getItem("token")
+                window.location=this.$globalConfig.goServer+"file/download?fileDir=" + this.$route.query.dirPath + "&fileName=" + this.$route.query.fileName+(token?"&token="+token:"")
             },
             transDoc(){
-                window.location=this.$globalConfig.goServer+"file/transDoc?fileDir=" + this.$route.query.dirPath + "&fileName=" + this.$route.query.fileName
+                let token=localStorage.getItem("token")
+                window.location=this.$globalConfig.goServer+"file/transDoc?fileDir=" + this.$route.query.dirPath + "&fileName=" + this.$route.query.fileName+(token?"&token="+token:"")
             },
             handleEditorImgAdd(pos, $file){
                 var _this=this;
