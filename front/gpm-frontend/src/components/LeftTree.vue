@@ -40,6 +40,14 @@
             <Icon type="load-c" size="30" class="demo-spin-icon-load"></Icon>
             <div>Loading...</div>
         </Spin>
+
+        <div style="position: absolute;top:0px;right:5px">
+            <a @click="gotoDesktop">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-dasuolvetuliebiao"></use>
+                </svg>
+            </a>
+        </div>
     </div>
 </template>
 
@@ -77,6 +85,10 @@
             }
         },
         methods: {
+            gotoDesktop(){
+                this.$store.commit("updateDirTree","desktop")
+                this.routePush({},'/blank',"空白预览")
+            },
             handleUpload(file) {
                 const param = new FormData();
                 param.append('myfile', file)
@@ -405,40 +417,7 @@
                                             }
                                             return 'icon-wenjianjia'
                                         } else {
-                                            if (data.title.endsWith(".doc") || data.title.endsWith(".docx")) {
-                                                return "icon-doc"
-                                            }
-                                            if (data.title.endsWith(".xls") || data.title.endsWith(".xlsx")) {
-                                                return "icon-xls"
-                                            }
-                                            if (data.title.endsWith(".ppt") || data.title.endsWith(".pptx")) {
-                                                return "icon-ppt"
-                                            }
-                                            if (data.title.endsWith(".json")) {
-                                                return "icon-json"
-                                            }
-                                            if (data.title.endsWith(".js")) {
-                                                return "icon-js-square"
-                                            }
-                                            if (data.title.endsWith(".pdf")) {
-                                                return "icon-pdf"
-                                            }
-                                            if (/.*\.(png|PNG|jpg|JPG|JPEG|jpeg|gif|GIF)/.test(data.title)) {
-                                                return "icon-picture"
-                                            }
-                                            if (/.*\.(zip|7z|rar)/.test(data.title)) {
-                                                return "icon-zip"
-                                            }
-                                            if (data.title.endsWith(".md")) {
-                                                return "icon-file-markdown"
-                                            }
-                                            if (data.title.endsWith(".html")) {
-                                                return "icon-HTML"
-                                            }
-                                            if (data.title.endsWith(".xml")) {
-                                                return "icon-xml"
-                                            }
-                                            return 'icon-wenjian'
+                                            return vueThis.fileIcon(data.title)
                                         }
                                     }(),
                                 }
@@ -456,13 +435,6 @@
                     ]),
 
                 ]);
-            },
-            routePush(node,routerAddress,title){
-                this.contentTitle = title
-                this.$router.push({
-                    path: this.redirect || routerAddress,
-                    query: {dirPath: node.dirPath, fileName: node.title}
-                });
             },
             /**
              * 树节点被选中时触发的编辑器打开和父节点展开事件

@@ -39,7 +39,7 @@ define(function (require, exports, module) {
           method: 'post',
           data: {
             value: saveData,
-            dirPath: window.vueThis.$route.query.dirPath,
+            fileDir: window.vueThis.$route.query.dirPath,
             fileName: window.vueThis.$route.query.fileName
           },
           header: {

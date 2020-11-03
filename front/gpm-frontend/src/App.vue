@@ -1,7 +1,8 @@
 <template>
   <div id="app">
     <Login v-if="!$store.state.isLogin"></Login>
-    <Home  v-if="$store.state.isLogin"></Home>
+    <Desktop  v-if="$store.state.isLogin && $store.state.dtype.dirType=='desktop'"></Desktop>
+    <Home v-if="$store.state.isLogin && $store.state.dtype.dirType=='tree'"></Home>
     <Spin fix :style="{zIndex:1000}" v-show="$store.state.isSpinShow">
       <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
       <div style="color: red">编译中，请稍后。。。</div>
@@ -31,9 +32,11 @@
 <script>
   import Home from "./components/Home";
   import Login from "./components/Login";
+  import Desktop from "./components/Desktop";
   export default {
     components:{
       Login,
+      Desktop,
       Home
     },
     computed:{

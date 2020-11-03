@@ -19,9 +19,11 @@ Vue.use(router);
 Vue.config.productionTip = false
 Vue.prototype.$axios = axios
 Vue.prototype.$ = $
-import {loadEditorContent,saveEditorContent} from  './utils/utils'
+import {loadEditorContent,saveEditorContent,fileIcon,routePush} from  './utils/utils'
+Vue.prototype.fileIcon=fileIcon
 Vue.prototype.loadEditorContent=loadEditorContent
 Vue.prototype.saveEditorContent=saveEditorContent
+Vue.prototype.routePush=routePush
 Vue.prototype.$axios.interceptors.request.use(
     config => {
         if (config.method == 'get') {

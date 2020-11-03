@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-
+import desktop from './desktop.js'
+import dtype from "./dirtype.js";
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -279,5 +280,7 @@ export default new Vuex.Store({
     }
   },
   modules: {
+    desktop,
+    dtype
   }
 })
