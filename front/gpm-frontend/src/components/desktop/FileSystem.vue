@@ -1,11 +1,13 @@
 <style scoped>
     .fileSystem {
         padding-top: 31px;
+        user-select: none;
     }
 
     .fileContainer {
         display: flex;
         flex-direction: row;
+        user-select: none;
         flex-wrap: wrap;
         justify-content: flex-start;
         align-items: flex-start;
@@ -33,6 +35,15 @@
         user-select: none;
         color: black
     }
+    .contextmenu1{
+        position: absolute;
+        left: 50px;
+        top: 50px;
+        background-color: rgb(242,242,242);
+        user-select:none;
+        padding-right: 40px;
+        padding-left: 10px;
+    }
     /deep/ .ivu-modal-header{
         display: none;
     }
@@ -55,8 +66,9 @@
         </div>
         <hr/>
         <div class="fileContainer">
-            <div v-for="(item,i) in dataArray" :key="i" class="fileItem" :title="item.title">
-                <a @click="clickFile(item)">
+            <div v-for="(item,i) in dataArray" :key="i" class="fileItem" :title="item.title" :ref="'fileItem'+i" @mouseover="mouseOverRef('fileItem'+i,'rgb(229,243,255)')"
+                 @mouseleave="mouseLeaveRef('fileItem'+i)">
+                <a @dblclick="clickFile(item)" @click="selectClick(item,'fileItem'+i)">
                     <svg class="icon" aria-hidden="true">
                         <use :xlink:href="curFileIcon(item)"></use>
                     </svg>
@@ -99,8 +111,11 @@
                 dataArray: [],
                 curDirHtml: '<a href=javascript:window.clickToPath("/","",true,true)>/ </a>',
                 curDir: '/',
+                selectedItem:null,
+                selectedRef:null,
                 showEditorMadal:false,
-                documentHeight:window.innerHeight
+                documentHeight:window.innerHeight,
+                currentVisible:false,
             }
         },
         watch: {
@@ -119,12 +134,39 @@
             }
         },
         methods: {
+            mouseOverRef(refName,bgColor){
+                // this.$(className).css('background-color', 'rgb(60,95,130)');
+                this.$refs[refName][0].style.backgroundColor=bgColor;
+            },
+            mouseLeaveRef(refName){
+                if(this.selectedRef==refName)
+                    this.$refs[refName][0].style.backgroundColor='rgb(204,232,255)';
+                else
+                    this.$refs[refName][0].style.backgroundColor='';
+            },
+            mouseOver(className,bgColor){
+                // this.$(className).css('background-color', 'rgb(60,95,130)');
+                this.$(className).css('background-color', bgColor);
+            },
+            mouseLeave(className){
+                this.$(className).css('background-color', '');
+            },
             curFileIcon(data) {
                 if (data.isDir) {
                     return '#icon-wenjianjia'
                 } else {
                     return '#'+this.fileIcon(data.title)
                 }
+            },
+            selectClick(item,refName){
+                this.selectedItem=item;
+                this.selectedRef=refName;
+                for(let refTmp in this.$refs){
+                    this.$refs[refTmp][0].style.border="";
+                    this.$refs[refTmp][0].style.backgroundColor="";
+                }
+                this.$refs[refName][0].style.border="1px double rgb(153,209,255)";
+                this.$refs[refName][0].style.backgroundColor="rgb(204,232,255)";
             },
             clickFile(item) {
                 if(item.isDir) {
@@ -153,11 +195,13 @@
                 vueThis.$axios.get(this.$globalConfig.goServer + "home/tree").then((response) => {
                     vueThis.dataArray = response.data.data
                 })
-            }
+            },
+
         },
         components: {},
         mounted() {
             this.initData();
+
         }
     }
 </script>

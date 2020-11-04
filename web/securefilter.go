@@ -33,9 +33,14 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 	if "GET" == ctx.Request.Method || "DELETE" == ctx.Request.Method {
 		dirPath = ctx.Request.FormValue("fileDir")
 	} else {
-		mapParam := make(map[string]interface{})
-		json.Unmarshal(ctx.Input.RequestBody, &mapParam)
-		dirPath = mapParam["fileDir"].(string)
+		contentType := ctx.Request.Header["Content-Type"]
+		if len(contentType) > 0 && strings.HasPrefix(contentType[0], "multipart/form-data;") {
+			dirPath = ctx.Request.Form.Get("fileDir")
+		} else {
+			mapParam := make(map[string]interface{})
+			json.Unmarshal(ctx.Input.RequestBody, &mapParam)
+			dirPath = mapParam["fileDir"].(string)
+		}
 	}
 	//获取当前路径需要验证的用户权限
 	actList := service.GetPathRequirePerm(requestPath)

@@ -156,10 +156,10 @@ func (c *FileController) CreateDir() {
    :param fileName 当前文件名。
 */
 func (c *FileController) RenameFile() {
-	fileDir := c.GetString("fileDir")
-	fileName := c.GetString("fileName")
-	newFileName := c.GetString("newFileName")
-	err := fileSystem.Rename(fileDir, fileName, newFileName)
+	markdown := models.Markdown{}
+	data := c.Ctx.Input.RequestBody
+	err := json.Unmarshal(data, &markdown)
+	err = fileSystem.Rename(markdown.FileDir, markdown.FileName, markdown.NewFileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return

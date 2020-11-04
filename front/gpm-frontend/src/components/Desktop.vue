@@ -39,6 +39,16 @@
         padding-right: 40px;
         padding-left: 10px;
     }
+    .fileSystemContextmenu{
+        position: absolute;
+        z-index: 500;
+        left: 50px;
+        top: 50px;
+        background-color: rgb(242,242,242);
+        user-select:none;
+        padding-right: 40px;
+        padding-left: 10px;
+    }
     .contextmenu div{
         margin-bottom: 5px;
     }
@@ -58,7 +68,7 @@
     <div class="desktop">
         <div class="single"  @mouseover="mouseOver('.single','rgb(60,95,130)')"
              @mouseleave="mouseLeave('.single')">
-            <a @dblclick="dirClick">
+            <a @dblclick="dirClick" >
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#icon-wenjianjia"></use>
                 </svg>
@@ -67,23 +77,71 @@
                 </div>
             </a>
         </div>
-        <div class="contextmenu" v-if="currentVisible">
-            <div class="switch"  @mouseover="mouseOver('.switch','rgb(217,217,217)')"
-                  @mouseleave="mouseLeave('.switch')" @click="switchToDirectory">
+        <!--桌面右键菜单-->
+        <div class="contextmenu" v-if="contextmenuVisible">
+            <div class="switch"  @mouseover="mouseOver('.switch','rgb(217,217,217)')" @click="switchToDirectory"
+                 @mouseleave="mouseLeave('.switch')">
                 切换目录树方式(S)
             </div>
             <hr/>
-            <div class="uploadFile"  @mouseover="mouseOver('.uploadFile','rgb(217,217,217)')"
-                 @mouseleave="mouseLeave('.uploadFile')">
-                上传文件(U)
+            <div class="refreshCurren"  @mouseover="mouseOver('.refreshCurren','rgb(217,217,217)')"
+                 @mouseleave="mouseLeave('.refreshCurren')">
+                刷新
             </div>
         </div>
+
         <Modal width="70%"
                 v-model="showMadal"
                 title="文件系统"
                 :footer-hide="true"
                 >
            <FileSystem></FileSystem>
+            <!--文件系统右键菜单-->
+            <div class="fileSystemContextmenu" v-if="fileSystemContextmenuVisible">
+                <div class="fileSystemUploadFile" @mouseover="mouseOver('.fileSystemUploadFile','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemUploadFile')">
+                    <Upload :style="{width:'100%'}" :show-upload-list="false" action=""
+                            ref="upload"
+
+                    >上传文件(UF)
+                    </Upload>
+                </div>
+                <div class="fileSystemRename" @mouseover="mouseOver('.fileSystemRename','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemRename')">
+                    重命名(RN)
+                </div>
+                <div class="fileSystemDelete" @mouseover="mouseOver('.fileSystemDelete','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemDelete')">
+                    删除文件(DE)
+                </div>
+                <hr/>
+
+                <div class="fileSystemCreateMd" @mouseover="mouseOver('.fileSystemCreateMd','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCreateMd')">
+                    <font color="red"> 新建md(MD)</font>
+                </div>
+                <div class="fileSystemCreateFlow" @mouseover="mouseOver('.fileSystemCreateFlow','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCreateFlow')">
+                    <font color="red"> 新建flow(FW)</font>
+                </div>
+                <div class="fileSystemCreateSnow" @mouseover="mouseOver('.fileSystemCreateSnow','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCreateSnow')">
+                    <font color="red">  新建思维导图(NN)</font>
+                </div>
+                <div class="fileSystemCreateFile" @mouseover="mouseOver('.fileSystemCreateFile','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCreateFile')">
+                    <font color="red">  新建文件(NF)</font>
+                </div>
+                <hr/>
+                <div class="fileSystemCreateVp" @mouseover="mouseOver('.fileSystemCreateVp','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCreateVp')">
+                    <font color="green">新建vuepress(VP)</font>
+                </div>
+                <div class="fileSystemBuildVp" @mouseover="mouseOver('.fileSystemBuildVp','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemBuildVp')">
+                    <font color="green"> 构建vuepress(BP)</font>
+                </div>
+            </div>
         </Modal>
     </div>
 
@@ -94,8 +152,10 @@
     export default {
         data() {
             return {
-                currentVisible:false,
-                showMadal:false
+                contextmenuVisible:false,
+                fileSystemContextmenuVisible:false,
+                showMadal:false,
+                registerContextMenu:false
             }
         },
         props: {},
@@ -113,8 +173,16 @@
             mouseLeave(className){
                 this.$(className).css('background-color', '');
             },
+            selectClick(){
+
+            },
             dirClick(){
                 this.showMadal=true
+                if(!this.registerContextMenu) {
+                    this.contextMenu(".ivu-modal-content", ".fileSystemContextmenu")
+                    this.registerContextMenu=true
+                }
+                // this.contextMenu(".ivu-modal-content",".fileItem")
             },
             dragDiv(className){
                 let helperdialogwrapper =$(className);
@@ -159,20 +227,36 @@
                     }
                 );
             },
-            contextMenu(){
+            getOffset(parentDivClassName,target){
+                let x=0,y=0
+                if(target!=null) {
+                    let curClassName = ("." + target.getAttribute("class"))
+                    if (curClassName != parentDivClassName) {
+                        let offsetObject = this.getOffset(parentDivClassName, ((target.tagName=="use" || target.tagName=="svg")?target.parentNode:target.offsetParent))
+                        x += (target.offsetLeft ? target.offsetLeft : 0) + offsetObject.x
+                        y += (target.offsetTop ? target.offsetTop : 0) + offsetObject.y
+                    }
+                }
+                return {
+                    x:x,
+                    y:y
+                }
+            },
+            contextMenu(parentDivClassName,contextMenuDivClassName){
                 var _this=this
-                $(document).ready(function() {
+                $(parentDivClassName).ready(function() {
                     // 鼠标右键事件
-                    $(document).contextmenu(function(e) {
+                    $(parentDivClassName).contextmenu(function(e) {
                         // 获取窗口尺寸
-                        let winWidth = $(document).width();
-                        let winHeight = $(document).height();
+                        let winWidth = $(parentDivClassName).width();
+                        let winHeight = $(parentDivClassName).height();
                         // 鼠标点击位置坐标
-                        let mouseX = e.pageX;
-                        let mouseY = e.pageY;
+                        let offsetObject=_this.getOffset(parentDivClassName,e.target)
+                        let mouseX = e.offsetX+offsetObject.x;
+                        let mouseY = e.offsetY+offsetObject.y;
                         // ul标签的宽高
-                        let menuWidth = $(".contextmenu").width();
-                        let menuHeight = $(".contextmenu").height();
+                        let menuWidth = $(contextMenuDivClassName).width();
+                        let menuHeight = $(contextMenuDivClassName).height();
                         // 最小边缘margin(具体窗口边缘最小的距离)
                         let minEdgeMargin = 10;
                         // 以下判断用于检测ul标签出现的地方是否超出窗口范围
@@ -198,10 +282,10 @@
                             menuLeft = mouseX + minEdgeMargin + "px";
                             menuTop = mouseY + minEdgeMargin + "px";
                         };
-                        _this.currentVisible=true;
+                       _this[contextMenuDivClassName.substring(1)+"Visible"]=true;
                         _this.$nextTick(()=>{
                             // ul菜单出现
-                            $(".contextmenu").css({
+                            $(contextMenuDivClassName).css({
                                 "left": menuLeft,
                                 "top": menuTop
                             }).show();
@@ -210,16 +294,16 @@
                         return false;
                     });
                     // 点击之后，右键菜单隐藏
-                    $(document).click(function() {
-                        $(".contextmenu").hide();
-                        _this.currentVisible=false;
+                    $(parentDivClassName).click(function() {
+                        $(contextMenuDivClassName).hide();
+                        _this[contextMenuDivClassName.substring(1)+"Visible"]=false;
                     });
                 });
             }
         },
         mounted() {
             this.dragDiv(".single")
-            this.contextMenu()
+            this.contextMenu(".desktop",".contextmenu")
         }
     }
 </script>

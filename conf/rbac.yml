@@ -5,6 +5,7 @@ roles:
         - read
         - listDir
         - write
+        - "*"
   dev-tmp-test:
     - path: '/.*'
       act:

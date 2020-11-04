@@ -46,6 +46,11 @@
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#icon-dasuolvetuliebiao"></use>
                 </svg>
+            </a>&nbsp;
+            <a>
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-renshu" style="color: blue"></use>
+                </svg>
             </a>
         </div>
     </div>
@@ -90,11 +95,9 @@
                 this.routePush({},'/blank',"空白预览")
             },
             handleUpload(file) {
-                const param = new FormData();
-                param.append('myfile', file)
-                param.append('fileDir', this.selectNode.dirPath + "/" + this.selectNode.title)
-                this.$axios.post(this.$globalConfig.goServer + "/file/upload", param).then(res => {
-                    this.selectChange([this.selectNode])
+                let _this=this;
+                this.uploadFile(file,()=>{
+                    _this.selectChange([_this.selectNode])
                 })
             },
             /**
@@ -117,13 +120,10 @@
             },
             handleContextMenuEdit() {
                 let selectNode=this.$store.state.selectedNode
-                let code = prompt("请输入名称：",selectNode.title);
-                var _this=this;
-                if (code != null && code.trim() != "") {
-                    this.$axios.post(this.$globalConfig.goServer + "file/rename?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title+ "&newFileName=" + code,).then((response) => {
-                        _this.$set(selectNode, 'title', code)
-                    });
-                }
+                let _this=this;
+                this.editFile((code)=>{
+                    _this.$set(selectNode, 'title', code)
+                })
             },
             handleContextMenuUpload(){
             },
@@ -131,18 +131,13 @@
              * 下载文件方法事件
              * */
             handleContextDownload() {
-                var selectNodes = this.$refs.tree.getSelectedNodes()
+                let selectNodes = this.$refs.tree.getSelectedNodes()
                 if (selectNodes.length == 0) {
                     this.$Message.error("请选择一个文件");
                     return;
                 }
-                var selectNode = selectNodes[0];
-                if (selectNode.isDir) {
-                    this.$Message.error("不允许直接下载目录，请选择文件");
-                    return;
-                }
-                let token=localStorage.getItem("token")
-                window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title+(token?"&token="+token:"")
+                let selectNode = selectNodes[0];
+                this.downloadFile(selectNode)
             },
             /**
              * 从跟节点遍历获取当前节点父节点
@@ -165,135 +160,106 @@
              * 删除文件
              */
             handleContextMenuDelete() {
-                let vueThis = this;
+                let _this = this;
                 let selectNodes = this.$refs.tree.getSelectedNodes()
                 if (selectNodes.length == 0) {
                     this.$Message.error("请选选择展开子目录");
                     return;
                 }
-                var selectNode = selectNodes[0];
+                let selectNode = selectNodes[0];
                 if (selectNode.isDir) {
                     this.$Message.error("不允许直接删除目录，请选择文件");
                     return;
                 }
-                let {index, parentNode} = this.getParent(this.$refs.tree.data[0], selectNode)
-                this.$axios.delete(this.$globalConfig.goServer + "file/delete?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title).then((response) => {
+                let {index, parentNode} = _this.getParent(_this.$refs.tree.data[0], selectNode)
+                this.deleteFile(()=>{
                     parentNode.children.splice(index, 1)
-                    this.$set(parentNode, 'selected', true)
-                    // vueThis.selectNode=parentNode;
-                    vueThis.$store.commit("setSelecedNode", parentNode)
-                    vueThis.routePush({},'/blank',"空白预览")
+                    _this.$set(parentNode, 'selected', true)
+                    _this.$store.commit("setSelecedNode", parentNode)
+                    _this.routePush({},'/blank',"空白预览")
                 })
             },
             /**
              * 编译vuepress项目
              */
             handleContextMenuBuildVp() {
-                var vueThis = this;
-                vueThis.$store.commit('showLoading')
-                var selectNodes = this.$refs.tree.getSelectedNodes()
+                let _this = this;
+                _this.$store.commit('showLoading')
+                let selectNodes = this.$refs.tree.getSelectedNodes()
                 if (selectNodes.length == 0) {
                     this.$Message.error("请选选择展开子目录");
                 }
-                var selectNode = selectNodes[0];
-                if (selectNode.isDir) {
-                    this.$axios.post(this.$globalConfig.goServer + "md/buildVp",{fileDir:selectNode.dirPath,fileName:selectNode.title}).then((response) => {
-                        window.open(this.$globalConfig.goServer + response.data.data)
-                        vueThis.$store.commit('hideLoading')
-                    }).catch(()=>{
-                        vueThis.$store.commit('hideLoading')
-                    });
-                }
-                console.log("执行完成")
+                let selectNode = selectNodes[0];
+                _this.buildVpFile(selectNode)
+
             },
             /**
              * 创建vuepress项目
              */
             handleContextMenuCreateVp() {
-                var selectNodes = this.$refs.tree.getSelectedNodes()
-                var vueThis = this;
+                let selectNodes = this.$refs.tree.getSelectedNodes()
+                let _this = this;
                 if (selectNodes.length == 0) {
                     this.$Message.error("请选选择展开子目录");
                 }
-                var selectNode = selectNodes[0];
-                if (selectNode.isDir) {
-                    var code = prompt("请输入vuepress名称：");
-                    if (code != null && code.trim() != "") {
-                        var fileDir = selectNode.dirPath + "/" + selectNode.title;
-                        this.$axios.post(this.$globalConfig.goServer + "md/createVp",{fileDir:fileDir,fileName:code}).then((response) => {
-                            selectNode.children.push({
-                                title: code,
-                                dirPath: fileDir,
-                                expand: true,
-                                contextmenu: true,
-                                isDir: true,
-                                selected: true,
-                                children: []
-                            })
-                            this.$router.push({
-                                path: this.redirect || '/mdeditor',
-                                query: {dirPath: fileDir, fileName: code, content: ""}
-                            });
-                            vueThis.$set(selectNode, 'selected', false)
-                            //vueThis.selectNode=selectNode.children[selectNode.children.length-1]
-                            vueThis.$store.commit("setSelecedNode", selectNode.children[selectNode.children.length - 1])
-                            vueThis.selectChange([vueThis.selectNode])
-                        });
-                    }
-                }
+                let selectNode = selectNodes[0];
+                let fileDir = selectNode.dirPath + "/" + selectNode.title;
+                this.createVpFile(selectNode,(code)=>{
+                    selectNode.children.push({
+                        title: code,
+                        dirPath: fileDir,
+                        expand: true,
+                        contextmenu: true,
+                        isDir: true,
+                        selected: true,
+                        children: []
+                    })
+                    this.$router.push({
+                        path: _this.redirect || '/mdeditor',
+                        query: {dirPath: fileDir, fileName: code, content: ""}
+                    });
+                    _this.$set(selectNode, 'selected', false)
+                    _this.$store.commit("setSelecedNode", selectNode.children[selectNode.children.length - 1])
+                    _this.selectChange([vueThis.selectNode])
+                })
             },
             handleContextMenuCreateFile() {
-
                 this.handleContextMenuCreateText("请输入文件名称：",null,null);
             },
             handleContextMenuCreateText(title,suffix) {
                 //手工选中某个节点
                 let selectNodes = this.$refs.tree.getSelectedNodes()
-                let vueThis = this;
+                let _this = this;
                 if (selectNodes.length == 0) {
                     this.$Message.error("请选选择展开子目录");
                 }
                 let selectNode = selectNodes[0];
-                // vueThis.selectNode=selectNode;
-                vueThis.$store.commit("setSelecedNode", selectNode)
+                _this.$store.commit("setSelecedNode", selectNode)
                 if (selectNode.isDir) {
                     if (selectNode.expand == false) {
-                        vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?fileDir=" + vueThis.selectNode.dirPath + "&fileName=" + vueThis.selectNode.title).then((response) => {
-                            vueThis.selectNode.children = response.data.data //挂载子节点
-                            vueThis.selectNode.expand = true    //展开子节点
+                        vueThis.$axios.get(_this.$globalConfig.goServer + "home/listSub?fileDir=" + _this.selectNode.dirPath + "&fileName=" + _this.selectNode.title).then((response) => {
+                            _this.selectNode.children = response.data.data //挂载子节点
+                            _this.selectNode.expand = true    //展开子节点
                         })
                     }
                     selectNode.expand = true;
-                    var code = prompt(title);
-                    if (code != null && code.trim() != "") {
-                        let suffixRe=this.$globalConfig.supportFile
-                        if(!suffix && !suffixRe.test(code)){
-                            vueThis.$Message.error("该文件目不支持创建,只支持:"+suffixRe)
-                            return;
-                        }
-                        if (suffix && !code.endsWith(suffix)) {
-                            code = code + suffix;
-                        }
-                        var fileDir = selectNode.dirPath + "/" + selectNode.title;
-                        this.$axios.post(this.$globalConfig.goServer + "file/create",{fileDir:fileDir,fileName:code}).then((response) => {
-                            selectNode.children.push({
-                                title: code,
-                                dirPath: fileDir,
-                                expand: false,
-                                contextmenu: true,
-                                isDir: false,
-                                selected: true,
-                                children: []
-                            })
-                            vueThis.$set(selectNode, 'selected', false)
-                            let newSelected = selectNode.children[selectNode.children.length - 1]
-                            vueThis.$store.commit("setSelecedNode",newSelected )
-                            vueThis.selectChange([newSelected])
-                        })
-                    }
-                } else {
-                    this.$Message.error("请选选择展开子目录");
                 }
+                let fileDir = selectNode.dirPath + "/" + selectNode.title;
+                this.createTextFile(selectNode,title,suffix,(code)=>{
+                    selectNode.children.push({
+                        title: code,
+                        dirPath: fileDir,
+                        expand: false,
+                        contextmenu: true,
+                        isDir: false,
+                        selected: true,
+                        children: []
+                    })
+                    _this.$set(selectNode, 'selected', false)
+                    let newSelected = selectNode.children[selectNode.children.length - 1]
+                    _this.$store.commit("setSelecedNode",newSelected )
+                    _this.selectChange([newSelected])
+                })
             },
             /**
              * 创建markdown文件
