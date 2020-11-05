@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/astaxie/beego/context"
 	"github.com/chenhg5/collection"
+	"gpm/controllers"
 	"gpm/models"
 	"gpm/service"
 	"gpm/tools"
@@ -21,6 +22,15 @@ var IgnoreList = []string{
   @userName 当前用户名
 */
 func checkFileSystemPerm(ctx *context.Context, userName string) error {
+	//初始化fileSystem
+	workspace := ctx.Request.Header["Workspace"]
+	if len(workspace) > 0 && workspace[0] == "1" {
+		controllers.RequestFileSystem("1")
+		//个人不需要权限控制
+		return nil
+	} else {
+		controllers.RequestFileSystem("0")
+	}
 	requestPath := ctx.Request.URL.Path
 	if requestPath == "/home/tree" {
 		if !service.CheckUserAct(userName, tools.PathSeparator, service.ActListDir) {

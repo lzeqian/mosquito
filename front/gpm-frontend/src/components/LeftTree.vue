@@ -47,7 +47,7 @@
                     <use xlink:href="#icon-dasuolvetuliebiao"></use>
                 </svg>
             </a>&nbsp;
-            <a>
+            <a @click="gotoPerson">
                 <svg class="icon" aria-hidden="true">
                     <use xlink:href="#icon-renshu" style="color: blue"></use>
                 </svg>
@@ -93,6 +93,13 @@
             gotoDesktop(){
                 this.$store.commit("updateDirTree","desktop")
                 this.routePush({},'/blank',"空白预览")
+            },
+            gotoPerson(){
+                let workspace=this.$store.state.dtype.workspace=="1"?"0":"1";
+                let title=this.$store.state.dtype.workspace=="1"?"公共文档库":"个人文档库";
+                this.$store.commit("updateWorkspace",workspace)
+                this.routePush({},'/blank',"空白预览")
+                this.listRoot(title)
             },
             handleUpload(file) {
                 let _this=this;
@@ -535,28 +542,31 @@
                     }
 
                 }
+            },
+            listRoot(title){
+                let vueThis = this;
+                vueThis.$axios.get(this.$globalConfig.goServer + "home/tree").then((response) => {
+                    var resultData = response.data
+                    vueThis.data5 = [
+                        {
+                            title: title,
+                            expand: true,
+                            dirPath:'/',
+                            contextmenu: false,
+                            isDir: true,
+                            root: true,
+                            children: resultData.data
+                        }];
+                    vueThis.$nextTick(()=>{
+                        vueThis.initData()
+                    })
+
+                })
             }
         }
         ,
         mounted() {
-            var vueThis = this;
-            vueThis.$axios.get(this.$globalConfig.goServer + "home/tree").then((response) => {
-                var resultData = response.data
-                vueThis.data5 = [
-                    {
-                        title: "目录结构树",
-                        expand: true,
-                        dirPath:'/',
-                        contextmenu: false,
-                        isDir: true,
-                        root: true,
-                        children: resultData.data
-                    }];
-                vueThis.$nextTick(()=>{
-                    vueThis.initData()
-                })
-
-            })
+            this.listRoot("公共文档库");
             this.preventDefault()
             document.getElementById('area').addEventListener("drop",
                 this.dropUpload,

@@ -24,19 +24,33 @@ func ServeJSON(controller beego.Controller, data interface{}) {
 }
 
 var fileSystem service.FileSystem
+var globalFileSystem service.FileSystem
+var personFileSystem service.FileSystem
 
 func initFileSystem() {
 	fsaf := service.FileSystemAbstractFactory{}
 	fsaf.InitFactory()
 	fileSystemLocal, _ := fsaf.ConstructFactory()
-	fileSystem = fileSystemLocal
+	globalFileSystem = fileSystemLocal
+	fileSystemPerson, _ := fsaf.ConstructFactoryCustom("person")
+	personFileSystem = fileSystemPerson
+}
+func RequestFileSystem(tp string) {
+	if globalFileSystem == nil {
+		initFileSystem()
+	}
+	if "" == tp || "0" == tp {
+		fileSystem = globalFileSystem
+		return
+	}
+	fileSystem = personFileSystem
 }
 func PubInit(controller beego.Controller, ctx *context.Context, controllerName, actionName string, app interface{}) {
 	controller.Init(ctx, controllerName, actionName, app)
-	if fileSystem == nil {
+	if globalFileSystem == nil {
 		initFileSystem()
 	} else {
-		if fileSystem.Ping() != nil {
+		if globalFileSystem.Ping() != nil {
 			initFileSystem()
 		}
 	}
