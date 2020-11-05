@@ -3,7 +3,7 @@
   <el-row class="block-col-1">
     <el-col :span="24">
       <!-- <span class="demonstration">click 激活</span> -->
-      <el-dropdown trigger="click" :hide-on-click="true" class="dropdown-toggle theme-icons menu-btn" @command="handleCommand">
+      <el-dropdown trigger="click" :hide-on-click="true" class="dropdown-toggle theme-icons menu-btn" @command="handleCommand" >
         <span class="el-dropdown-link ">
         {{current_theme}}
       <i class="el-icon-caret-bottom el-icon--right"></i>
@@ -31,7 +31,11 @@ export default {
       ulActive: false
     };
   },
-
+    watch: {
+        selectTheme(newv, oldv) {
+            this.updateThemeDefaultValue(newv)
+        },
+    },
   computed: {
       ...mapGetters({
           'minder': 'getMinder'
@@ -42,11 +46,21 @@ export default {
     class_theme_index: function () {
       return "theme-" + this.theme_index;
     },
+      selectTheme(){
+          let currentTheme =this.minder.queryCommandValue &&
+              this.minder.queryCommandValue("Theme");
+          this.updateThemeDefaultValue(currentTheme)
+          return currentTheme;
+      }
   },
 
   methods: {
+      updateThemeDefaultValue(currentTheme){
+          this.current_theme=currentTheme||"";
+      },
     handleCommand(command) {
         this.minder.execCommand('Theme', command);
+        this.current_theme=command
     },
   },
 };

@@ -8,7 +8,7 @@
         mapMutations,
         mapGetters
     } from 'vuex'
-
+    import hotkeys from 'hotkeys-js';
     export default {
         mounted() {
             var Editor = require('../../../assets/script/editor');

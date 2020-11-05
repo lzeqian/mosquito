@@ -33,21 +33,10 @@ define(function (require, exports, module) {
       key: 'S',
       enable: canExp,
       action: function() {
-        var saveData=JSON.stringify(minder.exportJson())
-        window.vueThis.$axios({
-          url: window.vueThis.$globalConfig.goServer+"file/save",
-          method: 'post',
-          data: {
-            value: saveData,
-            fileDir: window.vueThis.$route.query.dirPath,
-            fileName: window.vueThis.$route.query.fileName
-          },
-          header: {
-            'Content-Type': 'application/json'  //如果写成contentType会报错
-          }
-        }).then((response) => {
-          window.vueThis.$Message.info("保存成功")
-        });
+        let saveData=JSON.stringify(minder.exportJson())
+        window.vueThis.saveEditorContent({
+          value: saveData,
+        })
       }
     });
 
@@ -77,7 +66,6 @@ define(function (require, exports, module) {
     }
 
     function exportImage (){
-      //png.exportPNGImage(minder);
       minder.exportData("png").then((imgUrl)=>{
         // 这里是获取到的图片base64编码,这里只是个例子哈，要自行编码图片替换这里才能测试看到效果
        // 如果浏览器支持msSaveOrOpenBlob方法（也就是使用IE浏览器的时候），那么调用该方法去下载图片
