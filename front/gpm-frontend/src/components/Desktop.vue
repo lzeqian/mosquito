@@ -25,6 +25,13 @@
         padding-left: 10px;
         padding-right: 10px;
     }
+    .person {
+        position: absolute;
+        left: 50px;
+        top: 180px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
     .textDiv{
         padding-left: 5px;
         color: white;
@@ -74,6 +81,17 @@
                 </svg>
                 <div class="textDiv">
                 公共文档
+                </div>
+            </a>
+        </div>
+        <div class="person"  @mouseover="mouseOver('.person','rgb(60,95,130)')"
+             @mouseleave="mouseLeave('.person')">
+            <a @dblclick="dirPersonClick" >
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-wenjianjia"></use>
+                </svg>
+                <div class="textDiv">
+                    个人文档
                 </div>
             </a>
         </div>
@@ -184,13 +202,22 @@
                     this.registerContextMenu=true
                 }
             },
+            dirPersonClick(){
+                this.$store.commit("updateWorkspace","1")
+                this.showMadal=true
+                if(!this.registerContextMenu) {
+                    this.contextMenu(".ivu-modal-content", ".fileSystemContextmenu")
+                    this.registerContextMenu=true
+                }
+            },
             dragDiv(className){
                 let helperdialogwrapper =$(className);
                 let x = 0;
                 let y = 0;
                 let l = 0;
                 let t = 0;
-                let isDown = false;
+                window.isDown = false;
+                window.curClassName=null;
                 //鼠标按下事件
                 $(className).bind("mousedown",function(e) {
                     //获取x坐标和y坐标
@@ -201,12 +228,13 @@
                     l = helperdialogwrapper.offset().left;
                     t = helperdialogwrapper.offset().top;
                     //开关打开
-                    isDown = true;
+                    window.isDown = true;
+                    window.curClassName=className
                     //设置样式
                 });
                 //鼠标移动
                 window.onmousemove = function(e) {
-                    if (isDown == false) {
+                    if (window.isDown == false) {
                         return;
                     }
                     //获取x和y
@@ -218,12 +246,12 @@
                     let sss=parseInt(nx) -parseInt(x);
                     let lll=parseInt(ny) -parseInt(y);
                     //这里设置offset而不是css，因为获取时是根据offset获取的偏移量
-                    $(className).offset({top:nt,left:nl});
+                    $(window.curClassName).offset({top:nt,left:nl});
                 }
                 //鼠标抬起事件
                 $(className).bind("mouseup",function() {
                         //开关关闭
-                        isDown = false;
+                    window.isDown = false;
                     }
                 );
             },
@@ -303,6 +331,7 @@
         },
         mounted() {
             this.dragDiv(".single")
+            this.dragDiv(".person")
             this.contextMenu(".desktop",".contextmenu")
         }
     }

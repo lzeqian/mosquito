@@ -167,6 +167,7 @@
                 }
             },
             selectClick(item,refName){
+                this.$store.commit("setSelecedNode", item)
                 this.selectedItem=item;
                 this.selectedRef=refName;
                 for(let refTmp in this.$refs){
@@ -179,6 +180,7 @@
                 this.$refs[refName][0].style.backgroundColor="rgb(204,232,255)";
             },
             clickFile(item) {
+                this.$store.commit("setSelecedNode", item)
                 if(item.isDir) {
                     this.curDir = item.dirPath + (this.curDir == "/" ? "" : "/") + item.title
                     let vueThis = this;
@@ -202,16 +204,15 @@
             initData() {
                 let vueThis = this;
                 window.fileSystemVueThis = vueThis
-                vueThis.$axios.get(this.$globalConfig.goServer + "home/tree").then((response) => {
+                vueThis.curDir='/';
+                vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?root=true&fileDir=/").then((response) => {
                     vueThis.dataArray = response.data.data
                 })
             },
-
         },
         components: {},
         mounted() {
             this.initData();
-
         }
     }
 </script>
