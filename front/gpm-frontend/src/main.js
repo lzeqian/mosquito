@@ -51,7 +51,8 @@ Vue.prototype.$axios.interceptors.response.use(
     function (response) {
         const status = response.status
         if (status === 200) {
-            if (response.data.code != 0) {
+            if ((response.data.code!=undefined && response.data.code != 0) ||
+                (response.data.errno!=undefined && response.data.errno != 0)) {
                 //token验证失败后需要清空token，让登录失败
                 if(response.data.code==3 || response.data.code==4){
                     window.vueComponents.$store.state.isLogin=false;

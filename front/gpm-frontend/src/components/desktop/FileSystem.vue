@@ -118,7 +118,15 @@
                 currentVisible:false,
             }
         },
+        computed:{
+            curFileSwitch(){
+                return this.$store.state.dtype.workspace
+            }
+        },
         watch: {
+            curFileSwitch(newv, oldv){
+                this.initData();
+            },
             curDir(newv, oldv) {
                 let splitArray = newv.split("/")
                 let parentDir = null;
@@ -162,8 +170,10 @@
                 this.selectedItem=item;
                 this.selectedRef=refName;
                 for(let refTmp in this.$refs){
-                    this.$refs[refTmp][0].style.border="";
-                    this.$refs[refTmp][0].style.backgroundColor="";
+                    if(this.$refs[refTmp][0]) {
+                        this.$refs[refTmp][0].style.border = "";
+                        this.$refs[refTmp][0].style.backgroundColor = "";
+                    }
                 }
                 this.$refs[refName][0].style.border="1px double rgb(153,209,255)";
                 this.$refs[refName][0].style.backgroundColor="rgb(204,232,255)";

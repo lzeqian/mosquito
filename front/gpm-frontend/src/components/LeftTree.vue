@@ -5,6 +5,8 @@
             <template slot="contextMenu">
                 <DropdownItem @click.native="handleContextMenuEdit" v-if="selectNode!=null && !selectNode.isDir">重命名
                 </DropdownItem>
+                <DropdownItem @click.native="handleContextMenuCopy" v-if="selectNode!=null && !selectNode.isDir">复制
+                </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuDelete" v-if="selectNode!=null && !selectNode.isDir">删除
                 </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuUpload" v-if="selectNode!=null && selectNode.isDir">
@@ -74,7 +76,7 @@
         },
         computed: {
             selectNode() {
-                return this.$store.state.selectedNode
+                return this.$store.getters.getSelectedNode
             },
             rotateIcon() {
                 return [
@@ -126,7 +128,7 @@
                 }
             },
             handleContextMenuEdit() {
-                let selectNode=this.$store.state.selectedNode
+                let selectNode=this.$store.getters.getSelectedNode
                 let _this=this;
                 this.editFile((code)=>{
                     _this.$set(selectNode, 'title', code)
@@ -179,7 +181,7 @@
                     return;
                 }
                 let {index, parentNode} = _this.getParent(_this.$refs.tree.data[0], selectNode)
-                this.deleteFile(()=>{
+                this.deleteFile(selectNode,()=>{
                     parentNode.children.splice(index, 1)
                     _this.$set(parentNode, 'selected', true)
                     _this.$store.commit("setSelecedNode", parentNode)
@@ -251,10 +253,14 @@
                     }
                     selectNode.expand = true;
                 }
-                let fileDir = selectNode.dirPath + "/" + selectNode.title;
+                let fileDir = selectNode.dirPath + "/" + selectNode.fileName
                 this.createTextFile(selectNode,title,suffix,(code)=>{
+                    if(!selectNode.children){
+                        selectNode.children=[]
+                    }
                     selectNode.children.push({
                         title: code,
+                        fileName:code,
                         dirPath: fileDir,
                         expand: false,
                         contextmenu: true,
@@ -423,7 +429,7 @@
                     var vueThis = this;
                     this.$set(node, 'selected', true)
                     if (node.isDir) {
-                        vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?fileDir=" + node.dirPath + "&fileName=" + node.title+ "&root=" + node.root).then((response) => {
+                        vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?fileDir=" + node.dirPath + "&fileName=" + node.fileName+ "&root=" + node.root).then((response) => {
                             node.children = response.data.data //挂载子节点
                             node.expand = true    //展开子节点
                         })
@@ -484,7 +490,7 @@
             },
             dropUpload(e){
                 e.preventDefault(); //取消默认浏览器拖拽效果
-                let selectNode=this.$store.state.selectedNode
+                let selectNode=this.$store.getters.getSelectedNode
                 var fileDir = selectNode.dirPath + "/" + selectNode.title;
                 let _this=this;
                 if(!selectNode){
@@ -545,14 +551,15 @@
             },
             listRoot(title){
                 let vueThis = this;
-                vueThis.$axios.get(this.$globalConfig.goServer + "home/tree").then((response) => {
+                vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?root=true&fileDir=/").then((response) => {
                     var resultData = response.data
                     vueThis.data5 = [
                         {
                             title: title,
+                            fileName:"",
                             expand: true,
                             dirPath:'/',
-                            contextmenu: false,
+                            contextmenu: vueThis.$store.state.dtype.workspace==0?false:true,
                             isDir: true,
                             root: true,
                             children: resultData.data

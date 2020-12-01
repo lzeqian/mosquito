@@ -35,6 +35,9 @@ func initFileSystem() {
 	fileSystemPerson, _ := fsaf.ConstructFactoryCustom("person")
 	personFileSystem = fileSystemPerson
 }
+func GetFileSystem() service.FileSystem {
+	return fileSystem
+}
 func RequestFileSystem(tp string) {
 	if globalFileSystem == nil {
 		initFileSystem()

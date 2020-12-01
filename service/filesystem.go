@@ -17,8 +17,8 @@ const (
 type FileSystem interface {
 	/**
 	    读取文件字节内容
-		:param 目录名称
-	    :param 文件名称
+		:param 目录名称 如：parentDir:/test/doc
+	    :param 文件名称 如：filename:readme.md
 	*/
 	ReadByte(string, string) ([]byte, error)
 	/**
@@ -96,6 +96,20 @@ type FileSystemFactoryI interface {
 	  创建对应的文件系统实例
 	*/
 	Create(prefix string) (FileSystem, error)
+}
+
+/**
+  文件系统在设置的rootpath后面追加的路径类
+*/
+type FileSystemSuper struct {
+	appendRoot string
+}
+
+func (s *FileSystemSuper) setAppendRoot(appendRoot string) {
+	s.appendRoot = appendRoot
+}
+func (s *FileSystemSuper) getAppendRoot() string {
+	return s.appendRoot
 }
 
 /**

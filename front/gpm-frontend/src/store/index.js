@@ -86,8 +86,10 @@ export default new Vuex.Store({
 
     getEditor(state){
       return state.editor
+    },
+    getSelectedNode(state){
+      return state.selectedNode
     }
-
 
   },
   mutations: {

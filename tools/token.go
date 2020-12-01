@@ -25,6 +25,20 @@ type MyCustomClaims struct {
 	jwt.StandardClaims
 }
 
+func GetTokenInfo(tokenString string) (*MyCustomClaims, error) {
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&MyCustomClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(KEY), nil
+		})
+	claims, ok := token.Claims.(*MyCustomClaims)
+	if !ok || !token.Valid {
+		return nil, err
+	}
+	return claims, nil
+}
+
 // update expireAt and return a new token
 func RefreshToken(tokenString string) (string, error) {
 	// first get previous token

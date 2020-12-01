@@ -188,11 +188,13 @@
 
             // 提交图片
             imageChange(param, type) {
+                debugger
                 const formData = new FormData()
                 formData.append('myfile', param.file)
                 formData.append('projectName', this.$route.query.fileName)
                 var _this = this;
                 _this.$axios.post(this.$globalConfig.goServer + '/file/uploadToServer', formData).then(res => {
+                    debugger
                     if (res.data.errno == 0) {
                         this.minder.execCommand('Image', res.data.data[0], "");
                     }

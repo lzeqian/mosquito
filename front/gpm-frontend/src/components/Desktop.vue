@@ -73,7 +73,7 @@
                     <use xlink:href="#icon-wenjianjia"></use>
                 </svg>
                 <div class="textDiv">
-                共享目录
+                公共文档
                 </div>
             </a>
         </div>
@@ -177,12 +177,12 @@
 
             },
             dirClick(){
+                this.$store.commit("updateWorkspace","0")
                 this.showMadal=true
                 if(!this.registerContextMenu) {
                     this.contextMenu(".ivu-modal-content", ".fileSystemContextmenu")
                     this.registerContextMenu=true
                 }
-                // this.contextMenu(".ivu-modal-content",".fileItem")
             },
             dragDiv(className){
                 let helperdialogwrapper =$(className);

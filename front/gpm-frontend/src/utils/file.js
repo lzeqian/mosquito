@@ -4,13 +4,17 @@ function downloadFile(selectNode) {
         return;
     }
     let token=localStorage.getItem("token")
-    window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title+(token?"&token="+token:"")
+    window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title+(token?"&token="+token:"")+"&Workspace="+this.$store.state.dtype.workspace
 }
 
 function uploadFile(file,func) {
     const param = new FormData();
+    let fileDir=this.selectNode.dirPath + "/" +this.selectNode.title;
+    if(this.selectNode.root){
+        fileDir=this.selectNode.dirPath
+    }
     param.append('myfile', file)
-    param.append('fileDir', this.selectNode.dirPath + "/" + this.selectNode.title)
+    param.append('fileDir', fileDir)
     this.$axios.post(this.$globalConfig.goServer + "/file/upload", param).then(res => {
         func && func()
     })
@@ -37,7 +41,10 @@ function createVpFile(selectNode,func){
     if (selectNode.isDir) {
         let code = prompt("请输入vuepress名称：");
         if (code != null && code.trim() != "") {
-            let fileDir = selectNode.dirPath + "/" + selectNode.title;
+            let fileDir=selectNode.dirPath + "/" +selectNode.title;
+            if(selectNode.root){
+                fileDir=selectNode.dirPath
+            }
             this.$axios.post(this.$globalConfig.goServer + "md/createVp",{fileDir:fileDir,fileName:code}).then((response) => {
                 func && func(code)
             });
@@ -58,7 +65,10 @@ function createTextFile(selectNode,title,suffix,func) {
             if (suffix && !code.endsWith(suffix)) {
                 code = code + suffix;
             }
-            var fileDir = selectNode.dirPath + "/" + selectNode.title;
+            let fileDir=selectNode.dirPath + "/" +this.selectNode.title;
+            if(selectNode.root){
+                fileDir=selectNode.dirPath
+            }
             this.$axios.post(this.$globalConfig.goServer + "file/create",{fileDir:fileDir,fileName:code}).then((response) => {
                 func && func(code)
             })
@@ -68,7 +78,7 @@ function createTextFile(selectNode,title,suffix,func) {
     }
 }
 function editFile(func){
-    let selectNode=this.$store.state.selectedNode
+    let selectNode=this.$store.getters.getSelectedNode
     let code = prompt("请输入名称：",selectNode.title);
     let _this=this;
     if (code != null && code.trim() != "") {
@@ -82,23 +92,28 @@ function editFile(func){
     }
 }
 function loadEditorContent(func) {
-    let dirName = this.$route.query.dirPath;
-    let fileName = this.$route.query.fileName;
     let vueThis = this;
-    this.$axios.get(this.$globalConfig.goServer + "file/query?fileDir=" + dirName + "&fileName=" + fileName).then((response) => {
+    let fileDir=vueThis.$store.getters.getSelectedNode.dirPath;
+    let fileName=vueThis.$store.getters.getSelectedNode.fileName;
+    this.$axios.get(this.$globalConfig.goServer + "file/query?fileDir=" + fileDir + "&fileName=" + fileName).then((response) => {
         vueThis.content = response.data
         func(vueThis, response.data.data)
     })
 }
 function saveEditorContent (data, func) {
     let vueThis = this;
+    let fileDir=vueThis.$store.getters.getSelectedNode.dirPath;
+    let fileName=vueThis.$store.getters.getSelectedNode.fileName;
+    if(vueThis.$store.getters.getSelectedNode.root){
+        fileDir="/"
+    }
     vueThis.$axios({
         url: vueThis.$globalConfig.goServer + "file/save",
         method: 'post',
         data: {
             ...data,
-            fileDir: vueThis.$route.query.dirPath,
-            fileName: vueThis.$route.query.fileName
+            fileDir: fileDir,
+            fileName: fileName
         },
         header: {
             'Content-Type': 'application/json'  //如果写成contentType会报错

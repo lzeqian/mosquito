@@ -9,7 +9,8 @@ import (
 )
 
 type LocalFileSystem struct {
-	RootPath string
+	fileSystemEntity FileSystemSuper
+	RootPath         string
 }
 
 func (s *LocalFileSystem) ReadByte(parentDir string, fileName string) ([]byte, error) {
@@ -57,6 +58,7 @@ func (s *LocalFileSystem) ListDir(dirPth string) ([]models.Node, error) {
 	for index, fi := range dir {
 		node := models.Node{
 			Title:       fi.Name(),
+			FileName:    fi.Name(),
 			Expand:      false,
 			Contextmenu: true,
 			IsDir:       true,

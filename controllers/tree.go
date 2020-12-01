@@ -37,13 +37,16 @@ func (c *TreeController) ListSubTree() {
 	fileName := c.GetString("fileName")
 	root, _ := c.GetBool("root")
 	var destPath string
-	if root {
+	if root && fileDir == "" {
 		destPath = tools.PathSeparator
 	} else {
 		if fileDir == tools.PathSeparator {
 			destPath = fileDir + fileName
 		} else {
-			destPath = fileDir + tools.PathSeparator + fileName
+			destPath = fileDir
+			if fileName != "" {
+				destPath = fileDir + tools.PathSeparator + fileName
+			}
 		}
 	}
 	if fileSystem.IsDir(destPath) {

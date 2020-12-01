@@ -8,7 +8,7 @@ export const GlobalConfig={
         "\\.html|\\.txt":['/htmleditor',"html编辑器"],
         "\\.json|\\.js|\\.py|\\.css|\\.java|\\.vue|\\.yml|\\.yaml|\\.xml":['/codeeditor',"html编辑器"],
         "\\.pdf|\\.doc|\\.docx|\\.ppt|\\.pptx":['/pdfeditor',"pdf预览器"],
-        "\\.png|\\.PNG|\\.JPG|\\.jpg\\.JPEG\\.jpeg|\\.gif\\.GIF":['/imageviewer',"pdf预览器"],
+        "\\.png|\\.PNG|\\.JPG|\\.jpg|\\.JPEG|\\.jpeg|\\.gif|\\.GIF":['/imageviewer',"pdf预览器"],
         "\\.mind":['/mindeditor',"pdf预览器"],
     }
 }

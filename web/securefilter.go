@@ -17,28 +17,8 @@ var IgnoreList = []string{
 	"/file/viewerFromServer",
 }
 
-/**
-  检查当前用户当前路径下是否有权限操作文件系统权限
-  @userName 当前用户名
-*/
-func checkFileSystemPerm(ctx *context.Context, userName string) error {
-	//初始化fileSystem
-	workspace := ctx.Request.Header["Workspace"]
-	if len(workspace) > 0 && workspace[0] == "1" {
-		controllers.RequestFileSystem("1")
-		//个人不需要权限控制
-		return nil
-	} else {
-		controllers.RequestFileSystem("0")
-	}
-	requestPath := ctx.Request.URL.Path
-	if requestPath == "/home/tree" {
-		if !service.CheckUserAct(userName, tools.PathSeparator, service.ActListDir) {
-			return errors.New("请确保当前用户拥有以下权限：" + service.ActListDir)
-		} else {
-			return nil
-		}
-	}
+func getDirPath(ctx *context.Context) string {
+	//获取父亲目录路径
 	var dirPath string
 	if "GET" == ctx.Request.Method || "DELETE" == ctx.Request.Method {
 		dirPath = ctx.Request.FormValue("fileDir")
@@ -50,8 +30,80 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 			mapParam := make(map[string]interface{})
 			json.Unmarshal(ctx.Input.RequestBody, &mapParam)
 			dirPath = mapParam["fileDir"].(string)
+
 		}
 	}
+	return dirPath
+}
+func setDirPath(ctx *context.Context, insertValue string) string {
+	//获取父亲目录路径
+	var dirPath string
+	if "GET" == ctx.Request.Method || "DELETE" == ctx.Request.Method {
+		ctx.Request.Form.Set("fileDir", insertValue)
+	} else {
+		contentType := ctx.Request.Header["Content-Type"]
+		if len(contentType) > 0 && strings.HasPrefix(contentType[0], "multipart/form-data;") {
+			ctx.Request.Form.Set("fileDir", insertValue)
+		} else {
+			mapParam := make(map[string]interface{})
+			json.Unmarshal(ctx.Input.RequestBody, &mapParam)
+			mapParam["fileDir"] = insertValue
+			requestBody, _ := json.Marshal(mapParam)
+			ctx.Input.RequestBody = requestBody
+		}
+	}
+	return dirPath
+}
+
+/**
+  检查当前用户当前路径下是否有权限操作文件系统权限
+  @userName 当前用户名
+*/
+func checkFileSystemPerm(ctx *context.Context, userName string) error {
+	requestPath := ctx.Request.URL.Path
+	dirPath := getDirPath(ctx)
+	//初始化fileSystem，workspace确定是个人空间还是公共空间
+	workspace := ctx.Request.Header["Workspace"]
+	//如果请求头中不存在，判断参数中是否存在
+	if len(workspace) == 0 {
+		workspaceParam := ctx.Request.FormValue("Workspace")
+		if workspaceParam != "" {
+			workspace = []string{workspaceParam}
+		}
+	}
+	//如果是个人空间需要在个人路径上加上用户名
+	if len(workspace) > 0 && workspace[0] == "1" {
+		controllers.RequestFileSystem("1")
+		if dirPath != "" {
+			//if requestPath == "/home/listSub" || dirPath==tools.PathSeparator {
+			authorization := ctx.Request.Header["Authorization"]
+			if len(authorization) > 0 {
+				myCustomClaims, _ := tools.GetTokenInfo(authorization[0])
+				userInfo := service.GetUser(myCustomClaims.Name)
+				//if !strings.HasSuffix(dirPath, tools.PathSeparator) {
+				//	dirPath = dirPath + tools.PathSeparator
+				//}
+				if !strings.HasSuffix(dirPath, tools.PathSeparator+userInfo["userFullName"].(string)) {
+					setDirPath(ctx, dirPath+userInfo["userFullName"].(string))
+					controllers.GetFileSystem().Mkdir(dirPath, userInfo["userFullName"].(string))
+				}
+
+			}
+			//}
+		}
+		//个人不需要权限控制
+		return nil
+	} else {
+		controllers.RequestFileSystem("0")
+	}
+	//if requestPath == "/home/tree" {
+	//	if !service.CheckUserAct(userName, tools.PathSeparator, service.ActListDir) {
+	//		return errors.New("请确保当前用户拥有以下权限：" + service.ActListDir)
+	//	} else {
+	//		return nil
+	//	}
+	//}
+
 	//获取当前路径需要验证的用户权限
 	actList := service.GetPathRequirePerm(requestPath)
 	if actList.Len() == 0 {
