@@ -91,11 +91,11 @@
         methods: {
             downloadFile(){
                 let token=localStorage.getItem("token")
-                window.location=this.$globalConfig.goServer+"file/download?fileDir=" + this.$route.query.dirPath + "&fileName=" + this.$route.query.fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.state.dtype.workspace
+                window.location=this.$globalConfig.goServer+"file/download?fileDir=" + this.$route.query.dirPath + "&fileName=" + this.$route.query.fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace
             },
             transDoc(){
                 let token=localStorage.getItem("token")
-                window.location=this.$globalConfig.goServer+"file/transDoc?fileDir=" + this.$route.query.dirPath + "&fileName=" + this.$route.query.fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.state.dtype.workspace
+                window.location=this.$globalConfig.goServer+"file/transDoc?fileDir=" + this.$route.query.dirPath + "&fileName=" + this.$route.query.fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace
             },
             handleEditorImgAdd(pos, $file){
                 var _this=this;

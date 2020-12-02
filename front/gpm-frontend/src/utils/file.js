@@ -4,7 +4,7 @@ function downloadFile(selectNode) {
         return;
     }
     let token=localStorage.getItem("token")
-    window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title+(token?"&token="+token:"")+"&Workspace="+this.$store.state.dtype.workspace
+    window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace
 }
 
 function uploadFile(file,func) {

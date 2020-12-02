@@ -120,7 +120,7 @@
         },
         computed:{
             curFileSwitch(){
-                return this.$store.state.dtype.workspace
+                return this.$store.getters.currentWorkspace
             }
         },
         watch: {

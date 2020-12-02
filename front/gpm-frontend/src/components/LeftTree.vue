@@ -103,8 +103,8 @@
                 this.routePush({},'/blank',"空白预览")
             },
             gotoPerson(){
-                let workspace=this.$store.state.dtype.workspace=="1"?"0":"1";
-                let title=this.$store.state.dtype.workspace=="1"?"公共文档库":"个人文档库";
+                let workspace=this.$store.getters.currentWorkspace=="1"?"0":"1";
+                let title=this.$store.getters.currentWorkspace=="1"?"公共文档库":"个人文档库";
                 this.$store.commit("updateWorkspace",workspace)
                 this.routePush({},'/blank',"空白预览")
                 this.listRoot(title)
@@ -615,7 +615,7 @@
                             fileName:"",
                             expand: true,
                             dirPath:'/',
-                            contextmenu: vueThis.$store.state.dtype.workspace==0?false:true,
+                            contextmenu: vueThis.$store.getters.currentWorkspace==0?false:true,
                             isDir: true,
                             root: true,
                             children: resultData.data
