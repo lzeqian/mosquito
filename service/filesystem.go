@@ -43,12 +43,12 @@ type FileSystem interface {
 	    列表目录下所有子目录和文件
 		:param 目录名称
 	*/
-	ListDir(string) ([]models.Node, error)
+	ListDir(string, string) ([]models.Node, error)
 	/**
 	  判断路径是否为目录
 	  :param 文件路径
 	*/
-	IsDir(string) bool
+	IsDir(string) (bool, error)
 	/**
 	    列表根目录下所有子目录和文件
 		:param 目录名称
@@ -74,6 +74,14 @@ type FileSystem interface {
 	    :param 覆盖还是追加
 	*/
 	SaveTextFile(string, string, string, os.FileMode) error
+	/**
+	    保存二进制内容
+		:param 目录名称
+	    :param 文件名称
+	    :param 字节内容
+	    :param 覆盖还是追加
+	*/
+	SaveByte(string, string, []byte, os.FileMode) error
 	/**
 	    重命名
 	    :param 文件所在目录

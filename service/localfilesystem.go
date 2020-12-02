@@ -6,6 +6,7 @@ import (
 	"gpm/tools"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type LocalFileSystem struct {
@@ -39,23 +40,27 @@ func (s *LocalFileSystem) RmDir(parentDir string, fileName string) error {
 	return os.RemoveAll(destPath)
 }
 func (s *LocalFileSystem) ListRoot() ([]models.Node, error) {
-	return s.ListDir(tools.PathSeparator)
+	return s.ListDir(tools.PathSeparator, "")
 }
-func (s *LocalFileSystem) IsDir(destPath string) bool {
+func (s *LocalFileSystem) IsDir(destPath string) (bool, error) {
 	destDirPath := s.RootPath + tools.PathSeparator + destPath
-	fi, _ := os.Stat(destDirPath)
-	return fi.IsDir()
+	fi, err := os.Stat(destDirPath)
+	return fi.IsDir(), err
 }
-func (s *LocalFileSystem) ListDir(dirPth string) ([]models.Node, error) {
-	destDirPath := s.RootPath + tools.PathSeparator + dirPth
+func (s *LocalFileSystem) ListDir(dirPath string, trimPrefix string) ([]models.Node, error) {
+	destDirPath := s.RootPath + tools.PathSeparator + dirPath
 	dir, err := ioutil.ReadDir(destDirPath)
 	nodeList := make([]models.Node, len(dir))
-
+	showDirPath := dirPath
+	if trimPrefix != "" {
+		showDirPath = strings.TrimPrefix(dirPath, trimPrefix)
+	}
 	if err != nil {
 		return nil, err
 	}
 	//PthSep := string(os.tools.PathSeparator)
 	for index, fi := range dir {
+
 		node := models.Node{
 			Title:       fi.Name(),
 			FileName:    fi.Name(),
@@ -63,7 +68,7 @@ func (s *LocalFileSystem) ListDir(dirPth string) ([]models.Node, error) {
 			Contextmenu: true,
 			IsDir:       true,
 			Children:    []models.Node{},
-			DirPath:     dirPth,
+			DirPath:     showDirPath,
 		}
 		if fi.IsDir() {
 			node.IsDir = true
@@ -86,8 +91,11 @@ func (s *LocalFileSystem) CreateFile(parentDir string, fileName string) error {
 	return err
 }
 func (s *LocalFileSystem) SaveTextFile(parentDir string, fileName string, content string, policyType os.FileMode) error {
+	return s.SaveByte(parentDir, fileName, []byte(content), policyType)
+}
+func (s *LocalFileSystem) SaveByte(parentDir string, fileName string, content []byte, policyType os.FileMode) error {
 	destPath := s.RootPath + tools.PathSeparator + parentDir + tools.PathSeparator + fileName
-	return ioutil.WriteFile(destPath, []byte(content), policyType)
+	return ioutil.WriteFile(destPath, content, policyType)
 }
 func (s *LocalFileSystem) Rename(srcDir string, src string, dest string) error {
 	srcPath := s.RootPath + tools.PathSeparator + srcDir + tools.PathSeparator + src

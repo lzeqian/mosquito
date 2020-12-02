@@ -55,9 +55,17 @@ fileSystemPermMapping:
   - path: /file/create
     act:
       - createFile
+  - path: /file/copy
+    act:
+      - read
+      - createFile
+      - write
   - path: /file/mkdir
     act:
       - createDir
+  - path: /file/rmdir
+    act:
+      - deleteDir
   - path: /file/rename
     act:
       - write

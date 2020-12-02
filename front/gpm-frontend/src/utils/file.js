@@ -23,9 +23,21 @@ function uploadFile(file,func) {
  * 删除文件
  */
 function deleteFile(selectNode,func) {
-    this.$axios.delete(this.$globalConfig.goServer + "file/delete?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title).then((response) => {
-        func && func()
-    })
+    if(confirm("确认是否删除")) {
+        this.$axios.delete(this.$globalConfig.goServer + "file/delete?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.title).then((response) => {
+            func && func()
+        })
+    }
+}
+/**
+ * 删除文件
+ */
+function deleteDir(selectNode,func) {
+    if(confirm("确认是否删除目录")) {
+        this.$axios.delete(this.$globalConfig.goServer + "file/rmdir?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.fileName).then((response) => {
+            func && func()
+        })
+    }
 }
 function buildVpFile(selectNode) {
     let _this=this;
@@ -75,6 +87,20 @@ function createTextFile(selectNode,title,suffix,func) {
         }
     } else {
         _this.$Message.error("请选选择展开子目录");
+    }
+}
+function createDir(selectNode,title,func) {
+    let _this=this;
+    if (selectNode.isDir) {
+        let code = prompt(title);
+        if (code != null && code.trim() != "") {
+            let fileDir=selectNode.dirPath + "/" +this.selectNode.fileName;
+            this.$axios.post(this.$globalConfig.goServer + "/file/mkdir",{fileDir:fileDir,fileName:code}).then((response) => {
+                func && func(fileDir,code)
+            })
+        }
+    } else {
+        _this.$Message.error("请选择一个目录");
     }
 }
 function editFile(func){
@@ -127,6 +153,30 @@ function saveEditorContent (data, func) {
         // vueThis.$Message.info("保存失败" + err)
     });
 }
+function copyFile (func) {
+    let _this=this;
+    let selectNode=_this.$store.getters.getSelectedNode
+    if (!selectNode.isDir) {
+        let fileName=selectNode.fileName;
+        let fileNamePre=fileName.substring(0,fileName.lastIndexOf("."))
+        let fileExt=fileName.substr(fileName.lastIndexOf(".")+1)
+        let code = prompt("请输入名称：",fileNamePre+"_bak."+fileExt);
+        if (code != null && code.trim() != "") {
+            let fileDir = selectNode.dirPath;
+            this.$axios.post(this.$globalConfig.goServer + "file/copy", {
+                fileDir: fileDir,
+                fileName: fileName,
+                newFileName:code
+            }).then((response) => {
+                func && func(code)
+            })
+        }
+    } else {
+        _this.$Message.error("请选择文件");
+    }
+
+
+}
 export default{
     downloadFile,
     uploadFile,
@@ -136,5 +186,8 @@ export default{
     createTextFile,
     editFile,
     loadEditorContent,
-    saveEditorContent
+    saveEditorContent,
+    copyFile,
+    createDir,
+    deleteDir
 }

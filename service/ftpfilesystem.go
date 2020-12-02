@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"errors"
 	"github.com/astaxie/beego"
 	"gopkg.in/dutchcoders/goftp.v1"
 	"gpm/models"
@@ -49,14 +50,15 @@ func (s *FtpFileSystem) RmDir(parentDir string, fileName string) error {
    业务文档为目录名称，如果需要处理可通过路径：业务文档/apollo/a.xt访问文件，注意根目录不需要/
 */
 func (s *FtpFileSystem) ListRoot() ([]models.Node, error) {
-	return s.ListDir("")
+	return s.ListDir("", "")
 }
-func (s *FtpFileSystem) IsDir(destPath string) bool {
+func (s *FtpFileSystem) IsDir(destPath string) (bool, error) {
 	formatDestPath := tools.FormatPath(destPath)
 	index := strings.LastIndex(formatDestPath, tools.PathSeparator)
 	dirName := formatDestPath[0:index]
 	lastName := formatDestPath[index+1:]
 	listFile, _ := s.fs.List(dirName)
+	ifHave := false
 	for _, curFile := range listFile {
 		if strings.Index(curFile, "<") > 0 {
 			reReplace, _ := regexp.Compile("[ |\t]+")
@@ -64,8 +66,9 @@ func (s *FtpFileSystem) IsDir(destPath string) bool {
 			typeStr := splitFile[2]
 			filename := strings.TrimSpace(splitFile[3])
 			if lastName == filename {
+				ifHave = true
 				if "<DIR>" == typeStr {
-					return true
+					return true, nil
 				}
 			}
 		} else {
@@ -79,12 +82,20 @@ func (s *FtpFileSystem) IsDir(destPath string) bool {
 			} else {
 				filename = strings.TrimSpace(splitFile[3])
 			}
-			if isDir && lastName == filename {
-				return true
+			if lastName == filename {
+				ifHave = true
+				if isDir {
+					return true, nil
+				}
 			}
 		}
 	}
-	return false
+	if ifHave {
+		return false, nil
+	} else {
+		return false, errors.New("文件不存在")
+	}
+
 }
 
 /**
@@ -95,7 +106,7 @@ func (s *FtpFileSystem) IsDir(destPath string) bool {
   shareName:="测试目录"
   path:=""
 */
-func (s *FtpFileSystem) ListDir(dirPth string) ([]models.Node, error) {
+func (s *FtpFileSystem) ListDir(dirPth string, trimPrefix string) ([]models.Node, error) {
 	formatDestPath := tools.FormatPath(dirPth)
 	listFile, _ := s.fs.List(formatDestPath)
 	reReplace, _ := regexp.Compile("[ |\t]+")
@@ -158,15 +169,15 @@ func (s *FtpFileSystem) CreateFile(parentDir string, fileName string) error {
 	return s.fs.Stor(formatDestPath+tools.PathSeparator+fileName, bytes.NewReader([]byte("")))
 }
 func (s *FtpFileSystem) SaveTextFile(parentDir string, fileName string, content string, policyType os.FileMode) error {
+	return s.SaveByte(parentDir, fileName, []byte(content), policyType)
+}
+func (s *FtpFileSystem) SaveByte(parentDir string, fileName string, content []byte, policyType os.FileMode) error {
 	formatDestPath := tools.FormatPath(parentDir)
 	err := s.DeleteFile(parentDir, fileName)
 	for err != nil && !strings.HasPrefix(err.Error(), "550") {
 		err = s.DeleteFile(parentDir, fileName)
 	}
-	err1 := s.fs.Stor(formatDestPath+tools.PathSeparator+fileName, bytes.NewReader([]byte(content)))
-	//for err1 !=nil{
-	//	err1=s.fs.Stor(formatDestPath+tools.PathSeparator+fileName,bytes.NewReader([]byte(content)));
-	//}
+	err1 := s.fs.Stor(formatDestPath+tools.PathSeparator+fileName, bytes.NewReader(content))
 	return err1
 }
 func (s *FtpFileSystem) Rename(srcDir string, src string, dest string) error {

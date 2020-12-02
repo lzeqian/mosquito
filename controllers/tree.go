@@ -4,7 +4,9 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	"gpm/models"
+	"gpm/service"
 	"gpm/tools"
+	"strings"
 )
 
 type TreeController struct {
@@ -45,12 +47,25 @@ func (c *TreeController) ListSubTree() {
 		} else {
 			destPath = fileDir
 			if fileName != "" {
-				destPath = fileDir + tools.PathSeparator + fileName
+				if !strings.HasSuffix(fileDir, tools.PathSeparator) {
+					destPath = fileDir + tools.PathSeparator + fileName
+				} else {
+					destPath = fileDir + fileName
+				}
+
 			}
 		}
 	}
-	if fileSystem.IsDir(destPath) {
-		files, _ := fileSystem.ListDir(destPath)
+	isDir, _ := fileSystem.IsDir(destPath)
+	if isDir {
+		authorization := c.Ctx.Request.Header["Authorization"]
+		trimPrefix := ""
+		if len(authorization) > 0 {
+			myCustomClaims, _ := tools.GetTokenInfo(authorization[0])
+			userInfo := service.GetUser(myCustomClaims.Name)
+			trimPrefix = tools.PathSeparator + userInfo["userFullName"].(string)
+		}
+		files, _ := fileSystem.ListDir(destPath, trimPrefix)
 		ServeJSON(c.Controller, files)
 	} else {
 		c.Data["json"] = &models.Result{}

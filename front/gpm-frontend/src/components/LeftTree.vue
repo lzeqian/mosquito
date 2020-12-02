@@ -27,6 +27,12 @@
                 <DropdownItem @click.native="handleContextMenuCreateSnow" style="color: #ed4014"
                               v-if="selectNode!=null && selectNode.isDir">新建思维导图
                 </DropdownItem>
+                <DropdownItem @click.native="handleContextMenuCreateDir" style="color: #ed4014"
+                              v-if="selectNode!=null && selectNode.isDir">新建目录
+                </DropdownItem>
+                <DropdownItem @click.native="handleContextMenuDeleteDir" style="color: #ed4014"
+                              v-if="selectNode!=null && selectNode.isDir">删除目录
+                </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuCreateFile" style="color: #ed4014"
                               v-if="selectNode!=null && selectNode.isDir">新建文件
                 </DropdownItem>
@@ -189,6 +195,20 @@
                 })
             },
             /**
+             * 删除文件
+             */
+            handleContextMenuDeleteDir() {
+                let _this = this;
+                let selectNode = this.selectNode;
+                let {index, parentNode} = _this.getParent(_this.$refs.tree.data[0], selectNode)
+                this.deleteDir(selectNode,()=>{
+                    parentNode.children.splice(index, 1)
+                    _this.$set(parentNode, 'selected', true)
+                    _this.$store.commit("setSelecedNode", parentNode)
+                    _this.routePush({},'/blank',"空白预览")
+                })
+            },
+            /**
              * 编译vuepress项目
              */
             handleContextMenuBuildVp() {
@@ -201,6 +221,24 @@
                 let selectNode = selectNodes[0];
                 _this.buildVpFile(selectNode)
 
+            },
+            handleContextMenuCopy(){
+                debugger
+                let _this = this;
+                let selectNodes = this.$refs.tree.getSelectedNodes()
+                if (selectNodes.length == 0) {
+                    this.$Message.error("请选择一个文件");
+                    return;
+                }
+                let selectNode = selectNodes[0];
+                if (selectNode.isDir) {
+                    this.$Message.error("不允许复制目录");
+                    return;
+                }
+                let {index, parentNode} = _this.getParent(_this.$refs.tree.data[0], selectNode)
+                this.copyFile(function () {
+                    _this.selectChange([parentNode])
+                })
             },
             /**
              * 创建vuepress项目
@@ -232,6 +270,24 @@
                     _this.selectChange([vueThis.selectNode])
                 })
             },
+            handleContextMenuCreateDir(){
+                let selectNode=this.selectNode
+                this.createDir(this.selectNode,"请输入设置的文件夹名称",(fileDir,code)=>{
+                    if(!selectNode.children){
+                        selectNode.children=[]
+                    }
+                    selectNode.children.push({
+                        title: code,
+                        fileName:code,
+                        dirPath: fileDir,
+                        expand: false,
+                        contextmenu: true,
+                        isDir: true,
+                        selected: false,
+                        children: []
+                    })
+                })
+            },
             handleContextMenuCreateFile() {
                 this.handleContextMenuCreateText("请输入文件名称：",null,null);
             },
@@ -240,7 +296,7 @@
                 let selectNodes = this.$refs.tree.getSelectedNodes()
                 let _this = this;
                 if (selectNodes.length == 0) {
-                    this.$Message.error("请选选择展开子目录");
+                    this.$Message.error("请先选择目录");
                 }
                 let selectNode = selectNodes[0];
                 _this.$store.commit("setSelecedNode", selectNode)

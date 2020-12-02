@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -57,7 +58,8 @@ func (c *FileController) DeleteFile() {
 	fileDir := c.GetString("fileDir")
 	fileName := c.GetString("fileName")
 	destPath := fileDir + tools.PathSeparator + fileName
-	if !fileSystem.IsDir(destPath) {
+	isDir, _ := fileSystem.IsDir(destPath)
+	if !isDir {
 		err := fileSystem.DeleteFile(fileDir, fileName)
 		ServeJSON(c.Controller, err)
 		return
@@ -134,6 +136,28 @@ func (c *FileController) CreateFile() {
 }
 
 /**
+  copy文件
+   :param fileDir 当前文件目录。
+   :param fileName 当前文件名。
+*/
+func (c *FileController) CopyFile() {
+	markdown := models.Markdown{}
+	data := c.Ctx.Input.RequestBody
+	json.Unmarshal(data, &markdown)
+	readByte, err := fileSystem.ReadByte(markdown.FileDir, markdown.FileName)
+	if err != nil {
+		ServeJSON(c.Controller, err)
+		return
+	}
+	err = fileSystem.SaveByte(markdown.FileDir, markdown.NewFileName, readByte, os.ModePerm)
+	if err != nil {
+		ServeJSON(c.Controller, err)
+		return
+	}
+	ServeJSON(c.Controller, "")
+}
+
+/**
   创建markdown
    :param fileDir 当前文件目录。
    :param fileName 当前文件名。
@@ -143,6 +167,33 @@ func (c *FileController) CreateDir() {
 	data := c.Ctx.Input.RequestBody
 	json.Unmarshal(data, &markdown)
 	err := fileSystem.Mkdir(markdown.FileDir, markdown.FileName)
+	if err != nil {
+		ServeJSON(c.Controller, err)
+		return
+	}
+	ServeJSON(c.Controller, "")
+}
+
+/**
+  删除目录
+   :param fileDir 当前文件目录。
+   :param fileName 当前文件名。
+*/
+func (c *FileController) DeleteDir() {
+	fileDir := c.GetString("fileDir")
+	fileName := c.GetString("fileName")
+	listFileDir := ""
+	if strings.HasSuffix(fileDir, tools.PathSeparator) {
+		listFileDir = fileDir + fileName
+	} else {
+		listFileDir = fileDir + tools.PathSeparator + fileName
+	}
+	nodeList, _ := fileSystem.ListDir(listFileDir, "")
+	if len(nodeList) > 0 {
+		ServeJSON(c.Controller, errors.New("存在多个子元素，请删除后继续"))
+		return
+	}
+	err := fileSystem.RmDir(fileDir, fileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return

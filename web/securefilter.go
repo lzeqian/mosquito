@@ -83,9 +83,17 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 				//if !strings.HasSuffix(dirPath, tools.PathSeparator) {
 				//	dirPath = dirPath + tools.PathSeparator
 				//}
-				if !strings.HasSuffix(dirPath, tools.PathSeparator+userInfo["userFullName"].(string)) {
-					setDirPath(ctx, dirPath+userInfo["userFullName"].(string))
-					controllers.GetFileSystem().Mkdir(dirPath, userInfo["userFullName"].(string))
+
+				if !strings.HasPrefix(dirPath, tools.PathSeparator+userInfo["userFullName"].(string)) {
+					targetDirPath := dirPath
+					//if(dirPath==tools.PathSeparator){
+					//	targetDirPath="";
+					//}
+					setDirPath(ctx, tools.PathSeparator+userInfo["userFullName"].(string)+(targetDirPath))
+					_, err := controllers.GetFileSystem().IsDir(tools.PathSeparator + userInfo["userFullName"].(string))
+					if err != nil {
+						controllers.GetFileSystem().Mkdir(tools.PathSeparator, userInfo["userFullName"].(string))
+					}
 				}
 
 			}

@@ -71,7 +71,7 @@ func (c *MarkDownController) CreateVuePress() {
 	ServeJSON(c.Controller, "")
 }
 func copyRemoteToLocal(remoteDir string, localDir string) {
-	nodes, _ := fileSystem.ListDir(remoteDir)
+	nodes, _ := fileSystem.ListDir(remoteDir, "")
 	for _, nodeTmp := range nodes {
 		if nodeTmp.IsDir {
 			os.Mkdir(localDir+tools.PathSeparator+nodeTmp.Title, os.ModePerm)

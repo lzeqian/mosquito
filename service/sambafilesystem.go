@@ -56,12 +56,12 @@ func (s *SambaFileSystem) ListRoot() ([]models.Node, error) {
 		}
 		return nodeList, nil
 	}
-	return s.ListDir("")
+	return s.ListDir("", "")
 }
-func (s *SambaFileSystem) IsDir(destPath string) bool {
+func (s *SambaFileSystem) IsDir(destPath string) (bool, error) {
 	formatDestPath := s.getPath(destPath)
-	fi, _ := s.fs.Lstat(formatDestPath)
-	return fi.IsDir()
+	fi, err := s.fs.Lstat(formatDestPath)
+	return fi.IsDir(), err
 }
 func (s *SambaFileSystem) getTargetPath(dirPth string, cfileName string) string {
 	fomatDirPath := s.getPath(dirPth)
@@ -90,7 +90,7 @@ func (s *SambaFileSystem) getPath(dirPth string) string {
   shareName:="测试目录"
   path:=""
 */
-func (s *SambaFileSystem) ListDir(dirPth string) ([]models.Node, error) {
+func (s *SambaFileSystem) ListDir(dirPth string, trimPrefix string) ([]models.Node, error) {
 	fileArray, _ := s.fs.ReadDir(s.getPath(dirPth))
 	nodeList := make([]models.Node, len(fileArray))
 	for index, fi := range fileArray {
@@ -120,7 +120,10 @@ func (s *SambaFileSystem) CreateFile(parentDir string, fileName string) error {
 	return err
 }
 func (s *SambaFileSystem) SaveTextFile(parentDir string, fileName string, content string, policyType os.FileMode) error {
-	return s.fs.WriteFile(s.getTargetPath(parentDir, fileName), []byte(content), policyType)
+	return s.SaveByte(parentDir, fileName, []byte(content), policyType)
+}
+func (s *SambaFileSystem) SaveByte(parentDir string, fileName string, content []byte, policyType os.FileMode) error {
+	return s.fs.WriteFile(s.getTargetPath(parentDir, fileName), content, policyType)
 }
 func (s *SambaFileSystem) Rename(srcDir string, src string, dest string) error {
 	srcPath := s.getTargetPath(srcDir, src)
