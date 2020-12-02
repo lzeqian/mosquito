@@ -45,7 +45,7 @@
 
                 let path=fileName.endsWith(".pdf")?"file/download":"file/transPdf";
                 let token=localStorage.getItem("token")
-                path = encodeURIComponent(this.$globalConfig.goServer + path+"?fileDir=" + dirPath + "&fileName=" + fileName+(token?"&token="+token:""), "utf-8");
+                path = encodeURIComponent(this.$globalConfig.goServer + path+"?fileDir=" + dirPath + "&fileName=" + fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace, "utf-8");
                 this.pdfSrc='/pdf/web/viewer.html?file='+path
             }
 

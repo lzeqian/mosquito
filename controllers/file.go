@@ -77,7 +77,7 @@ func (this *FileController) UploadFile() {
 	f, h, _ := this.GetFile("myfile") //获取上传的文件
 	fileName := h.Filename
 	fileByte, _ := ioutil.ReadAll(f)
-	err := fileSystem.SaveTextFile(fileDir, fileName, string(fileByte), 0777)
+	err := fileSystem.SaveByte(fileDir, fileName, fileByte, 0777)
 	if err != nil {
 		ServeJSON(this.Controller, err)
 		return

@@ -118,14 +118,14 @@
                 title="文件系统"
                 :footer-hide="true"
                 >
-           <FileSystem></FileSystem>
+           <FileSystem  ref="fileSystemRef"></FileSystem>
             <!--文件系统右键菜单-->
             <div class="fileSystemContextmenu" v-if="fileSystemContextmenuVisible">
                 <div class="fileSystemUploadFile" @mouseover="mouseOver('.fileSystemUploadFile','rgb(217,217,217)')"
                      @mouseleave="mouseLeave('.fileSystemUploadFile')">
                     <Upload :style="{width:'100%'}" :show-upload-list="false" action=""
                             ref="upload"
-
+                            :before-upload="handleUpload"
                     >上传文件(UF)
                     </Upload>
                 </div>
@@ -185,6 +185,14 @@
         computed: {},
         components: {FileSystem},
         methods: {
+            handleUpload(file) {
+                let fileSystemRef=this.$refs.fileSystemRef;
+                fileSystemRef.refreshCurView()
+                // this.uploadFile(file,()=>{
+                //     //刷新当前目录
+                // })
+                return false;
+            },
             refreshRetry(){
                 window.location.reload();
             },

@@ -34,7 +34,7 @@
                 let dirName=this.$route.query.dirPath;
                 let fileName=this.$route.query.fileName;
                 let token=localStorage.getItem("token")
-                this.imgSrc=this.$globalConfig.goServer+'/file/download?fileDir='+dirName+'&fileName='+fileName+(token?"&token="+token:"");
+                this.imgSrc=this.$globalConfig.goServer+'/file/download?fileDir='+dirName+'&fileName='+fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace;
             },
         },
         created(){

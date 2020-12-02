@@ -86,7 +86,7 @@
                 var fileName=this.$route.query.fileName
                 var req = new XMLHttpRequest();
                 let token=localStorage.getItem("token")
-                var url=vueThis.$globalConfig.goServer +"/file/download?fileDir=" + dirPath + "&fileName=" + fileName+(token?"&token="+token:"")
+                var url=vueThis.$globalConfig.goServer +"/file/download?fileDir=" + dirPath + "&fileName=" + fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace
                 req.open("GET", url, true);
                 req.responseType = "arraybuffer";
                 req.onload = function(e) {

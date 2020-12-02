@@ -92,24 +92,12 @@
 </template>
 <script>
 
-    window.clickToPath = (dirPath, title, root) => {
-        if (root) {
-            fileSystemVueThis.curDir = "/"
-            fileSystemVueThis.initData();
-        } else {
-            fileSystemVueThis.$axios.get(fileSystemVueThis.$globalConfig.goServer + "home/listSub?fileDir=" + dirPath + "&fileName=" + title + "&root=" + root).then((response) => {
-                fileSystemVueThis.dataArray = response.data.data //挂载子节点
-            })
-            fileSystemVueThis.curDir = dirPath + (dirPath == "/" ? "" : "/") + title
-        }
-
-    }
     export default {
         name: 'FileSystem',
         data() {
             return {
                 dataArray: [],
-                curDirHtml: '<a href=javascript:window.clickToPath("/","",true,true)>/ </a>',
+                curDirHtml: '<a href=javascript:window.fileSystemVueThis.clickToPath("/","",true,true)>/ </a>',
                 curDir: '/',
                 selectedItem:null,
                 selectedRef:null,
@@ -133,15 +121,38 @@
                 for (let sa of splitArray) {
                     if (sa == "") {
                         parentDir = "/"
-                        this.curDirHtml = '<a href=javascript:window.clickToPath("/","",true,true)>/ </a>';
+                        this.curDirHtml = '<a href=javascript:window.fileSystemVueThis.clickToPath("/","",true,true)>/ </a>';
                     } else {
-                        this.curDirHtml = this.curDirHtml + (parentDir == "/" ? "" : "/") + '<a href=javascript:window.clickToPath("' + parentDir + '","' + sa + '",' + false + ',true)>' + sa + '</a>'
+                        this.curDirHtml = this.curDirHtml + (parentDir == "/" ? "" : "/") + '<a href=javascript:window.fileSystemVueThis.clickToPath("' + parentDir + '","' + sa + '",' + false + ',true)>' + sa + '</a>'
                         parentDir = parentDir + (parentDir == "/" ? "" : "/") + sa;
                     }
                 }
             }
         },
         methods: {
+            refreshCurView(){
+                if(this.curDir=="/"){
+                    this.clickToPath(this.curDir,"",true)
+                }else {
+                    let index = this.curDir.lastIndexOf("/")
+                    let dirPath=this.curDir.substring(0,index)||"/"
+                    let fileName=this.curDir.substring(index+1)
+                    this.clickToPath(dirPath,fileName,false)
+                }
+
+            },
+            clickToPath(dirPath, title, root){
+                let fileSystemVueThis=this;
+                if (root) {
+                    fileSystemVueThis.curDir = "/"
+                    fileSystemVueThis.initData();
+                } else {
+                    fileSystemVueThis.$axios.get(fileSystemVueThis.$globalConfig.goServer + "home/listSub?fileDir=" + dirPath + "&fileName=" + title + "&root=" + root).then((response) => {
+                        fileSystemVueThis.dataArray = response.data.data //挂载子节点
+                    })
+                    fileSystemVueThis.curDir = dirPath + (dirPath == "/" ? "" : "/") + title
+                }
+            },
             mouseOverRef(refName,bgColor){
                 // this.$(className).css('background-color', 'rgb(60,95,130)');
                 this.$refs[refName][0].style.backgroundColor=bgColor;

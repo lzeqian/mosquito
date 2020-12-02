@@ -54,6 +54,18 @@ func setDirPath(ctx *context.Context, insertValue string) string {
 	}
 	return dirPath
 }
+func getAuthorization(ctx *context.Context) string {
+	//获取请求头的授权头token，未获取到则获取token参数
+	token := ctx.Request.Header["Authorization"]
+	var tokenString string = ""
+	if token != nil && len(token) > 0 {
+		tokenString = token[0]
+	}
+	if tokenString == "" {
+		tokenString = ctx.Request.FormValue("token")
+	}
+	return tokenString
+}
 
 /**
   检查当前用户当前路径下是否有权限操作文件系统权限
@@ -76,9 +88,9 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 		controllers.RequestFileSystem("1")
 		if dirPath != "" {
 			//if requestPath == "/home/listSub" || dirPath==tools.PathSeparator {
-			authorization := ctx.Request.Header["Authorization"]
-			if len(authorization) > 0 {
-				myCustomClaims, _ := tools.GetTokenInfo(authorization[0])
+			authorization := getAuthorization(ctx)
+			if authorization != "" {
+				myCustomClaims, _ := tools.GetTokenInfo(authorization)
 				userInfo := service.GetUser(myCustomClaims.Name)
 				//if !strings.HasSuffix(dirPath, tools.PathSeparator) {
 				//	dirPath = dirPath + tools.PathSeparator
@@ -124,19 +136,15 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 	return nil
 }
 
+/**
+  检验用户是否登录过滤器
+*/
 var FilterUser = func(ctx *context.Context) {
 	if ctx.Request.Method == "OPTIONS" || collection.Collect(IgnoreList).Contains(ctx.Request.URL.Path) {
 		return
 	}
 	//获取请求头的授权头token，未获取到则获取token参数
-	token := ctx.Request.Header["Authorization"]
-	var tokenString string = ""
-	if token != nil && len(token) > 0 {
-		tokenString = token[0]
-	}
-	if tokenString == "" {
-		tokenString = ctx.Request.FormValue("token")
-	}
+	var tokenString string = getAuthorization(ctx)
 	if tokenString == "" {
 		ctx.Input.RunController = nil
 		result := models.Result{
