@@ -102,7 +102,12 @@
                 切换目录树方式(S)
             </div>
             <hr/>
-            <div class="refreshCurren"  @mouseover="mouseOver('.refreshCurren','rgb(217,217,217)')"
+            <div class="quit"  @mouseover="mouseOver('.quit','rgb(217,217,217)')" @click="exitLogin"
+                 @mouseleave="mouseLeave('.quit')">
+                退出登录(Q)
+            </div>
+            <hr/>
+            <div class="refreshCurren"  @mouseover="mouseOver('.refreshCurren','rgb(217,217,217)')"  @click="refreshRetry"
                  @mouseleave="mouseLeave('.refreshCurren')">
                 刷新
             </div>
@@ -180,6 +185,16 @@
         computed: {},
         components: {FileSystem},
         methods: {
+            refreshRetry(){
+                window.location.reload();
+            },
+            exitLogin() {
+                if (localStorage.getItem("token")) {
+                    localStorage.removeItem("token")
+                    this.$store.state.isLogin = false
+                    this.$router.push("/")
+                }
+            },
             switchToDirectory(){
                 this.$store.commit("updateDirTree","tree")
                 this.routePush({},'/blank',"空白预览")
