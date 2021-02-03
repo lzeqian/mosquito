@@ -24,7 +24,13 @@ func (s *SambaFileSystem) ReadText(parentDir string, fileName string) (string, e
 	readByte, err := s.ReadByte(parentDir, fileName)
 	return string(readByte), err
 }
-
+func (s *SambaFileSystem) ExistFile(parentDir string, fileName string) (bool, error) {
+	fi, err := s.fs.Stat(s.getTargetPath(parentDir, fileName))
+	if err == nil && !fi.IsDir() {
+		return true, nil
+	}
+	return false, err
+}
 func (s *SambaFileSystem) Mkdir(parentDir string, fileName string) error {
 	return s.fs.MkdirAll(s.getTargetPath(parentDir, fileName), os.ModePerm)
 }
@@ -71,6 +77,7 @@ func (s *SambaFileSystem) getTargetPath(dirPth string, cfileName string) string 
 		return fomatDirPath + tools.PathSeparator + cfileName
 	}
 }
+
 func (s *SambaFileSystem) getPath(dirPth string) string {
 	formatDirPath := tools.FormatPath(dirPth)
 	if s.RootPath == tools.PathSeparator {

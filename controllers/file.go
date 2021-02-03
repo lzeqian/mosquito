@@ -14,6 +14,7 @@ import (
 	"gpm/tools"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -87,6 +88,41 @@ func (this *FileController) UploadFile() {
 }
 
 /**
+  上传文件
+   :param fileDir 当前文件目录。
+   :param fileName 当前文件名。
+*/
+func (this *FileController) UploadOfficeFile() {
+	fileDir := this.GetString("fileDir")
+	fileName := this.GetString("fileName")
+	data := this.Ctx.Input.RequestBody
+	paramData := make(map[string]string)
+	json.Unmarshal(data, &paramData)
+	resultJson := make(map[string]interface{})
+	resultJson["error"] = 0
+	if paramData["url"] != "" {
+		url := paramData["url"]
+		res, err := http.Get(url)
+		if err != nil {
+			panic(err)
+		}
+		if paramData["fileDir"] != "" {
+			fileDir = paramData["fileDir"]
+		}
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(res.Body)
+		err1 := fileSystem.SaveByte(fileDir, fileName, buf.Bytes(), 0777)
+		if err1 != nil {
+			resultJson["error"] = 1
+			this.ServeJSON()
+		}
+	}
+	this.Data["json"] = &resultJson
+	this.ServeJSON()
+
+}
+
+/**
   获取子目录结构
    :param fileDir 当前文件目录。
    :param fileName 当前文件名。
@@ -127,6 +163,11 @@ func (c *FileController) CreateFile() {
 	markdown := models.Markdown{}
 	data := c.Ctx.Input.RequestBody
 	json.Unmarshal(data, &markdown)
+	exist, _ := fileSystem.ExistFile(markdown.FileDir, markdown.FileName)
+	if exist {
+		ServeJSON(c.Controller, errors.New("文件已存在"))
+		return
+	}
 	err := fileSystem.CreateFile(markdown.FileDir, markdown.FileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)
@@ -210,6 +251,11 @@ func (c *FileController) RenameFile() {
 	markdown := models.Markdown{}
 	data := c.Ctx.Input.RequestBody
 	err := json.Unmarshal(data, &markdown)
+	exist, _ := fileSystem.ExistFile(markdown.FileDir, markdown.NewFileName)
+	if exist {
+		ServeJSON(c.Controller, errors.New("文件已存在"))
+		return
+	}
 	err = fileSystem.Rename(markdown.FileDir, markdown.FileName, markdown.NewFileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)

@@ -19,6 +19,18 @@ function uploadFile(file,func) {
         func && func()
     })
 }
+function uploadFileFun(file,dirPath,fileName,root,func) {
+    const param = new FormData();
+    let fileDir=dirPath + "/" +fileName;
+    if(root){
+        fileDir=dirPath
+    }
+    param.append('myfile', file)
+    param.append('fileDir', fileDir)
+    this.$axios.post(this.$globalConfig.goServer + "/file/upload", param).then(res => {
+        func && func()
+    })
+}
 /**
  * 删除文件
  */
@@ -89,18 +101,44 @@ function createTextFile(selectNode,title,suffix,func) {
         _this.$Message.error("请选选择展开子目录");
     }
 }
+function createTextFun(dirPath,suffix,title,func) {
+    let _this=this;
+    let code = prompt(title);
+    if (code != null && code.trim() != "") {
+        let suffixRe=_this.$globalConfig.supportFile
+        if(!suffix && !suffixRe.test(code)){
+            _this.$Message.error("该文件目不支持创建,只支持:"+suffixRe)
+            return;
+        }
+        if (suffix && !code.endsWith(suffix)) {
+            code = code + suffix;
+        }
+        this.$axios.post(this.$globalConfig.goServer + "file/create",{fileDir:dirPath,fileName:code}).then((response) => {
+            func && func(code)
+        })
+    }
+
+}
 function createDir(selectNode,title,func) {
     let _this=this;
     if (selectNode.isDir) {
-        let code = prompt(title);
-        if (code != null && code.trim() != "") {
-            let fileDir=selectNode.dirPath + "/" +this.selectNode.fileName;
-            this.$axios.post(this.$globalConfig.goServer + "/file/mkdir",{fileDir:fileDir,fileName:code}).then((response) => {
-                func && func(fileDir,code)
-            })
-        }
+        _this._createDir();
     } else {
         _this.$Message.error("请选择一个目录");
+    }
+}
+function _createDir(selectNode,title,func) {
+    let code = prompt(title);
+    if (code != null && code.trim() != "") {
+        let fileDir=null;
+        if(!selectNode){
+            fileDir="/"
+        }else{
+            fileDir=selectNode.dirPath + "/" +this.selectNode.fileName;
+        }
+        this.$axios.post(this.$globalConfig.goServer + "/file/mkdir",{fileDir:fileDir,fileName:code}).then((response) => {
+            func && func(fileDir,code)
+        })
     }
 }
 function editFile(func){
@@ -117,14 +155,31 @@ function editFile(func){
         });
     }
 }
+function renameFile(newName,func,errFunc){
+    let selectNode=this.$store.getters.getSelectedNode
+    let _this=this;
+    if (newName != null && newName.trim() != "") {
+        this.$axios.post(this.$globalConfig.goServer + "file/rename",{
+            fileDir:selectNode.dirPath,
+            fileName:selectNode.title,
+            newFileName:newName
+        }).then((response) => {
+            func && func()
+        }).catch((reason)=>{
+            errFunc && errFunc(reason)
+        });
+    }
+}
 function loadEditorContent(func) {
     let vueThis = this;
-    let fileDir=vueThis.$store.getters.getSelectedNode.dirPath;
-    let fileName=vueThis.$store.getters.getSelectedNode.fileName;
-    this.$axios.get(this.$globalConfig.goServer + "file/query?fileDir=" + fileDir + "&fileName=" + fileName).then((response) => {
-        vueThis.content = response.data
-        func(vueThis, response.data.data)
-    })
+    if(vueThis.$store.getters.getSelectedNode) {
+        let fileDir = vueThis.$store.getters.getSelectedNode.dirPath;
+        let fileName = vueThis.$store.getters.getSelectedNode.fileName;
+        this.$axios.get(this.$globalConfig.goServer + "file/query?fileDir=" + fileDir + "&fileName=" + fileName).then((response) => {
+            vueThis.content = response.data
+            func(vueThis, response.data.data)
+        })
+    }
 }
 function saveEditorContent (data, func) {
     let vueThis = this;
@@ -180,14 +235,18 @@ function copyFile (func) {
 export default{
     downloadFile,
     uploadFile,
+    uploadFileFun,
     deleteFile,
     buildVpFile,
     createVpFile,
     createTextFile,
+    createTextFun,
     editFile,
+    renameFile,
     loadEditorContent,
     saveEditorContent,
     copyFile,
     createDir,
+    _createDir,
     deleteDir
 }

@@ -19,9 +19,10 @@ Vue.use(router);
 Vue.config.productionTip = false
 Vue.prototype.$axios = axios
 Vue.prototype.$ = $
-import {fileIcon,routePush} from  './utils/utils'
+import {fileIcon,routePush,randomUuid} from  './utils/utils'
 Vue.prototype.fileIcon=fileIcon
 Vue.prototype.routePush=routePush
+Vue.prototype.randomUuid=randomUuid
 //文件操作相关函数
 import fileFunction from  './utils/file'
 Object.assign(Vue.prototype,fileFunction)

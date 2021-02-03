@@ -12,6 +12,7 @@ func init() {
 	beego.Router("/md/buildVp", &controllers.MarkDownController{}, "post:BuildVuePress")
 	beego.Router("/file/download", &controllers.FileController{}, "get:DownloadFile")
 	beego.Router("/file/upload", &controllers.FileController{}, "post:UploadFile")
+	beego.Router("/file/uploadOfficeFile", &controllers.FileController{}, "post:UploadOfficeFile")
 	beego.Router("/file/save", &controllers.FileController{}, "post:SaveFile")
 	beego.Router("/file/copy", &controllers.FileController{}, "post:CopyFile")
 	beego.Router("/file/delete", &controllers.FileController{}, "delete:DeleteFile")

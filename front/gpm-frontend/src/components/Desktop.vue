@@ -121,47 +121,59 @@
            <FileSystem  ref="fileSystemRef"></FileSystem>
             <!--文件系统右键菜单-->
             <div class="fileSystemContextmenu" v-if="fileSystemContextmenuVisible">
+                <div class="returnPreStep" @mouseover="mouseOver('.returnPreStep','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.returnPreStep')" @click="$refs.fileSystemRef.returnPreStep()">
+                    返回上一级
+                </div>
+                <hr/>
                 <div class="fileSystemUploadFile" @mouseover="mouseOver('.fileSystemUploadFile','rgb(217,217,217)')"
                      @mouseleave="mouseLeave('.fileSystemUploadFile')">
                     <Upload :style="{width:'100%'}" :show-upload-list="false" action=""
-                            ref="upload"
-                            :before-upload="handleUpload"
+                            ref="input"
+                            :before-upload="handleUploadFile"
                     >上传文件(UF)
                     </Upload>
                 </div>
-                <div class="fileSystemRename" @mouseover="mouseOver('.fileSystemRename','rgb(217,217,217)')"
-                     @mouseleave="mouseLeave('.fileSystemRename')">
-                    重命名(RN)
-                </div>
                 <div class="fileSystemDelete" @mouseover="mouseOver('.fileSystemDelete','rgb(217,217,217)')"
-                     @mouseleave="mouseLeave('.fileSystemDelete')">
-                    删除文件(DE)
+                     @mouseleave="mouseLeave('.fileSystemDelete')" @click="$refs.fileSystemRef.deleteCurFile()">
+                    删除(DE)
+                </div>
+                <div class="copyFile" @mouseover="mouseOver('.copyFile','rgb(217,217,217)')" v-if="selectNode!=null && !selectNode.isDir"
+                     @mouseleave="mouseLeave('.copyFile')" @click="$refs.fileSystemRef.copyCurFile()">
+                    复制(DD)
+                </div>
+                <div class="refreshDir" @mouseover="mouseOver('.refreshDir','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.refreshDir')" @click="$refs.fileSystemRef.refreshCurView()">
+                    刷新(R)
                 </div>
                 <hr/>
-
+                <div class="fileSystemCreateDir" @mouseover="mouseOver('.fileSystemCreateDir','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCreateDir')"  @click="$refs.fileSystemRef.createCurDir()">
+                    <font color="red"> 新建目录(MD)</font>
+                </div>
                 <div class="fileSystemCreateMd" @mouseover="mouseOver('.fileSystemCreateMd','rgb(217,217,217)')"
-                     @mouseleave="mouseLeave('.fileSystemCreateMd')">
+                     @mouseleave="mouseLeave('.fileSystemCreateMd')" @click="$refs.fileSystemRef.createMdFileInCur()">
                     <font color="red"> 新建md(MD)</font>
                 </div>
                 <div class="fileSystemCreateFlow" @mouseover="mouseOver('.fileSystemCreateFlow','rgb(217,217,217)')"
-                     @mouseleave="mouseLeave('.fileSystemCreateFlow')">
+                     @mouseleave="mouseLeave('.fileSystemCreateFlow')" @click="$refs.fileSystemRef.createFlowFileInCur()">
                     <font color="red"> 新建flow(FW)</font>
                 </div>
                 <div class="fileSystemCreateSnow" @mouseover="mouseOver('.fileSystemCreateSnow','rgb(217,217,217)')"
-                     @mouseleave="mouseLeave('.fileSystemCreateSnow')">
+                     @mouseleave="mouseLeave('.fileSystemCreateSnow')" @click="$refs.fileSystemRef.createSnowFileInCur()">
                     <font color="red">  新建思维导图(NN)</font>
                 </div>
                 <div class="fileSystemCreateFile" @mouseover="mouseOver('.fileSystemCreateFile','rgb(217,217,217)')"
-                     @mouseleave="mouseLeave('.fileSystemCreateFile')">
+                     @mouseleave="mouseLeave('.fileSystemCreateFile')" @click="$refs.fileSystemRef.createTextFileInCur()">
                     <font color="red">  新建文件(NF)</font>
                 </div>
                 <hr/>
                 <div class="fileSystemCreateVp" @mouseover="mouseOver('.fileSystemCreateVp','rgb(217,217,217)')"
-                     @mouseleave="mouseLeave('.fileSystemCreateVp')">
+                     @mouseleave="mouseLeave('.fileSystemCreateVp')" @click="$refs.fileSystemRef.createVpFileInCur()">
                     <font color="green">新建vuepress(VP)</font>
                 </div>
                 <div class="fileSystemBuildVp" @mouseover="mouseOver('.fileSystemBuildVp','rgb(217,217,217)')"
-                     @mouseleave="mouseLeave('.fileSystemBuildVp')">
+                     @mouseleave="mouseLeave('.fileSystemBuildVp')" @click="$refs.fileSystemRef.buildVpFileInCur()">
                     <font color="green"> 构建vuepress(BP)</font>
                 </div>
             </div>
@@ -182,16 +194,17 @@
             }
         },
         props: {},
-        computed: {},
+        computed: {
+            selectNode() {
+                return this.$store.getters.getSelectedNode
+            },
+        },
         components: {FileSystem},
         methods: {
-            handleUpload(file) {
+            handleUploadFile(file) {
                 let fileSystemRef=this.$refs.fileSystemRef;
-                fileSystemRef.refreshCurView()
-                // this.uploadFile(file,()=>{
-                //     //刷新当前目录
-                // })
-                return false;
+                fileSystemRef.uploadFile(file)
+                return false
             },
             refreshRetry(){
                 window.location.reload();

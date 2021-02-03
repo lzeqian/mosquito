@@ -29,7 +29,11 @@ func getDirPath(ctx *context.Context) string {
 		} else {
 			mapParam := make(map[string]interface{})
 			json.Unmarshal(ctx.Input.RequestBody, &mapParam)
-			dirPath = mapParam["fileDir"].(string)
+			if mapParam["fileDir"] != nil {
+				dirPath = mapParam["fileDir"].(string)
+			} else {
+				dirPath = ctx.Request.FormValue("fileDir")
+			}
 
 		}
 	}

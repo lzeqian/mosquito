@@ -10,6 +10,7 @@ import ImageViewer from '../views/editor/ImageViewer'
 import FlowEditor from '../views/editor/FlowEditor'
 import BlankViewer from '../views/editor/BlankViewer'
 import MindEditor from "../components/mind/editor";
+import OfficeEditor from "../views/editor/OfficeEditor";
 Vue.use(VueRouter)
 
   const routes = [
@@ -63,6 +64,11 @@ Vue.use(VueRouter)
       path: '/mindeditor',
       name: 'MindEditor',
       component: MindEditor
+    },
+    {
+      path: '/officeeditor',
+      name: 'OfficeEditor',
+      component: OfficeEditor
     }
 ]
 const originalPush = VueRouter.prototype.push

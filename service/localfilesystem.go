@@ -84,6 +84,17 @@ func (s *LocalFileSystem) DeleteFile(parentDir string, fileName string) error {
 	destPath := s.RootPath + tools.PathSeparator + parentDir + tools.PathSeparator + fileName
 	return os.Remove(destPath)
 }
+func (s *LocalFileSystem) ExistFile(parentDir string, fileName string) (bool, error) {
+	destPath := s.RootPath + tools.PathSeparator + parentDir + tools.PathSeparator + fileName
+	_, err := os.Stat(destPath)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
 func (s *LocalFileSystem) CreateFile(parentDir string, fileName string) error {
 	destPath := s.RootPath + tools.PathSeparator + parentDir + tools.PathSeparator + fileName
 	f, err := os.Create(destPath)

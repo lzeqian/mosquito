@@ -43,6 +43,9 @@ func (s *FtpFileSystem) RmDir(parentDir string, fileName string) error {
 	formatDestPath := tools.FormatPath(parentDir)
 	return s.fs.Rmd(formatDestPath + tools.PathSeparator + fileName)
 }
+func (s *FtpFileSystem) ExistFile(parentDir string, fileName string) (bool, error) {
+	return false, nil
+}
 
 /**
   一般路径为 /测试目录/业务文档

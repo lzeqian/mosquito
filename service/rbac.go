@@ -184,6 +184,7 @@ func CheckUserAct(userName string, inputPath string, inputAct string) bool {
 func CheckUserMulAct(userName string, inputPath string, inputAct []string) bool {
 	//当前用户拥有的权限
 	actsList := GetUserPathAccess(userName, inputPath)
+	fmt.Println(tools.ListToArray(actsList))
 	haveCount := 0
 	//循环询问当前用户是否拥有权限
 	for _, v := range inputAct {

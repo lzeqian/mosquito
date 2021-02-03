@@ -28,6 +28,12 @@ type FileSystem interface {
 	*/
 	ReadText(string, string) (string, error)
 	/**
+	    是否存在文件
+		:param 目录名称
+	    :param 文件名称
+	*/
+	ExistFile(string, string) (bool, error)
+	/**
 	    创建目录
 		:param 目录名称
 	    :param 文件名称
