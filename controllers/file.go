@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -153,6 +154,32 @@ func (c *FileController) QueryFile() {
 	text, _ := fileSystem.ReadText(fileDir, fileName)
 	ServeJSON(c.Controller, text)
 }
+func createFile(markdown models.Markdown) (err error) {
+	filesuffix := path.Ext(markdown.FileName)
+	var rerr error
+	rerr = fileSystem.CreateFile(markdown.FileDir, markdown.FileName)
+	ifCopy := false
+	copySrc := ""
+	if ".xlsx" == filesuffix {
+		ifCopy = true
+		copySrc = "null.xlsx"
+
+	} else if ".pptx" == filesuffix {
+		ifCopy = true
+		copySrc = "null.pptx"
+	}
+	if ifCopy {
+		f, err := os.Open("files/" + copySrc)
+		if err != nil {
+			fmt.Println("read file fail", err)
+			return err
+		}
+		defer f.Close()
+		fd, err := ioutil.ReadAll(f)
+		fileSystem.SaveByte(markdown.FileDir, markdown.FileName, fd, os.ModePerm)
+	}
+	return rerr
+}
 
 /**
   创建markdown
@@ -168,7 +195,9 @@ func (c *FileController) CreateFile() {
 		ServeJSON(c.Controller, errors.New("文件已存在"))
 		return
 	}
-	err := fileSystem.CreateFile(markdown.FileDir, markdown.FileName)
+	//err := fileSystem.CreateFile(markdown.FileDir, markdown.FileName)
+	err := createFile(markdown)
+
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return

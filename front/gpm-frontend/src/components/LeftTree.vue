@@ -36,6 +36,15 @@
                 <DropdownItem @click.native="handleContextMenuCreateFile" style="color: #ed4014"
                               v-if="selectNode!=null && selectNode.isDir">新建文件
                 </DropdownItem>
+                <DropdownItem @click.native="handleContextMenuCreateWord" style="color: #ed4014"
+                              v-if="selectNode!=null && selectNode.isDir">新建word
+                </DropdownItem>
+                <DropdownItem @click.native="handleContextMenuCreateExcel" style="color: #ed4014"
+                              v-if="selectNode!=null && selectNode.isDir">新建excel
+                </DropdownItem>
+                <DropdownItem @click.native="handleContextMenuCreatePpt" style="color: #ed4014"
+                              v-if="selectNode!=null && selectNode.isDir">新建ppt
+                </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuCreateVp" style="color: green"
                               v-if="selectNode!=null && selectNode.isDir">新建vuepress
                 </DropdownItem>
@@ -344,6 +353,15 @@
             },
             handleContextMenuCreateSnow(){
                 this.handleContextMenuCreateText("请输入思维导图：",".mind");
+            },
+            handleContextMenuCreateWord(){
+                this.handleContextMenuCreateText("请输入Word：",".docx");
+            },
+            handleContextMenuCreateExcel(){
+                this.handleContextMenuCreateText("请输入Excel：",".xlsx");
+            },
+            handleContextMenuCreatePpt(){
+                this.handleContextMenuCreateText("请输入Ppt：",".pptx");
             },
             /**
              * 检查是否是vuepress项目
