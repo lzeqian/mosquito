@@ -587,6 +587,14 @@ users:
   userName: admin
 - ifActivate: 1
   password: e10adc3949ba59abbe56e057f20f883e
+  position: 管理员11
+  role: admin
+  userFullName: 管理员11
+  userGroup: admin
+  userLog: /images/userlog.jpg
+  userName: admin1
+- ifActivate: 1
+  password: e10adc3949ba59abbe56e057f20f883e
   position: 部门经理
   role: admin
   userFullName: 廖敏

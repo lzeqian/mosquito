@@ -20,7 +20,10 @@ func (c *LoginController) Login() {
 	password := userInfo["password"]
 	if service.CheckUserPassword(userName, password) {
 		token := tools.GenerateToken(tools.User{Id: userName, Name: userName}, 10*24*60)
-		ServeJSON(c.Controller, token)
+		userMap := make(map[string]string)
+		userMap["token"] = token
+		userMap["userName"] = userName
+		ServeJSON(c.Controller, userMap)
 	} else {
 		ServeJSON(c.Controller, errors.New("用户验证失败，请重试"))
 	}

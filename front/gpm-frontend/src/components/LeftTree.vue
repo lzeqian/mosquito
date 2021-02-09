@@ -18,6 +18,8 @@
                 </DropdownItem>
                 <DropdownItem @click.native="handleContextDownload" v-if="selectNode!=null && !selectNode.isDir">下载
                 </DropdownItem>
+                <DropdownItem @click.native="handleContextShare" v-if="selectNode!=null && !selectNode.isDir && $store.getters.currentWorkspace==1">分享
+                </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuCreateMd" style="color: #ed4014"
                               v-if="selectNode!=null && selectNode.isDir">新建md
                 </DropdownItem>
@@ -57,7 +59,25 @@
             <Icon type="load-c" size="30" class="demo-spin-icon-load"></Icon>
             <div>Loading...</div>
         </Spin>
-
+        <Modal
+                v-model="showShare"
+                title="分享"
+                @on-ok="ok"
+                @on-cancel="cancel">
+            谁可以查看/编辑文档<br/>
+            <RadioGroup v-model="shareObject.shareMode">
+                <Radio :label="0">仅仅我自己</Radio><br/>
+                <Radio :label="1">仅我分享的好友</Radio>
+                <RadioGroup v-model="shareObject.assignUserMode" v-if="shareObject.shareMode==1">
+                    <br/><Radio :label="0">可查看</Radio><br/>
+                    <Radio :label="1">可编辑</Radio><br/><br/>
+                    分享加入url: <a :href="shareObject.shareUrl">{{shareObject.joinUrl}}</a>
+                </RadioGroup><br/>
+                <Radio :label="2">所有人可查看</Radio><br/>
+                <Radio :label="3">所有人可编辑</Radio><br/>
+            </RadioGroup><br/><br/>
+            文档url: <a :href="shareObject.shareUrl">{{shareObject.shareUrl}}</a>
+        </Modal>
         <div style="position: absolute;top:0px;right:5px">
             <a @click="gotoDesktop">
                 <svg class="icon" aria-hidden="true">
@@ -71,9 +91,12 @@
             </a>
         </div>
     </div>
+
 </template>
 
 <script>
+    import {randomUuid} from "../utils/utils";
+
     export default {
         name: 'LeftTree',
         props:{
@@ -84,6 +107,16 @@
         },
         data() {
             return {
+                showShare:false,
+                shareObject:{
+                    shareMode:2,
+                    shareKey:"",
+                    joinKey:"",
+                    assignUserMode:1,
+                    shareUrl:"",
+                    joinUrl:""
+                },
+
                 isSpinShow: false,
                 isImgShow: false,
                 data5: [],
@@ -107,6 +140,32 @@
             }
         },
         methods: {
+            getShareUrl(){
+                this.shareObject.shareKey=randomUuid(8);
+                return window.location.protocol+this.$globalConfig.goServer+"docs/"+this.shareObject.shareKey;
+            },
+            getJoinUrl(){
+                this.shareObject.joinKey=randomUuid(8);
+                return window.location.protocol+this.$globalConfig.goServer+"docJoin/"+this.shareObject.joinKey;
+            },
+            handleContextShare(){
+                this.showShare=true;
+                this.shareObject.shareUrl=this.getShareUrl();
+                this.shareObject.joinUrl=this.getJoinUrl();
+            },
+            ok () {
+                let _this=this;
+                let curSelectNodes = _this.$refs.tree.getSelectedNodes()
+                this.$axios.post(this.$globalConfig.goServer+"share/shareFile",{
+                    fileDir:node.dirPath,
+                    fileName:node.fileName,
+                    shareUserName:localStorage.getItem("userName"),
+                    ..._this.shareObject
+                })
+            },
+            cancel () {
+                this.$Message.info('Clicked cancel');
+            },
             gotoDesktop(){
                 this.$store.commit("updateDirTree","desktop")
                 this.routePush({},'/blank',"空白预览")

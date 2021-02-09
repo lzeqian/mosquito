@@ -42,7 +42,6 @@ func (this *FileController) DownloadFile() {
 	fileDir := this.GetString("fileDir")
 	fileName := this.GetString("fileName")
 	readBytes, _ := fileSystem.ReadByte(fileDir, fileName)
-
 	this.Ctx.Output.Header("Content-type", "application/force-download")
 	this.Ctx.Output.Header("Content-Disposition", "attachment;filename="+fileName)
 	this.Ctx.Output.Header("Pragma", "No-cache")
@@ -112,10 +111,13 @@ func (this *FileController) UploadOfficeFile() {
 		}
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(res.Body)
-		err1 := fileSystem.SaveByte(fileDir, fileName, buf.Bytes(), 0777)
-		if err1 != nil {
-			resultJson["error"] = 1
-			this.ServeJSON()
+		bufBytes := buf.Bytes()
+		if len(bufBytes) > 0 {
+			err1 := fileSystem.SaveByte(fileDir, fileName, bufBytes, 0777)
+			if err1 != nil {
+				resultJson["error"] = 1
+				this.ServeJSON()
+			}
 		}
 	}
 	this.Data["json"] = &resultJson

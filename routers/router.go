@@ -26,5 +26,8 @@ func init() {
 	beego.Router("/file/transPdf", &controllers.FileController{}, "get:TranslatePdf")
 	beego.Router("/file/uploadToServer", &controllers.FileController{}, "post:UploadToServer")
 	beego.Router("/file/viewerFromServer", &controllers.FileController{}, "get:ViewerFromServer")
+	beego.Router("/share/shareFile", &controllers.ShareController{}, "post:ShareFile")
+	beego.Router("/share/getShareFile", &controllers.ShareController{}, "get:GetShareFile")
+	beego.Router("/share/cancelShareFile", &controllers.ShareController{}, "put:CancelShareFile")
 	beego.Router("/login", &controllers.LoginController{}, "post:Login")
 }

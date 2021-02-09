@@ -45,18 +45,19 @@
                 let fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
                 vm.wordURL = window.location.protocol+this.$globalConfig.goServer + "/file/download?fileDir=" + dirPath + "&fileName=" + fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace;
                 let documentType = "";
-                let key="";
+                let key=vm.randomUuid(20).replaceAll("-","");
                 if (/(xls|xlsx)/.test(fileExtension)) {
                     documentType = "spreadsheet"
-                    key=vm.randomUuid(20).replaceAll("-","")
                 }
                 if (/(doc|docx)/.test(fileExtension)) {
                     documentType = "word"
-                    key=vm.randomUuid(20).replaceAll("-","")
                 }
                 if (/(ppt|pptx)/.test(fileExtension)) {
                     documentType = "presentation"
-                    key=vm.randomUuid(20).replaceAll("-","")
+                }
+                //公共文档库必须使用同一个秘钥，可以协作编辑。
+                if(this.$store.getters.currentWorkspace==0){
+
                 }
                 let configJson={
                     "document": {
@@ -79,6 +80,10 @@
                         "actionLink": null,
                         "mode": "edit", //view表示预览
                         "lang": "zh",
+                        "user": {
+                            "id": localStorage.getItem("userName"),
+                            "name": localStorage.getItem("userName")
+                        },
                         "callbackUrl": window.location.protocol+this.$globalConfig.goServer+ "file/uploadOfficeFile?fileDir=" + dirPath+ "&fileName=" + fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace,
                         "customization": {
                             "about": true,

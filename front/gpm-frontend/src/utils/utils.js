@@ -33,6 +33,12 @@ export function fileIcon(title){
         if (title.endsWith(".xml")) {
             return "icon-xml"
         }
+        if (title.endsWith(".flow")) {
+            return "icon-liuchengtu"
+        }
+        if (title.endsWith(".mind")) {
+            return "icon-xmind"
+        }
         return 'icon-wenjian'
 }
 

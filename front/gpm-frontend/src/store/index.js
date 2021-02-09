@@ -93,9 +93,10 @@ export default new Vuex.Store({
 
   },
   mutations: {
-    login(state,token){
+    login(state,userInfo){
       state.isLogin=true
-      localStorage.setItem("token",token)
+      localStorage.setItem("token",userInfo.token)
+      localStorage.setItem("userName",userInfo.userName)
     },
     showLoading(state){
       state.isSpinShow = true
