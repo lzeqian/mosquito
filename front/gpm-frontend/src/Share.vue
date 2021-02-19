@@ -40,10 +40,6 @@
       Home
     },
     computed:{
-      routeQueryContent() {
-        return this.$route.query.dirPath+
-                this.$route.query.fileName
-      }
     },
     data() {
       return {
@@ -72,17 +68,23 @@
         if (localStorage.getItem("token")) {
           this.$store.state.isLogin = true
         }
-        if (vueThis.$route.name != "blankViewer"){
-            if (vueThis.$route && vueThis.$route.matched && vueThis.$route.matched.length > 0) {
-              let vueRouteComponents = vueThis.$route.matched[0].instances.default
-              if (vueRouteComponents) {
-                vueThis.loadEditorContent((vueThis, data) => {
+        if (vueThis.$route.name != "blankViewer") {
+          vueThis.loadEditorContent((vueThis, data) => {
+            vueThis.$store.commit("setSelectedNodeCacheData", data)
+            let initInterval=setInterval(()=>{
+              if (vueThis.$route && vueThis.$route.matched && vueThis.$route.matched.length > 0) {
+                let vueRouteComponents = vueThis.$route.matched[0].instances.default
+                if (vueRouteComponents) {
                   if (vueRouteComponents.initData) {
                     vueRouteComponents.initData(data)
+                    clearInterval(initInterval)
                   }
-                })
+
+                }
               }
-            }
+            },100)
+
+          })
         }
       }
 

@@ -188,10 +188,10 @@
 
             // 提交图片
             imageChange(param, type) {
-                debugger
                 const formData = new FormData()
+                let selectedNode=_this.$store.getters.getSelectedNode
                 formData.append('myfile', param.file)
-                formData.append('projectName', this.$route.query.fileName)
+                formData.append('projectName', selectedNode.fileName)
                 var _this = this;
                 _this.$axios.post(this.$globalConfig.goServer + '/file/uploadToServer', formData).then(res => {
                     debugger

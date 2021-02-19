@@ -220,7 +220,7 @@
                 }
             },
             $route(val) {
-                this.open();
+                // this.open();
             },
             error(curVal) {
                 this.$notify({
@@ -244,7 +244,7 @@
             canvasOptions.on = this.onMessage;
             canvas = new Topology('topology-canvas', canvasOptions);
             this.canvas=canvas
-            this.open();
+            // this.open();
         },
         methods: {
             onMenu(key, keyPath) {
@@ -301,11 +301,14 @@
                 this.$cookies.remove('token')
                 this.user = null
             },
-            async open() {
-                this.loadEditorContent((vueThis,data)=>{
-                    canvas.open(data);
-                })
+            initData(data){
+                canvas.open(data);
             },
+            // async open() {
+            //     this.loadEditorContent((vueThis,data)=>{
+            //
+            //     })
+            // },
             onDrag(event, node) {
                 event.dataTransfer.setData('Text', JSON.stringify(node.data));
             },
@@ -445,8 +448,9 @@
                 input.click();
             },
             handle_downloadSrc(data) {
-                let dirName=this.$route.query.dirPath;
-                let fileName=this.$route.query.fileName;
+                let selectedNode=_this.$store.getters.getSelectedNode
+                let dirName=selectedNode.dirPath;
+                let fileName=selectedNode.fileName;
                 FileSaver.saveAs(
                     new Blob([JSON.stringify(canvas.data)], {
                         type: 'text/plain;charset=utf-8'
@@ -460,7 +464,8 @@
                 })
             },
             handle_savePng(data) {
-                let fileName=this.$route.query.fileName;
+                let selectedNode=_this.$store.getters.getSelectedNode
+                let fileName=selectedNode.fileName;
                 canvas.saveAsImage(fileName.split(".flow")[0]+'.png');
             },
             handle_undo(data) {

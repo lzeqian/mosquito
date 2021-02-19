@@ -45,7 +45,8 @@ export function fileIcon(title){
 export function routePush(node,routerAddress,title){
     this.$router.push({
         path: routerAddress,
-        query: {dirPath: node.dirPath, fileName: node.title}
+        // query: {dirPath: node.dirPath, fileName: node.title}
+        params: {dirPath: node.dirPath, fileName: node.title}
     });
 }
 export function randomUuid(len) {

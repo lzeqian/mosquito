@@ -35,16 +35,6 @@
             ]),
         },
         watch: {
-            $route: {
-                handler: function (val, oldVal) {
-                    let _this = this;
-                    this.$nextTick(function () {  //页面加载完成后执行
-                        _this.initData()
-                    })
-                },
-                // 深度观察监听
-                deep: true
-            }
         },
         methods: {
             ...mapActions([
@@ -54,18 +44,14 @@
                 'setMinder',
                 'setEditor'
             ]),
-            initData() {
-                this.loadEditorContent((vueThis, data) => {
-                    window.vueThis.loadEditorContent((vueThis, data) => {
-                        if (data == null || data == "") {
-                            let data = {"root": {"data": {"id": "c6j2vns4ms00", "created": 1603335159200, "text": "标准主题"}}};
-                            editor.minder.importJson(data);
-                            return;
-                        }
-                        editor.minder.importJson(JSON.parse(data))
-                    })
-                })
-            },
+            childInitData(data){
+                if (data == null || data == "") {
+                    let data = {"root": {"data": {"id": "c6j2vns4ms00", "created": 1603335159200, "text": "标准主题"}}};
+                    editor.minder.importJson(data);
+                    return;
+                }
+                editor.minder.importJson(JSON.parse(data))
+            }
         },
     }
 </script>

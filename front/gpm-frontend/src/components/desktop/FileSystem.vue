@@ -375,6 +375,19 @@
                         if (re.test(item.title) ) {
                             this.showEditorMadal=true
                             this.routePush(item,...mapping[key])
+                            _this.loadEditorContent((vueThis, data) => {
+                                let initInterval = setInterval(() => {
+                                    if (vueThis.$route && vueThis.$route.matched && vueThis.$route.matched.length > 0) {
+                                        let vueRouteComponents = vueThis.$route.matched[0].instances.default
+                                        if (vueRouteComponents) {
+                                            if (vueRouteComponents.initData) {
+                                                vueRouteComponents.initData(data)
+                                                clearInterval(initInterval)
+                                            }
+                                        }
+                                    }
+                                }, 100)
+                            });
                             return;
                         }
                     }

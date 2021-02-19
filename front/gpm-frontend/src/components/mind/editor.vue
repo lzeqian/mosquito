@@ -2,7 +2,7 @@
     <div style="height: 99%;">
         <header-menu></header-menu>
 
-        <main-editor></main-editor>
+        <main-editor ref="mainEditor"></main-editor>
         <navigator></navigator>
     </div>
 
@@ -44,6 +44,11 @@
         },
         created(){
             window.vueThis=this
+        },
+        methods:{
+            initData(data){
+                this.$refs.mainEditor.childInitData(data)
+            }
         },
         mounted() {
 
