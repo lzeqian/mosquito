@@ -63,14 +63,16 @@
                 v-model="showShare"
                 title="分享"
                 @on-ok="ok"
+                :z-index="10002"
                 @on-cancel="cancel">
             谁可以查看/编辑文档<br/>
             <RadioGroup v-model="shareObject.shareMode">
                 <Radio :label="0">仅仅我自己</Radio><br/>
                 <Radio :label="1">仅我分享的好友</Radio>
-                <RadioGroup v-model="shareObject.assignUserMode" v-if="shareObject.shareMode==1">
-                    <br/><Radio :label="0">可查看</Radio><br/>
-                    <Radio :label="1">可编辑</Radio><br/><br/>
+                <br  v-if="shareObject.shareMode==1"/>
+                <RadioGroup v-model="shareObject.assignUserMode" v-if="shareObject.shareMode==1" style="margin-left:50px">
+                    <Radio :label="0">可查看</Radio><br/>
+                    <Radio :label="1">可编辑</Radio><br/>
                     分享加入url: <a :href="shareObject.shareUrl">{{shareObject.joinUrl}}</a>
                 </RadioGroup><br/>
                 <Radio :label="2">所有人可查看</Radio><br/>
@@ -155,12 +157,16 @@
             },
             ok () {
                 let _this=this;
-                let curSelectNodes = _this.$refs.tree.getSelectedNodes()
+                let selectNode=this.$store.getters.getSelectedNode
                 this.$axios.post(this.$globalConfig.goServer+"share/shareFile",{
-                    fileDir:node.dirPath,
-                    fileName:node.fileName,
+                    fileDir:selectNode.dirPath,
+                    fileName:selectNode.fileName,
                     shareUserName:localStorage.getItem("userName"),
                     ..._this.shareObject
+                }).then((resp)=>{
+                    if(resp.data.code==0){
+                        this.$Message.info('分享成功');
+                    }
                 })
             },
             cancel () {
@@ -706,7 +712,8 @@
         }
         ,
         mounted() {
-            this.listRoot("公共文档库");
+            let title=this.$store.getters.currentWorkspace=="0"?"公共文档库":"个人文档库";
+            this.listRoot(title);
             this.preventDefault()
             document.getElementById('area').addEventListener("drop",
                 this.dropUpload,
@@ -715,7 +722,6 @@
         }
     }
 </script>
-
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
     .menu-item span {

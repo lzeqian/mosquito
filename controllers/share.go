@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	"gpm/database"
+	"gpm/tools"
 )
 
 type ShareController struct {
@@ -24,7 +26,20 @@ func (c *ShareController) Init(ctx *context.Context, controllerName, actionName 
 func (c *ShareController) ShareFile() {
 	data := c.Ctx.Input.RequestBody
 	link := database.UserLink{}
+
+	token := c.Ctx.Input.Header("Authorization")
+	clwas, err := tools.GetTokenInfo(token)
+	if err != nil {
+		ServeJSON(c.Controller, errors.New("token错误"))
+		return
+	}
 	json.Unmarshal(data, &link)
+	link.ShareUserName = clwas.User.Name
+	userLink := database.FindLink(link.FileDir, link.FileName)
+	if userLink.ID != 0 {
+		ServeJSON(c.Controller, errors.New("已经分享过key："+userLink.ShareKey))
+		return
+	}
 	database.InsertLink(link)
 	ServeJSON(c.Controller, "")
 }

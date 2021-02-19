@@ -8,15 +8,13 @@ type UserLink struct {
 	UpdatedAt     time.Time
 	FileDir       string
 	FileName      string
-	ShareUserName string
+	ShareUserName string //当前分享用户
 	ShareMode     int    //0表示仅我自己 1表示所有用户只读，2表示所有用户可编辑，3表示指定用户可查看，4表示所有用户可编辑，
 	ShareUser     string //当状态为3-4时指定可编辑的用户，如张三,李四
 	Status        int    //0表示禁用，1表示启用
 	ShareKey      string //默认地址 http://ip/doc/Sfymd3D
 	JoinKey       string //默认加入key http://ip/docJoin/Sfymd3D
 }
-
-var db = getOrmDb()
 
 func InsertLink(link UserLink) {
 	link.ID, _ = snowFake.NextID()
@@ -33,6 +31,12 @@ func DeleteLink(link UserLink) {
 func GetLink(shareKey string) (ruserLink UserLink) {
 	var userLink UserLink
 	db.First(&userLink, "shareKey=?", shareKey)
+	return userLink
+}
+
+func FindLink(fileDir string, fileName string) (ruserLink UserLink) {
+	var userLink UserLink
+	db.Where("file_dir=?", fileDir).Where("file_name=?", fileName).Find(&userLink)
 	return userLink
 }
 func CancelLink(shareKey string) {

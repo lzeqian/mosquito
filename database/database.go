@@ -30,6 +30,7 @@ func getDb() (rdb *sql.DB) {
 
 var ifInitDb bool
 var gdb *gorm.DB
+var db = getOrmDb()
 
 func getOrmDb() (rdb *gorm.DB) {
 	if !ifInitDb {

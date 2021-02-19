@@ -23,5 +23,9 @@ module.exports = {
                 }
             },
         }
+    },
+    pages: {
+        index:"src/main.js",
+        share: 'src/share.js'
     }
 }
