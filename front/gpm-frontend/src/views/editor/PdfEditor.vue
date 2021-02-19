@@ -24,20 +24,14 @@
             }
         },
         computed: {
-            routeQueryContent() {
-                return (this.$route.query.dirPath+
-                    this.$route.query.fileName)
-            }
         },
         watch: {
-            routeQueryContent(newVal, oldVal) {
-                this.initData()
-            }
         },
         methods: {
             async initData() {
-                var dirPath = this.$route.query.dirPath
-                var fileName = this.$route.query.fileName
+                let selectedNode=this.$store.getters.getSelectedNode
+                var dirPath = selectedNode.dirPath
+                var fileName = selectedNode.fileName
                 if(!fileName.endsWith(".pdf") && fileName.indexOf(" ")>0){
                     this.$Message.error("文件名中存在空格，无法转换，请重命名后尝试");
                     return;

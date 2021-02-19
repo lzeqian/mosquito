@@ -90,18 +90,21 @@
         },
         methods: {
             downloadFile(){
+                let selectedNode=this.$store.getters.getSelectedNode
                 let token=localStorage.getItem("token")
-                window.location=this.$globalConfig.goServer+"file/download?fileDir=" + this.$route.query.dirPath + "&fileName=" + this.$route.query.fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace
+                window.location=this.$globalConfig.goServer+"file/download?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace
             },
             transDoc(){
+                let selectedNode=this.$store.getters.getSelectedNode
                 let token=localStorage.getItem("token")
-                window.location=this.$globalConfig.goServer+"file/transDoc?fileDir=" + this.$route.query.dirPath + "&fileName=" + this.$route.query.fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace
+                window.location=this.$globalConfig.goServer+"file/transDoc?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace
             },
             handleEditorImgAdd(pos, $file){
                 var _this=this;
+                let selectedNode=this.$store.getters.getSelectedNode
                 const param = new FormData();
                 param.append('myfile', $file)
-                param.append('projectName', this.$route.query.fileName)
+                param.append('projectName', selectedNode.fileName)
                 this.$axios.post(this.$globalConfig.goServer + "file/uploadToServer", param).then(res => {
                     let imageData=res.data.data;
                     _this.$refs.md.$imglst2Url([[pos, imageData]])

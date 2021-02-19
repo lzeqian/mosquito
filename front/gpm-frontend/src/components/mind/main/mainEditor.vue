@@ -33,14 +33,17 @@
             ...mapGetters([
                 'minder',
             ]),
-            routeQueryContent() {
-                return this.$route.query.dirPath +
-                    this.$route.query.fileName
-            }
         },
         watch: {
-            routeQueryContent(newVal, oldVal) {
-                this.initData()
+            $route: {
+                handler: function (val, oldVal) {
+                    let _this = this;
+                    this.$nextTick(function () {  //页面加载完成后执行
+                        _this.initData()
+                    })
+                },
+                // 深度观察监听
+                deep: true
             }
         },
         methods: {

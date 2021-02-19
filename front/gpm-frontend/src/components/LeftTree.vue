@@ -651,41 +651,52 @@
             },
             initData(){
                 let _this = this;
-                let dirPath=this.$route.query.dirPath
-                let fileName=this.$route.query.fileName
-                let root=this.$refs.tree.data[0]
-                let curParent=root;
-                if(dirPath && fileName){
-                    let newDirPath=dirPath.replace(/[/\\|/|\\]+/,"\\")
-                    let dirPathSplit=newDirPath.split("\\");
-                    //选择目录
-                    for(let j=0;j<dirPathSplit.length;j++){
-                        let curDirPath=dirPathSplit[j]
-                        if(curDirPath!=null && curDirPath!=""){
-                            for (let [index, node] of new Map(curParent.children.map((node, i) => [i, node]))) {
-                                if (curDirPath == node.title) {
-                                    if (node.isDir) {
-                                        _this.$axios.get(_this.$globalConfig.goServer + "home/listSub?fileDir=" + node.dirPath + "&fileName=" + node.title+ "&root=" + node.root).then((response) => {
-                                            node.children = response.data.data //挂载子节点
-                                            node.expand = true    //展开子节点
-                                            _this.$nextTick(()=>{
-                                                //选择目录下的文件
-                                                for (let [index, tnode] of new Map(curParent.children.map((tnode, i) => [i, tnode]))) {
-                                                    if (fileName == tnode.title) {
-                                                        _this.selectChange([tnode])
-                                                        break;
-                                                    }
-                                                }
-                                            })
-                                        })
-                                    }
-                                    curParent=node
+                let selectedNode=_this.$store.getters.getSelectedNode
+                if(selectedNode!=null) {
+                    let dirPath = selectedNode.dirPath
+                    let fileName = selectedNode.fileName
+                    let root = this.$refs.tree.data[0]
+                    let curParent = root;
+                    if (dirPath && fileName) {
+                        let newDirPath = dirPath.replace(/[/\\|/|\\]+/, "\\")
+                        if(newDirPath=="\\"){
+                            for (let [index, tnode] of new Map(curParent.children.map((tnode, i) => [i, tnode]))) {
+                                if (fileName == tnode.title) {
+                                    _this.selectChange([tnode])
                                     break;
+                                }
+                            }
+                            return;
+                        }
+                        let dirPathSplit = newDirPath.split("\\");
+                        //选择目录
+                        for (let j = 0; j < dirPathSplit.length; j++) {
+                            let curDirPath = dirPathSplit[j]
+                            if (curDirPath != null && curDirPath != "") {
+                                for (let [index, node] of new Map(curParent.children.map((node, i) => [i, node]))) {
+                                    if (curDirPath == node.title) {
+                                        if (node.isDir) {
+                                            _this.$axios.get(_this.$globalConfig.goServer + "home/listSub?fileDir=" + node.dirPath + "&fileName=" + node.title + "&root=" + node.root).then((response) => {
+                                                node.children = response.data.data //挂载子节点
+                                                node.expand = true    //展开子节点
+                                                _this.$nextTick(() => {
+                                                    //选择目录下的文件
+                                                    for (let [index, tnode] of new Map(curParent.children.map((tnode, i) => [i, tnode]))) {
+                                                        if (fileName == tnode.title) {
+                                                            _this.selectChange([tnode])
+                                                            break;
+                                                        }
+                                                    }
+                                                })
+                                            })
+                                        }
+                                        curParent = node
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
-
                 }
             },
             listRoot(title){

@@ -22,15 +22,8 @@
             }
         },
         computed: {
-            routeQueryContent() {
-                return this.$route.query.dirPath +
-                    this.$route.query.fileName
-            }
         },
         watch: {
-            routeQueryContent(newVal, oldVal) {
-                this.initData()
-            }
         },
         components: {},
         methods: {
@@ -72,8 +65,9 @@
             },
             initData() {
                 let _this = this;
-                let dirName = this.$route.query.dirPath;
-                let fileName = this.$route.query.fileName;
+                let selectedNode=_this.$store.getters.getSelectedNode
+                let dirName = selectedNode.dirPath;
+                let fileName = selectedNode.fileName;
                 let token = localStorage.getItem("token")
                 let img = new Image()
                 img.src = this.$globalConfig.goServer + '/file/download?fileDir=' + dirName + '&fileName=' + fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace;

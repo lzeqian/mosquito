@@ -8,6 +8,7 @@ export default new Vuex.Store({
   state: {
     isSpinShow: false,
     selectedNode:null,
+    selectedNodeCacheData:null,
     isLogin:false,
     data: {
       scale: 1,
@@ -88,7 +89,17 @@ export default new Vuex.Store({
       return state.editor
     },
     getSelectedNode(state){
-      return state.selectedNode
+      let seNo=state.selectedNode
+      if(seNo==null){
+        let lsSelectNode=localStorage.getItem("selectedNode");
+        if(lsSelectNode!=null){
+          seNo=JSON.parse(lsSelectNode)
+        }
+      }
+      return seNo;
+    },
+    getSelectedNodeCacheData(state){
+      return state.selectedNodeCacheData
     }
 
   },
@@ -106,6 +117,10 @@ export default new Vuex.Store({
     },
     setSelecedNode(state,selectedNode){
       state.selectedNode = selectedNode
+      localStorage.setItem("selectedNode",JSON.stringify(selectedNode))
+    },
+    setSelectedNodeCacheData(state,selectedNodeCacheData){
+      state.selectedNodeCacheData = selectedNodeCacheData
     },
     data(state, data) {
       state.data = data

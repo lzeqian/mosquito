@@ -54,21 +54,11 @@
             }
         },
         computed:{
-            routeQueryContent() {
-                return this.$route.query.dirPath+
-                    this.$route.query.fileName
-            }
         },
         watch:{
             content(n,o){
                 if(this.editor)
                     this.editor.txt.html(n)
-            },
-            routeQueryContent(newVal, oldVal) {
-                if(this.editor)
-                    this.editor.config.uploadImgParams = {
-                        projectName:this.$route.query.fileName
-                    }
             }
         },
         components: {
@@ -76,6 +66,7 @@
         },
         methods: {
             initData(data) {
+                var vueThis=this;
                 vueThis.content = data
             },
         },
@@ -84,6 +75,7 @@
         mounted() {
             vueThis=this;
             setTimeout(function(){
+                let selectedNode=vueThis.$store.getters.getSelectedNode
                 const editor = new E("#div1");
                 vueThis.editor=editor
                 vueThis.editor.config.height = vueThis.$refs.element.offsetHeight-50;
@@ -92,9 +84,12 @@
                 editor.menus.extend('alertMenuKey', AlertMenu)
                 editor.config.uploadImgServer =vueThis.$globalConfig.goServer + '/file/uploadToServer'
                 editor.config.uploadImgParams = {
-                    projectName:vueThis.$route.query.fileName
+                    projectName:selectedNode.fileName
                 }
-
+                editor.config.uploadImgHeaders = {
+                    Authorization: localStorage.getItem("token"),
+                    Workspace: vueThis.$store.getters.currentWorkspace,
+                }
                 editor.config.uploadFileName = 'myfile'
                 editor.config.menus = editor.config.menus.concat(menuKey)
                 editor.create();

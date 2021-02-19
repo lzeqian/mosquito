@@ -88,7 +88,9 @@
             },
         },
         created(){
-            let fileExtArray=this.$route.query.fileName.split(".");
+            let selectedNode=this.$store.getters.getSelectedNode
+            let fileName = selectedNode.fileName
+            let fileExtArray=fileName.split(".");
             let fileExt=fileExtArray[fileExtArray.length-1]
             if(fileExt=="js"||fileExt=="vue"){
                 this.cmOptions.mode="javascript";
@@ -110,6 +112,7 @@
             }
         },
         mounted() {
+
         }
     }
 </script>
