@@ -29,5 +29,6 @@ func init() {
 	beego.Router("/share/shareFile", &controllers.ShareController{}, "post:ShareFile")
 	beego.Router("/share/getShareFile", &controllers.ShareController{}, "get:GetShareFile")
 	beego.Router("/share/cancelShareFile", &controllers.ShareController{}, "put:CancelShareFile")
+	beego.Router("/docs/?:shareKey", &controllers.ShareController{}, "get:ShareStatic")
 	beego.Router("/login", &controllers.LoginController{}, "post:Login")
 }

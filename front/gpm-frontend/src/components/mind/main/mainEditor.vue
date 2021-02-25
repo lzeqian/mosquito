@@ -15,7 +15,7 @@
             var el = this.$el;
             var editor = window.editor = new Editor(el);
             this.setEditor(editor);
-            this.initData()
+            this.childInitData()
             // if (window.localStorage.mindText) {
             //   editor.minder.importJson(JSON.parse(window.localStorage.mindText));
             // }

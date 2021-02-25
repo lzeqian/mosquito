@@ -73,14 +73,14 @@ Vue.prototype.$axios.interceptors.response.use(
 Vue.prototype.$globalConfig = GlobalConfig
 router.beforeEach((to, from, next) => {
     if (!to.meta.title) {
-        document.title = "文档管理系统"
+        document.title = "文档管理平台"
     }
     next()
 
 })
 router.afterEach((to, from) => {
     if (!to.meta.title) {
-        document.title = "文档管理系统"
+        document.title = "文档管理平台"
     }
 })
 Vue.use(ViewUI);

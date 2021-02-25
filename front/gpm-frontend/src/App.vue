@@ -62,6 +62,11 @@
                 handler: function (val, oldVal) {
                     this.initData()
                 }
+            },
+            '$route'(to,from) {
+                if (this.$route.name == "blankViewer") {
+                    this.$store.commit("setSelecedNode", null)
+                }
             }
         },
         methods: {

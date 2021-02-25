@@ -68,13 +68,6 @@
             initData(data) {
                 var vueThis=this;
                 vueThis.content = data
-            },
-        },
-        created(){
-        },
-        mounted() {
-            vueThis=this;
-            setTimeout(function(){
                 let selectedNode=vueThis.$store.getters.getSelectedNode
                 const editor = new E("#div1");
                 vueThis.editor=editor
@@ -86,15 +79,35 @@
                 editor.config.uploadImgParams = {
                     projectName:selectedNode.fileName
                 }
-                editor.config.uploadImgHeaders = {
-                    Authorization: localStorage.getItem("token"),
-                    Workspace: vueThis.$store.getters.currentWorkspace,
+                let requestHeader={}
+                if(vueThis.$store.getters.getEditorMode=="share"){
+                    let shareKey=vueThis.$store.getters.getShareData["ShareKey"]
+                    requestHeader={
+                        Authorization: localStorage.getItem("token"),
+                        "Share-Key": shareKey
+                    }
+                }else{
+                    requestHeader={
+                        Authorization: localStorage.getItem("token"),
+                        Workspace: vueThis.$store.getters.currentWorkspace,
+                    }
                 }
+
+
+                editor.config.uploadImgHeaders = requestHeader
                 editor.config.uploadFileName = 'myfile'
                 editor.config.menus = editor.config.menus.concat(menuKey)
                 editor.create();
                 if(vueThis.content && vueThis.content!="")
                     vueThis.editor.txt.html(vueThis.content)
+            },
+        },
+        created(){
+        },
+        mounted() {
+            vueThis=this;
+            setTimeout(function(){
+
             },1000)
         }
     }

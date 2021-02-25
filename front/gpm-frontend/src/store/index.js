@@ -10,6 +10,9 @@ export default new Vuex.Store({
     selectedNode:null,
     selectedNodeCacheData:null,
     isLogin:false,
+    editorMode:'back',//编辑器模式默认是后台模式:back,还有一种共享模式:share
+    shareData:{
+    },
     data: {
       scale: 1,
       lineName: 'curve',
@@ -100,8 +103,13 @@ export default new Vuex.Store({
     },
     getSelectedNodeCacheData(state){
       return state.selectedNodeCacheData
-    }
-
+    },
+    getEditorMode(state){
+      return state.editorMode
+    },
+    getShareData(state){
+      return state.shareData;
+    },
   },
   mutations: {
     login(state,userInfo){
@@ -117,10 +125,20 @@ export default new Vuex.Store({
     },
     setSelecedNode(state,selectedNode){
       state.selectedNode = selectedNode
-      localStorage.setItem("selectedNode",JSON.stringify(selectedNode))
+      if(selectedNode==null){
+        localStorage.setItem("selectedNode",null)
+      }else {
+        localStorage.setItem("selectedNode", JSON.stringify(selectedNode))
+      }
     },
     setSelectedNodeCacheData(state,selectedNodeCacheData){
       state.selectedNodeCacheData = selectedNodeCacheData
+    },
+    setEditorMode(state,editorMode){
+      state.editorMode=editorMode;
+    },
+    setShareData(state,shareData){
+      state.shareData=shareData;
     },
     data(state, data) {
       state.data = data

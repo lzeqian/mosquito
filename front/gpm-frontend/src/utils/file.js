@@ -181,6 +181,14 @@ function loadEditorContent(func) {
         })
     }
 }
+function loadEditorContentByShareKey(key,func) {
+    let vueThis = this;
+    this.$axios.get(this.$globalConfig.goServer + "share/getShareFile?shareKey=" + key).then((response) => {
+        let fileDir = response.data.fileDir;
+        let fileName = response.data.fileName;
+        func(vueThis, response.data.data)
+    })
+}
 function saveEditorContent (data, func) {
     let vueThis = this;
     let fileDir=vueThis.$store.getters.getSelectedNode.dirPath;
@@ -244,6 +252,7 @@ export default{
     editFile,
     renameFile,
     loadEditorContent,
+    loadEditorContentByShareKey,
     saveEditorContent,
     copyFile,
     createDir,

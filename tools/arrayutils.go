@@ -9,3 +9,11 @@ func ListToArray(list *list.List) []string {
 	}
 	return actArray
 }
+func In(array []string, ele string) bool {
+	for _, tmp := range array {
+		if tmp == ele {
+			return true
+		}
+	}
+	return false
+}

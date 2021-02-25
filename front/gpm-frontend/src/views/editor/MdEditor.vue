@@ -92,12 +92,22 @@
             downloadFile(){
                 let selectedNode=this.$store.getters.getSelectedNode
                 let token=localStorage.getItem("token")
-                window.location=this.$globalConfig.goServer+"file/download?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace
+                if(this.$store.getters.getEditorMode=="share") {
+                    let shareKey=this.$store.getters.getShareData["ShareKey"]
+                    window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName + (token ? "&token=" + token : "") + "&shareKey=" + shareKey
+                }else{
+                    window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace
+                }
             },
             transDoc(){
                 let selectedNode=this.$store.getters.getSelectedNode
                 let token=localStorage.getItem("token")
-                window.location=this.$globalConfig.goServer+"file/transDoc?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName+(token?"&token="+token:"")+"&Workspace="+this.$store.getters.currentWorkspace
+                if(this.$store.getters.getEditorMode=="share") {
+                    let shareKey = this.$store.getters.getShareData["ShareKey"]
+                    window.location = this.$globalConfig.goServer + "file/transDoc?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName + (token ? "&token=" + token : "") + "&shareKey=" + shareKey
+                }else {
+                    window.location = this.$globalConfig.goServer + "file/transDoc?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace
+                }
             },
             handleEditorImgAdd(pos, $file){
                 var _this=this;

@@ -64,3 +64,14 @@ func (c *ShareController) GetShareFile() {
 	shareKey := c.GetString("shareKey")
 	ServeJSON(c.Controller, database.GetLink(shareKey))
 }
+
+/**
+  查看静态HTML
+   :param fileDir 当前文件目录。
+   :param fileName 当前文件名。
+*/
+func (c *ShareController) ShareStatic() {
+	shareKey := c.Ctx.Input.Param(":shareKey")
+	c.Data["ShareKey"] = shareKey
+	c.TplName = "share.tpl"
+}

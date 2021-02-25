@@ -68,15 +68,15 @@
             谁可以查看/编辑文档<br/>
             <RadioGroup v-model="shareObject.shareMode">
                 <Radio :label="0">仅仅我自己</Radio><br/>
-                <Radio :label="1">仅我分享的好友</Radio>
-                <br  v-if="shareObject.shareMode==1"/>
-                <RadioGroup v-model="shareObject.assignUserMode" v-if="shareObject.shareMode==1" style="margin-left:50px">
+                <Radio :label="3">仅我分享的好友</Radio>
+                <br  v-if="shareObject.shareMode==3"/>
+                <RadioGroup v-model="shareObject.assignUserMode" v-if="shareObject.shareMode==3" style="margin-left:50px">
                     <Radio :label="0">可查看</Radio><br/>
                     <Radio :label="1">可编辑</Radio><br/>
                     分享加入url: <a :href="shareObject.shareUrl">{{shareObject.joinUrl}}</a>
                 </RadioGroup><br/>
-                <Radio :label="2">所有人可查看</Radio><br/>
-                <Radio :label="3">所有人可编辑</Radio><br/>
+                <Radio :label="1">所有人可查看</Radio><br/>
+                <Radio :label="2">所有人可编辑</Radio><br/>
             </RadioGroup><br/><br/>
             文档url: <a :href="shareObject.shareUrl">{{shareObject.shareUrl}}</a>
         </Modal>
@@ -114,7 +114,7 @@
                     shareMode:2,
                     shareKey:"",
                     joinKey:"",
-                    assignUserMode:1,
+                    assignUserMode:0,
                     shareUrl:"",
                     joinUrl:""
                 },

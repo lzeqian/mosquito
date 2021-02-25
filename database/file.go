@@ -3,17 +3,18 @@ package database
 import "time"
 
 type UserLink struct {
-	ID            uint64 `gorm:"primary_key"`
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	FileDir       string
-	FileName      string
-	ShareUserName string //当前分享用户
-	ShareMode     int    //0表示仅我自己 1表示所有用户只读，2表示所有用户可编辑，3表示指定用户可查看，4表示所有用户可编辑，
-	ShareUser     string //当状态为3-4时指定可编辑的用户，如张三,李四
-	Status        int    //0表示禁用，1表示启用
-	ShareKey      string //默认地址 http://ip/doc/Sfymd3D
-	JoinKey       string //默认加入key http://ip/docJoin/Sfymd3D
+	ID             uint64 `gorm:"primary_key"`
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	FileDir        string
+	FileName       string
+	ShareUserName  string //当前分享用户
+	ShareMode      int    //0表示仅我自己 1表示所有用户只读，2表示所有用户可编辑，3仅仅我分享的好友
+	AssignUserMode int    // 当ShareMode=3时分享的类型，0表示可查看 1表示可编辑
+	ShareUser      string //当状态为ShareMode=3时指定可编辑的用户，如张三,李四
+	Status         int    //0表示禁用，1表示启用
+	ShareKey       string //默认地址 http://ip/doc/Sfymd3D
+	JoinKey        string //默认加入key http://ip/docJoin/Sfymd3D
 }
 
 func InsertLink(link UserLink) {
@@ -30,7 +31,7 @@ func DeleteLink(link UserLink) {
 }
 func GetLink(shareKey string) (ruserLink UserLink) {
 	var userLink UserLink
-	db.First(&userLink, "shareKey=?", shareKey)
+	db.First(&userLink, "share_key=?", shareKey)
 	return userLink
 }
 
@@ -42,7 +43,7 @@ func FindLink(fileDir string, fileName string) (ruserLink UserLink) {
 func CancelLink(shareKey string) {
 	tx := db.Begin()
 	var userLink UserLink
-	tx.First(&userLink, "shareKey=?", shareKey)
+	tx.First(&userLink, "share_key=?", shareKey)
 	userLink.Status = 0
 	tx.Model(&userLink).Update("Status", 0)
 	tx.Commit()

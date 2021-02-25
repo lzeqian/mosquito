@@ -19,7 +19,8 @@
         data() {
             return {
                 vHtml: "",
-                wordURL: ''//文件地址
+                wordURL: '',//文件下载地址
+                callbackURL:''//office检查状态和保存接口
             }
         },
         computed: {
@@ -37,9 +38,17 @@
                 let vm = this;
                 let token = localStorage.getItem("token")
                 let fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
-                vm.wordURL = window.location.protocol+this.$globalConfig.goServer + "/file/download?fileDir=" + dirPath + "&fileName=" + fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace;
-                let documentType = "";
                 let key=vm.randomUuid(20).replaceAll("-","");
+                if(this.$store.getters.getEditorMode=="share"){
+                    let shareKey=this.$store.getters.getShareData["ShareKey"]
+                    key=shareKey;
+                    vm.wordURL = window.location.protocol + this.$globalConfig.goServer + "/file/download?fileDir=" + dirPath + "&fileName=" + fileName + (token ? "&token=" + token : "") + "&shareKey=" + shareKey;
+                    vm.callbackURL = window.location.protocol+this.$globalConfig.goServer+ "file/uploadOfficeFile?fileDir=" + dirPath+ "&fileName=" + fileName + (token ? "&token=" + token : "") + "&shareKey=" + shareKey;
+                }else {
+                    vm.wordURL = window.location.protocol + this.$globalConfig.goServer + "/file/download?fileDir=" + dirPath + "&fileName=" + fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace;
+                    vm.callbackURL = window.location.protocol+this.$globalConfig.goServer+ "file/uploadOfficeFile?fileDir=" + dirPath+ "&fileName=" + fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace;
+                }
+                let documentType = "";
                 if (/(xls|xlsx)/.test(fileExtension)) {
                     documentType = "spreadsheet"
                 }
@@ -50,9 +59,6 @@
                     documentType = "presentation"
                 }
                 //公共文档库必须使用同一个秘钥，可以协作编辑。
-                if(this.$store.getters.currentWorkspace==0){
-
-                }
                 let configJson={
                     "document": {
                         "fileType": fileExtension,
@@ -78,7 +84,7 @@
                             "id": localStorage.getItem("userName"),
                             "name": localStorage.getItem("userName")
                         },
-                        "callbackUrl": window.location.protocol+this.$globalConfig.goServer+ "file/uploadOfficeFile?fileDir=" + dirPath+ "&fileName=" + fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace,
+                        "callbackUrl": vm.callbackURL,
                         "customization": {
                             "about": true,
                             "chat": true,

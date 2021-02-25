@@ -1,4 +1,5 @@
 // vue.config.js
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 module.exports = {
     devServer: {
         // open: process.platform === 'demo',
@@ -24,8 +25,20 @@ module.exports = {
             },
         }
     },
+    chainWebpack: config =>{
+
+    },
     pages: {
-        index:"src/main.js",
-        share: 'src/share.js'
+        index: {
+            entry: 'src/main.js',
+            filename: 'index.html',
+            title:"文档管理平台"
+        },
+        share:{
+            entry: 'src/share.js',
+            filename: 'share.html',
+            title:"文档管理平台"
+        }
+
     }
 }

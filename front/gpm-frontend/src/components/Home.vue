@@ -120,7 +120,6 @@
                 }
             },
             collapsedSider () {
-                debugger
                 this.$refs.leftSider.toggleCollapse();
             }
         },

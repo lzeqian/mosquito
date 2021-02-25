@@ -9,12 +9,17 @@ import (
 	"gpm/models"
 	"gpm/service"
 	"gpm/tools"
+	"regexp"
 	"strings"
 )
 
 var IgnoreList = []string{
 	"/login",
 	"/file/viewerFromServer",
+	"/share/getShareFile",
+	"/docs/.*",
+	".*/.*\\.[css|js|png|PNG|jpg|JPG|html|xml|txt|woff|woff2|ttf|eot|svg|map]",
+	"/favicon.ico",
 }
 
 func getDirPath(ctx *context.Context) string {
@@ -58,18 +63,6 @@ func setDirPath(ctx *context.Context, insertValue string) string {
 	}
 	return dirPath
 }
-func getAuthorization(ctx *context.Context) string {
-	//获取请求头的授权头token，未获取到则获取token参数
-	token := ctx.Request.Header["Authorization"]
-	var tokenString string = ""
-	if token != nil && len(token) > 0 {
-		tokenString = token[0]
-	}
-	if tokenString == "" {
-		tokenString = ctx.Request.FormValue("token")
-	}
-	return tokenString
-}
 
 /**
   检查当前用户当前路径下是否有权限操作文件系统权限
@@ -92,7 +85,7 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 		controllers.RequestFileSystem("1")
 		if dirPath != "" {
 			//if requestPath == "/home/listSub" || dirPath==tools.PathSeparator {
-			authorization := getAuthorization(ctx)
+			authorization := controllers.GetAuthorization(ctx)
 			if authorization != "" {
 				myCustomClaims, _ := tools.GetTokenInfo(authorization)
 				userInfo := service.GetUser(myCustomClaims.Name)
@@ -120,14 +113,6 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 	} else {
 		controllers.RequestFileSystem("0")
 	}
-	//if requestPath == "/home/tree" {
-	//	if !service.CheckUserAct(userName, tools.PathSeparator, service.ActListDir) {
-	//		return errors.New("请确保当前用户拥有以下权限：" + service.ActListDir)
-	//	} else {
-	//		return nil
-	//	}
-	//}
-
 	//获取当前路径需要验证的用户权限
 	actList := service.GetPathRequirePerm(requestPath)
 	if actList.Len() == 0 {
@@ -142,13 +127,66 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 
 /**
   检验用户是否登录过滤器
+  0表示验证通过,允许共享通过调用后端接口。
+  1表示验证失败，需要告诉用户没有权限访问。
+  2表示非共享接口调用，直接越过共享检测，进行其他权限校验。
+*/
+func checkShare(ctx *context.Context) models.Result {
+	requestPath := ctx.Request.URL.Path
+	result := models.Result{Code: 2, Data: "您无权限执行该操作"}
+	//获取请求头的授权头token，未获取到则获取token参数
+	shareKey := ctx.Request.Header["Share-Key"]
+	var shareKeyString string = ""
+	if shareKey != nil && len(shareKey) > 0 {
+		shareKeyString = shareKey[0]
+	}
+	if len(shareKeyString) == 0 {
+		shareKeyParam := ctx.Request.FormValue("shareKey")
+		if shareKeyParam != "" {
+			shareKeyString = shareKeyParam
+		}
+	}
+	//应该该接口在office插件启动时就需要检查状态，必须先放过到实际接口中去验证
+	if requestPath == "/file/uploadOfficeFile" && len(shareKeyString) > 0 {
+		ctx.Input.Params()["sharing"] = "1"
+		ctx.Request.Form.Set("sharing", "1")
+		ctx.Request.Form.Set("shareKey", shareKeyString)
+		result.Code = 0
+		return result
+	}
+	return controllers.CheckSharePrivileges(ctx, shareKeyString)
+}
+
+/**
+  检验用户是否登录过滤器
 */
 var FilterUser = func(ctx *context.Context) {
 	if ctx.Request.Method == "OPTIONS" || collection.Collect(IgnoreList).Contains(ctx.Request.URL.Path) {
 		return
+	} else {
+		//考虑使用正则表达式匹配
+		for _, ignore := range IgnoreList {
+			re := regexp.MustCompile(ignore)
+			if re.MatchString(ctx.Request.URL.Path) {
+				return
+			}
+		}
+	}
+	//0表示验证通过,允许共享通过调用后端接口。
+	//1表示验证失败，需要告诉用户没有权限访问。
+	//2表示非共享接口调用，直接越过共享检测，进行其他权限校验。
+	checkResult := checkShare(ctx)
+	if checkResult.Code == 0 {
+		controllers.RequestFileSystem("1")
+		return
+	}
+	if checkResult.Code == 1 {
+		byteJson, _ := json.Marshal(checkResult)
+		ctx.WriteString(string(byteJson))
+		return
 	}
 	//获取请求头的授权头token，未获取到则获取token参数
-	var tokenString string = getAuthorization(ctx)
+	var tokenString string = controllers.GetAuthorization(ctx)
 	if tokenString == "" {
 		ctx.Input.RunController = nil
 		result := models.Result{

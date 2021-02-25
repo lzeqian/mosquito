@@ -26,6 +26,7 @@ Vue.prototype.randomUuid=randomUuid
 //文件操作相关函数
 import fileFunction from  './utils/file'
 Object.assign(Vue.prototype,fileFunction)
+Vue.prototype.$globalConfig = GlobalConfig
 Vue.prototype.$axios.interceptors.request.use(
     config => {
         if (config.method == 'get') {
@@ -34,15 +35,10 @@ Vue.prototype.$axios.interceptors.request.use(
                 ...config.params
             }
         }
-        if(config.url.endsWith("/login")){
-            return config
+        if(localStorage.getItem("token")) {
+            config.headers['Authorization'] = localStorage.getItem("token");
         }
-        if(!localStorage.getItem("token")){
-            window.vueComponents.$store.state.isLogin=false;
-            return Promise.reject("您尚未登录请先登录");
-        }
-        config.headers['Authorization'] = localStorage.getItem("token");
-        config.headers['Workspace'] =  window.vueComponents.$store.getters.currentWorkspace
+        config.headers['Share-Key'] =  window.vueComponents.$store.getters.getShareData.ShareKey
         return config
     }, function (error) {
         return Promise.reject(error)
@@ -70,17 +66,17 @@ Vue.prototype.$axios.interceptors.response.use(
         return response;
     }
 )
-Vue.prototype.$globalConfig = GlobalConfig
+
 router.beforeEach((to, from, next) => {
     if (!to.meta.title) {
-        document.title = "文档管理系统"
+        document.title = "共享文件"
     }
     next()
 
 })
 router.afterEach((to, from) => {
     if (!to.meta.title) {
-        document.title = "文档管理系统"
+        document.title = "共享文件"
     }
 })
 Vue.use(ViewUI);

@@ -100,7 +100,18 @@ func (this *FileController) UploadOfficeFile() {
 	json.Unmarshal(data, &paramData)
 	resultJson := make(map[string]interface{})
 	resultJson["error"] = 0
+	//保存逻辑，保存需要检验是否是共享保存
 	if paramData["url"] != "" {
+		if this.Ctx.Request.Form.Get("sharing") == "1" {
+			shareKeyString := this.Ctx.Request.Form.Get("shareKey")
+			checkResult := CheckSharePrivileges(this.Ctx, shareKeyString)
+			if checkResult.Code != 0 {
+				resultJson["error"] = 1
+				this.Data["json"] = &resultJson
+				this.ServeJSON()
+				return
+			}
+		}
 		url := paramData["url"]
 		res, err := http.Get(url)
 		if err != nil {
