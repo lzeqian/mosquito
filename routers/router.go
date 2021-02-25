@@ -27,8 +27,10 @@ func init() {
 	beego.Router("/file/uploadToServer", &controllers.FileController{}, "post:UploadToServer")
 	beego.Router("/file/viewerFromServer", &controllers.FileController{}, "get:ViewerFromServer")
 	beego.Router("/share/shareFile", &controllers.ShareController{}, "post:ShareFile")
+	beego.Router("/share/updateShareFile", &controllers.ShareController{}, "post:UpdateShareFile")
 	beego.Router("/share/getShareFile", &controllers.ShareController{}, "get:GetShareFile")
 	beego.Router("/share/cancelShareFile", &controllers.ShareController{}, "put:CancelShareFile")
+	beego.Router("/share/isShareFile", &controllers.ShareController{}, "get:IsShareFile")
 	beego.Router("/docs/?:shareKey", &controllers.ShareController{}, "get:ShareStatic")
 	beego.Router("/login", &controllers.LoginController{}, "post:Login")
 }

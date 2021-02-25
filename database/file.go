@@ -42,9 +42,6 @@ func FindLink(fileDir string, fileName string) (ruserLink UserLink) {
 }
 func CancelLink(shareKey string) {
 	tx := db.Begin()
-	var userLink UserLink
-	tx.First(&userLink, "share_key=?", shareKey)
-	userLink.Status = 0
-	tx.Model(&userLink).Update("Status", 0)
+	tx.Where("share_key=?", shareKey).Delete(&UserLink{})
 	tx.Commit()
 }

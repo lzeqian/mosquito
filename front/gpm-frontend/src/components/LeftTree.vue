@@ -78,7 +78,10 @@
                 <Radio :label="1">所有人可查看</Radio><br/>
                 <Radio :label="2">所有人可编辑</Radio><br/>
             </RadioGroup><br/><br/>
-            文档url: <a :href="shareObject.shareUrl">{{shareObject.shareUrl}}</a>
+            <div v-if="preShareKey==null || preShareKey==''">文档url: <a :href="shareObject.shareUrl">{{shareObject.shareUrl}}</a></div>
+            <div v-if="preShareKey!=null && preShareKey!=''" style="color:red">
+                已分享:<a style="color:red" :href="getPreShareUrl()">{{getPreShareUrl()}}</a> ,<a style="color:gray" @click="cancelShare">取消分享</a>
+            </div>
         </Modal>
         <div style="position: absolute;top:0px;right:5px">
             <a @click="gotoDesktop">
@@ -118,7 +121,7 @@
                     shareUrl:"",
                     joinUrl:""
                 },
-
+                preShareKey:null,
                 isSpinShow: false,
                 isImgShow: false,
                 data5: [],
@@ -150,15 +153,26 @@
                 this.shareObject.joinKey=randomUuid(8);
                 return window.location.protocol+this.$globalConfig.goServer+"docJoin/"+this.shareObject.joinKey;
             },
+            getPreShareUrl(){
+                return window.location.protocol+this.$globalConfig.goServer+"docs/"+this.preShareKey;
+            },
             handleContextShare(){
+                let _this=this;
                 this.showShare=true;
                 this.shareObject.shareUrl=this.getShareUrl();
                 this.shareObject.joinUrl=this.getJoinUrl();
+                let selectNode=this.$store.getters.getSelectedNode
+                this.$axios.get(this.$globalConfig.goServer + "share/isShareFile?fileDir=" + selectNode.dirPath+"&fileName="+selectNode.fileName).then((response) => {
+                    if(response.data.code==0){
+                        _this.preShareKey=response.data.data.ShareKey;
+                    }
+                })
             },
             ok () {
                 let _this=this;
                 let selectNode=this.$store.getters.getSelectedNode
-                this.$axios.post(this.$globalConfig.goServer+"share/shareFile",{
+                let requestUrl=(this.preShareKey!=null && this.preShareKey!=""?"updateShareFile":"shareFile");
+                this.$axios.post(this.$globalConfig.goServer+"share/"+requestUrl,{
                     fileDir:selectNode.dirPath,
                     fileName:selectNode.fileName,
                     shareUserName:localStorage.getItem("userName"),
@@ -166,6 +180,15 @@
                 }).then((resp)=>{
                     if(resp.data.code==0){
                         this.$Message.info('分享成功');
+                    }
+                })
+            },
+            cancelShare(){
+                let _this=this;
+                this.$axios.put(this.$globalConfig.goServer+"share/cancelShareFile?preShareKey="+this.preShareKey).then((resp)=>{
+                    if(resp.data.code==0){
+                        _this.$Message.info('取消分享成功');
+                        _this.preShareKey=null;
                     }
                 })
             },
