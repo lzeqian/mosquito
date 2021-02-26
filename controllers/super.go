@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
 	"gpm/database"
@@ -75,7 +76,10 @@ func GetAuthorization(ctx *context.Context) string {
 }
 func CheckSharePrivileges(ctx *context.Context, shareKeyString string) models.Result {
 	requestPath := ctx.Request.URL.Path
-	result := models.Result{Code: 2, Data: "您无权限执行该操作"}
+	result := models.Result{Code: 2, Data: "您无权限执行该操作333"}
+	if requestPath == "/file/download" {
+		fmt.Println("hello")
+	}
 	//如果没有shareKey参数，则需要往后验证
 	if len(shareKeyString) == 0 {
 		return result

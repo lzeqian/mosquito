@@ -115,7 +115,6 @@ func GetPathRequirePerm(curPath string) *list.List {
 	fileSystemPermMappingObj := GetCachedRbacContent()["contentKey"].(map[string]interface{})["fileSystemPermMapping"]
 	fileSystemPermMapping := fileSystemPermMappingObj.([]interface{})
 	for _, v := range fileSystemPermMapping {
-		fmt.Println(v)
 		pathActMap := v.(map[interface{}]interface{})
 		path := pathActMap["path"].(string)
 		if curPath == path {
@@ -184,7 +183,6 @@ func CheckUserAct(userName string, inputPath string, inputAct string) bool {
 func CheckUserMulAct(userName string, inputPath string, inputAct []string) bool {
 	//当前用户拥有的权限
 	actsList := GetUserPathAccess(userName, inputPath)
-	fmt.Println(tools.ListToArray(actsList))
 	haveCount := 0
 	//循环询问当前用户是否拥有权限
 	for _, v := range inputAct {

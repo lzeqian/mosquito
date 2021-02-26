@@ -42,7 +42,7 @@
             return {
                 loading: true,
                 contentTitle: '',
-                shareKey: window.shareKey||'cba843f2'
+                shareKey: window.shareKey||'764fe063'
             }
         },
         watch: {},
@@ -55,6 +55,12 @@
                 }
                 if (vueThis.$route.name != "blankViewer") {
                     vueThis.loadEditorContentByShareKey(vueThis.shareKey, (vueThis, shareData) => {
+                        if(shareData.ID==0){
+                            vueThis.$Message.error({
+                                content: "分享key不存在，请尝试其他key"
+                            });
+                            return;
+                        }
                         vueThis.$store.commit("setShareData", shareData)
                         let node = {
                             dirPath: shareData["FileDir"],

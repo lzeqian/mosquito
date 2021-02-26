@@ -20,6 +20,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -106,6 +107,7 @@ func (this *FileController) UploadOfficeFile() {
 			shareKeyString := this.Ctx.Request.Form.Get("shareKey")
 			checkResult := CheckSharePrivileges(this.Ctx, shareKeyString)
 			if checkResult.Code != 0 {
+				fmt.Println(this.Ctx.Request.URL.Path + "%%%%%%%%" + strconv.Itoa(checkResult.Code))
 				resultJson["error"] = 1
 				this.Data["json"] = &resultJson
 				this.ServeJSON()

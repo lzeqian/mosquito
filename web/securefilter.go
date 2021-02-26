@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/astaxie/beego/context"
 	"github.com/chenhg5/collection"
 	"gpm/controllers"
@@ -10,6 +11,7 @@ import (
 	"gpm/service"
 	"gpm/tools"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -133,7 +135,7 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 */
 func checkShare(ctx *context.Context) models.Result {
 	requestPath := ctx.Request.URL.Path
-	result := models.Result{Code: 2, Data: "您无权限执行该操作"}
+	result := models.Result{Code: 2, Data: "您无权限执行该操作444"}
 	//获取请求头的授权头token，未获取到则获取token参数
 	shareKey := ctx.Request.Header["Share-Key"]
 	var shareKeyString string = ""
@@ -161,6 +163,7 @@ func checkShare(ctx *context.Context) models.Result {
   检验用户是否登录过滤器
 */
 var FilterUser = func(ctx *context.Context) {
+	fmt.Println("&&&&&&&&&&&&&&&" + ctx.Request.URL.Path)
 	if ctx.Request.Method == "OPTIONS" || collection.Collect(IgnoreList).Contains(ctx.Request.URL.Path) {
 		return
 	} else {
@@ -176,11 +179,13 @@ var FilterUser = func(ctx *context.Context) {
 	//1表示验证失败，需要告诉用户没有权限访问。
 	//2表示非共享接口调用，直接越过共享检测，进行其他权限校验。
 	checkResult := checkShare(ctx)
+	fmt.Println(ctx.Request.URL.Path + "----" + strconv.Itoa(checkResult.Code))
 	if checkResult.Code == 0 {
 		controllers.RequestFileSystem("1")
 		return
 	}
 	if checkResult.Code == 1 {
+		checkResult.Data = "您无权限执行该操作11"
 		byteJson, _ := json.Marshal(checkResult)
 		ctx.WriteString(string(byteJson))
 		return
