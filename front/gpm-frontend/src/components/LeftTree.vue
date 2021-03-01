@@ -18,7 +18,8 @@
                 </DropdownItem>
                 <DropdownItem @click.native="handleContextDownload" v-if="selectNode!=null && !selectNode.isDir">下载
                 </DropdownItem>
-                <DropdownItem @click.native="handleContextShare" v-if="selectNode!=null && !selectNode.isDir && $store.getters.currentWorkspace==1">分享
+                <DropdownItem @click.native="handleContextShare"
+                              v-if="selectNode!=null && !selectNode.isDir && $store.getters.currentWorkspace==1">分享
                 </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuCreateMd" style="color: #ed4014"
                               v-if="selectNode!=null && selectNode.isDir">新建md
@@ -37,6 +38,9 @@
                 </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuCreateFile" style="color: #ed4014"
                               v-if="selectNode!=null && selectNode.isDir">新建文件
+                </DropdownItem>
+                <DropdownItem @click.native="handleContextMenuCreateFileFromTemplate" style="color: #ed4014"
+                              v-if="selectNode!=null && selectNode.isDir">从模板新建
                 </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuCreateWord" style="color: #ed4014"
                               v-if="selectNode!=null && selectNode.isDir">新建word
@@ -62,26 +66,60 @@
         <Modal
                 v-model="showShare"
                 title="分享"
-                @on-ok="ok"
-                :z-index="10002"
-                @on-cancel="cancel">
+                @on-ok="sharePersonFile"
+                :z-index="10002">
             谁可以查看/编辑文档<br/>
             <RadioGroup v-model="shareObject.shareMode">
-                <Radio :label="0">仅仅我自己</Radio><br/>
+                <Radio :label="0">仅仅我自己</Radio>
+                <br/>
                 <Radio :label="3">仅我分享的好友</Radio>
-                <br  v-if="shareObject.shareMode==3"/>
-                <RadioGroup v-model="shareObject.assignUserMode" v-if="shareObject.shareMode==3" style="margin-left:50px">
-                    <Radio :label="0">可查看</Radio><br/>
-                    <Radio :label="1">可编辑</Radio><br/>
+                <br v-if="shareObject.shareMode==3"/>
+                <RadioGroup v-model="shareObject.assignUserMode" v-if="shareObject.shareMode==3"
+                            style="margin-left:50px">
+                    <Radio :label="0">可查看</Radio>
+                    <br/>
+                    <Radio :label="1">可编辑</Radio>
+                    <br/>
                     分享加入url: <a :href="shareObject.shareUrl">{{shareObject.joinUrl}}</a>
-                </RadioGroup><br/>
-                <Radio :label="1">所有人可查看</Radio><br/>
-                <Radio :label="2">所有人可编辑</Radio><br/>
-            </RadioGroup><br/><br/>
-            <div v-if="preShareKey==null || preShareKey==''">文档url: <a :href="shareObject.shareUrl">{{shareObject.shareUrl}}</a></div>
-            <div v-if="preShareKey!=null && preShareKey!=''" style="color:red">
-                已分享:<a style="color:red" :href="getPreShareUrl()">{{getPreShareUrl()}}</a> ,<a style="color:gray" @click="cancelShare">取消分享</a>
+                </RadioGroup>
+                <br/>
+                <Radio :label="1">所有人可查看</Radio>
+                <br/>
+                <Radio :label="2">所有人可编辑</Radio>
+                <br/>
+            </RadioGroup>
+            <br/><br/>
+            <div v-if="preShareKey==null || preShareKey==''">文档url: <a :href="shareObject.shareUrl">{{shareObject.shareUrl}}</a>
             </div>
+            <div v-if="preShareKey!=null && preShareKey!=''" style="color:red">
+                已分享:<a style="color:red" :href="getPreShareUrl()">{{getPreShareUrl()}}</a> ,<a style="color:gray"
+                                                                                               @click="cancelShare">取消分享</a>
+            </div>
+        </Modal>
+        <Modal
+                v-model="showTemplate"
+                title="模板选择"
+                @on-ok="createFileFromTemplate"
+                :z-index="10002">
+            <Form :model="templateObject" :label-width="80">
+                <FormItem label="模板组">
+                    <Select v-model="templateObject.templateGroupId" style="width:200px" @on-change="changeTemplateGroup">
+                        <Option v-for="groupItem in templateGroupData" :value="groupItem.value" :key="groupItem.value">{{
+                            groupItem.label}}
+                        </Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="模板">
+                    <Select v-model="templateObject.templateId" style="width:200px" @on-change="changeTemplateGroup">
+                        <Option v-for="item in templateData" :value="item.value" :key="item.value">{{
+                            item.label}}
+                        </Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="文件名称">
+                    <Input v-model="templateObject.fileName"  style="width: 300px" />
+                </FormItem>
+            </Form>
         </Modal>
         <div style="position: absolute;top:0px;right:5px">
             <a @click="gotoDesktop">
@@ -104,7 +142,7 @@
 
     export default {
         name: 'LeftTree',
-        props:{
+        props: {
             isCollapsed: {
                 type: Boolean,
                 default: false
@@ -112,16 +150,25 @@
         },
         data() {
             return {
-                showShare:false,
-                shareObject:{
-                    shareMode:2,
-                    shareKey:"",
-                    joinKey:"",
-                    assignUserMode:0,
-                    shareUrl:"",
-                    joinUrl:""
+                showShare: false,
+                showTemplate: false,
+                templateGroupData: [],
+                templateData: [],
+                templateObject: {
+                    templateGroupId: "",
+                    templateId: "",
+                    fileName: "",
+                    fileDir:""
                 },
-                preShareKey:null,
+                shareObject: {
+                    shareMode: 2,
+                    shareKey: "",
+                    joinKey: "",
+                    assignUserMode: 0,
+                    shareUrl: "",
+                    joinUrl: ""
+                },
+                preShareKey: null,
                 isSpinShow: false,
                 isImgShow: false,
                 data5: [],
@@ -145,70 +192,125 @@
             }
         },
         methods: {
-            getShareUrl(){
-                this.shareObject.shareKey=randomUuid(8);
-                return window.location.protocol+this.$globalConfig.goServer+"docs/"+this.shareObject.shareKey;
+            getShareUrl() {
+                this.shareObject.shareKey = randomUuid(8);
+                return window.location.protocol + this.$globalConfig.goServer + "docs/" + this.shareObject.shareKey;
             },
-            getJoinUrl(){
-                this.shareObject.joinKey=randomUuid(8);
-                return window.location.protocol+this.$globalConfig.goServer+"docJoin/"+this.shareObject.joinKey;
+            getJoinUrl() {
+                this.shareObject.joinKey = randomUuid(8);
+                return window.location.protocol + this.$globalConfig.goServer + "docJoin/" + this.shareObject.joinKey;
             },
-            getPreShareUrl(){
-                return window.location.protocol+this.$globalConfig.goServer+"docs/"+this.preShareKey;
+            getPreShareUrl() {
+                return window.location.protocol + this.$globalConfig.goServer + "docs/" + this.preShareKey;
             },
-            handleContextShare(){
-                let _this=this;
-                this.showShare=true;
-                this.shareObject.shareUrl=this.getShareUrl();
-                this.shareObject.joinUrl=this.getJoinUrl();
-                let selectNode=this.$store.getters.getSelectedNode
-                this.$axios.get(this.$globalConfig.goServer + "share/isShareFile?fileDir=" + selectNode.dirPath+"&fileName="+selectNode.fileName).then((response) => {
-                    if(response.data.code==0){
-                        _this.preShareKey=response.data.data.ShareKey;
+            handleContextShare() {
+                let _this = this;
+                this.showShare = true;
+                this.shareObject.shareUrl = this.getShareUrl();
+                this.shareObject.joinUrl = this.getJoinUrl();
+                let selectNode = this.$store.getters.getSelectedNode
+                this.$axios.get(this.$globalConfig.goServer + "share/isShareFile?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.fileName).then((response) => {
+                    if (response.data.code == 0) {
+                        _this.preShareKey = response.data.data.ShareKey;
                     }
                 })
             },
-            ok () {
-                let _this=this;
-                let selectNode=this.$store.getters.getSelectedNode
-                let requestUrl=(this.preShareKey!=null && this.preShareKey!=""?"updateShareFile":"shareFile");
-                this.$axios.post(this.$globalConfig.goServer+"share/"+requestUrl,{
-                    fileDir:selectNode.dirPath,
-                    fileName:selectNode.fileName,
-                    shareUserName:localStorage.getItem("userName"),
+            changeTemplateGroup() {
+                this.loadTemplate(this.templateObject.templateGroupId)
+            },
+            loadTemplateGroup(func){
+                let _this = this;
+                this.$axios.get(this.$globalConfig.goServer + "template/groups").then((response) => {
+                    if (response.data.code == 0) {
+                        _this.templateGroupData = response.data.data;
+                        if (_this.templateGroupData.length > 0) {
+                            _this.templateObject.templateGroupId = _this.templateGroupData[0].value;
+                            func&&func();
+                        }
+                    }
+                })
+            },
+            loadTemplate(groupId){
+                let _this = this;
+                this.$axios.get(this.$globalConfig.goServer + "/template/list?groupId="+_this.templateObject.templateGroupId).then((response) => {
+                    if (response.data.code == 0) {
+                        _this.templateData = response.data.data;
+                        if (_this.templateData.length > 0) {
+                            _this.templateObject.templateId = _this.templateData[0].value;
+                            _this.templateObject.fileName=_this.templateData[0].templatePath.substring(_this.templateData[0].templatePath.lastIndexOf("/")+1)
+                        }
+                    }
+                })
+            },
+            /**
+             * 点击模板创建文件菜单弹出
+             * */
+            handleContextMenuCreateFileFromTemplate() {
+                let _this = this;
+                this.showTemplate = true;
+                _this.loadTemplateGroup(()=>{
+                    _this.loadTemplate(_this.templateObject.templateGroupId)
+                    let selectNode = this.$store.getters.getSelectedNode
+                    _this.templateObject.fileDir=selectNode.dirPath
+
+                });
+            },
+            /**
+             * 模板创建文件点
+             * */
+            createFileFromTemplate() {
+                let _this = this;
+                let selectNode = this.$store.getters.getSelectedNode
+                _this.templateObject.fileDir=selectNode.dirPath+"/"+selectNode.fileName
+                debugger
+                this.$axios.post(this.$globalConfig.goServer + "/template/gen",_this.templateObject).then((response) => {
+                    if (response.data.code == 0) {
+                        _this.$Message.info('创建成功');
+                        _this.selectChange([selectNode])
+                    }
+                })
+            },
+            /**
+             * 分享文件
+             * */
+            sharePersonFile() {
+                let _this = this;
+                let selectNode = this.$store.getters.getSelectedNode
+                let requestUrl = (this.preShareKey != null && this.preShareKey != "" ? "updateShareFile" : "shareFile");
+                this.$axios.post(this.$globalConfig.goServer + "share/" + requestUrl, {
+                    fileDir: selectNode.dirPath,
+                    fileName: selectNode.fileName,
+                    shareUserName: localStorage.getItem("userName"),
                     ..._this.shareObject
-                }).then((resp)=>{
-                    if(resp.data.code==0){
+                }).then((resp) => {
+                    if (resp.data.code == 0) {
                         this.$Message.info('分享成功');
                     }
                 })
             },
-            cancelShare(){
-                let _this=this;
-                this.$axios.put(this.$globalConfig.goServer+"share/cancelShareFile?preShareKey="+this.preShareKey).then((resp)=>{
-                    if(resp.data.code==0){
+            cancelShare() {
+                let _this = this;
+                this.$axios.put(this.$globalConfig.goServer + "share/cancelShareFile?preShareKey=" + this.preShareKey).then((resp) => {
+                    if (resp.data.code == 0) {
                         _this.$Message.info('取消分享成功');
-                        _this.preShareKey=null;
+                        _this.preShareKey = null;
                     }
                 })
             },
-            cancel () {
-                this.$Message.info('Clicked cancel');
+            gotoDesktop() {
+                this.$store.commit("updateDirTree", "desktop")
+                this.routePush({}, '/blank', "空白预览")
             },
-            gotoDesktop(){
-                this.$store.commit("updateDirTree","desktop")
-                this.routePush({},'/blank',"空白预览")
-            },
-            gotoPerson(){
-                let workspace=this.$store.getters.currentWorkspace=="1"?"0":"1";
-                let title=this.$store.getters.currentWorkspace=="1"?"公共文档库":"个人文档库";
-                this.$store.commit("updateWorkspace",workspace)
-                this.routePush({},'/blank',"空白预览")
+            gotoPerson() {
+                let workspace = this.$store.getters.currentWorkspace == "1" ? "0" : "1";
+                let title = this.$store.getters.currentWorkspace == "1" ? "公共文档库" : "个人文档库";
+                this.$store.commit("updateWorkspace", workspace)
+                this.routePush({}, '/blank', "空白预览")
                 this.listRoot(title)
             },
             handleUpload(file) {
-                let _this=this;
-                this.uploadFile(file,()=>{
+                let _this = this;
+                this.uploadFile(file, () => {
                     _this.selectChange([_this.selectNode])
                 })
             },
@@ -231,13 +333,13 @@
                 }
             },
             handleContextMenuEdit() {
-                let selectNode=this.$store.getters.getSelectedNode
-                let _this=this;
-                this.editFile((code)=>{
+                let selectNode = this.$store.getters.getSelectedNode
+                let _this = this;
+                this.editFile((code) => {
                     _this.$set(selectNode, 'title', code)
                 })
             },
-            handleContextMenuUpload(){
+            handleContextMenuUpload() {
             },
             /**
              * 下载文件方法事件
@@ -284,11 +386,11 @@
                     return;
                 }
                 let {index, parentNode} = _this.getParent(_this.$refs.tree.data[0], selectNode)
-                this.deleteFile(selectNode,()=>{
+                this.deleteFile(selectNode, () => {
                     parentNode.children.splice(index, 1)
                     _this.$set(parentNode, 'selected', true)
                     _this.$store.commit("setSelecedNode", parentNode)
-                    _this.routePush({},'/blank',"空白预览")
+                    _this.routePush({}, '/blank', "空白预览")
                 })
             },
             /**
@@ -298,11 +400,11 @@
                 let _this = this;
                 let selectNode = this.selectNode;
                 let {index, parentNode} = _this.getParent(_this.$refs.tree.data[0], selectNode)
-                this.deleteDir(selectNode,()=>{
+                this.deleteDir(selectNode, () => {
                     parentNode.children.splice(index, 1)
                     _this.$set(parentNode, 'selected', true)
                     _this.$store.commit("setSelecedNode", parentNode)
-                    _this.routePush({},'/blank',"空白预览")
+                    _this.routePush({}, '/blank', "空白预览")
                 })
             },
             /**
@@ -319,7 +421,7 @@
                 _this.buildVpFile(selectNode)
 
             },
-            handleContextMenuCopy(){
+            handleContextMenuCopy() {
                 debugger
                 let _this = this;
                 let selectNodes = this.$refs.tree.getSelectedNodes()
@@ -348,7 +450,7 @@
                 }
                 let selectNode = selectNodes[0];
                 let fileDir = selectNode.dirPath + "/" + selectNode.title;
-                this.createVpFile(selectNode,(code)=>{
+                this.createVpFile(selectNode, (code) => {
                     selectNode.children.push({
                         title: code,
                         dirPath: fileDir,
@@ -367,15 +469,15 @@
                     _this.selectChange([vueThis.selectNode])
                 })
             },
-            handleContextMenuCreateDir(){
-                let selectNode=this.selectNode
-                this.createDir(this.selectNode,"请输入设置的文件夹名称",(fileDir,code)=>{
-                    if(!selectNode.children){
-                        selectNode.children=[]
+            handleContextMenuCreateDir() {
+                let selectNode = this.selectNode
+                this.createDir(this.selectNode, "请输入设置的文件夹名称", (fileDir, code) => {
+                    if (!selectNode.children) {
+                        selectNode.children = []
                     }
                     selectNode.children.push({
                         title: code,
-                        fileName:code,
+                        fileName: code,
                         dirPath: fileDir,
                         expand: false,
                         contextmenu: true,
@@ -386,9 +488,9 @@
                 })
             },
             handleContextMenuCreateFile() {
-                this.handleContextMenuCreateText("请输入文件名称：",null,null);
+                this.handleContextMenuCreateText("请输入文件名称：", null, null);
             },
-            handleContextMenuCreateText(title,suffix) {
+            handleContextMenuCreateText(title, suffix) {
                 //手工选中某个节点
                 let selectNodes = this.$refs.tree.getSelectedNodes()
                 let _this = this;
@@ -407,13 +509,13 @@
                     selectNode.expand = true;
                 }
                 let fileDir = selectNode.dirPath + "/" + selectNode.fileName
-                this.createTextFile(selectNode,title,suffix,(code)=>{
-                    if(!selectNode.children){
-                        selectNode.children=[]
+                this.createTextFile(selectNode, title, suffix, (code) => {
+                    if (!selectNode.children) {
+                        selectNode.children = []
                     }
                     selectNode.children.push({
                         title: code,
-                        fileName:code,
+                        fileName: code,
                         dirPath: fileDir,
                         expand: false,
                         contextmenu: true,
@@ -423,7 +525,7 @@
                     })
                     _this.$set(selectNode, 'selected', false)
                     let newSelected = selectNode.children[selectNode.children.length - 1]
-                    _this.$store.commit("setSelecedNode",newSelected )
+                    _this.$store.commit("setSelecedNode", newSelected)
                     _this.selectChange([newSelected])
                 })
             },
@@ -431,25 +533,25 @@
              * 创建markdown文件
              */
             handleContextMenuCreateMd() {
-                this.handleContextMenuCreateText("请输入markdown名称：",".md");
+                this.handleContextMenuCreateText("请输入markdown名称：", ".md");
             },
             /**
              * 创建markdown文件
              */
             handleContextMenuCreateFlow() {
-                this.handleContextMenuCreateText("请输入flow名称：",".flow");
+                this.handleContextMenuCreateText("请输入flow名称：", ".flow");
             },
-            handleContextMenuCreateSnow(){
-                this.handleContextMenuCreateText("请输入思维导图：",".mind");
+            handleContextMenuCreateSnow() {
+                this.handleContextMenuCreateText("请输入思维导图：", ".mind");
             },
-            handleContextMenuCreateWord(){
-                this.handleContextMenuCreateText("请输入Word：",".docx");
+            handleContextMenuCreateWord() {
+                this.handleContextMenuCreateText("请输入Word：", ".docx");
             },
-            handleContextMenuCreateExcel(){
-                this.handleContextMenuCreateText("请输入Excel：",".xlsx");
+            handleContextMenuCreateExcel() {
+                this.handleContextMenuCreateText("请输入Excel：", ".xlsx");
             },
-            handleContextMenuCreatePpt(){
-                this.handleContextMenuCreateText("请输入Ppt：",".pptx");
+            handleContextMenuCreatePpt() {
+                this.handleContextMenuCreateText("请输入Ppt：", ".pptx");
             },
             /**
              * 检查是否是vuepress项目
@@ -458,7 +560,7 @@
              */
             checkIfVb(data) {
                 if (data && data.isDir) {
-                    if (data.expand && data.children && data.children.length>0) {
+                    if (data.expand && data.children && data.children.length > 0) {
                         for (let c of data.children) {
                             if (c.title == ".vuepress") {
                                 return true
@@ -582,8 +684,8 @@
              * @param selectedList
              */
             selectChange(selectedList) {
-                if(selectedList.length==0){
-                    this.routePush({},'/blank',"空白预览")
+                if (selectedList.length == 0) {
+                    this.routePush({}, '/blank', "空白预览")
                 }
                 const node = selectedList[selectedList.length - 1]
                 if (node) {
@@ -591,45 +693,45 @@
                     var vueThis = this;
                     this.$set(node, 'selected', true)
                     if (node.isDir) {
-                        vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?fileDir=" + node.dirPath + "&fileName=" + node.fileName+ "&root=" + node.root).then((response) => {
+                        vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?fileDir=" + node.dirPath + "&fileName=" + node.fileName + "&root=" + node.root).then((response) => {
                             node.children = response.data.data //挂载子节点
                             node.expand = true    //展开子节点
                         })
                     } else {
-                        let mapping=this.$globalConfig.editorMapping
-                        for(let key in mapping){
+                        let mapping = this.$globalConfig.editorMapping
+                        for (let key in mapping) {
                             let re;
-                            eval("re=/^.+("+key+")$/")
-                            if (re.test(node.title) ) {
-                                this.routePush(node,...mapping[key])
+                            eval("re=/^.+(" + key + ")$/")
+                            if (re.test(node.title)) {
+                                this.routePush(node, ...mapping[key])
                                 return;
                             }
                         }
                     }
                     //没有push直接跳转到白板页面
-                    this.routePush({},'/blank',"空白预览")
+                    this.routePush({}, '/blank', "空白预览")
                 }
             },
-            preventDefault(){
+            preventDefault() {
                 this.$(document).on({
-                    dragleave:function(e){      //拖离
+                    dragleave: function (e) {      //拖离
                         e.preventDefault();
                     },
-                    drop:function(e){           //拖后放
+                    drop: function (e) {           //拖后放
                         e.preventDefault();
                     },
-                    dragenter:function(e){      //拖进
+                    dragenter: function (e) {      //拖进
                         e.preventDefault();
                     },
-                    dragover:function(e){       //拖来拖去
+                    dragover: function (e) {       //拖来拖去
                         e.preventDefault();
                     }
                 });
             },
-            async uploadEntry(parentDir,entry){
-                let name=entry.name;
-                let _this=this;
-                if(entry.isFile){
+            async uploadEntry(parentDir, entry) {
+                let name = entry.name;
+                let _this = this;
+                if (entry.isFile) {
                     entry.file(async function (file) {
                         const param = new FormData();
                         param.append('myfile', file)
@@ -638,24 +740,27 @@
 
                         })
                     })
-                }else{
+                } else {
                     //服务器创建目录
-                    await this.$axios.post(this.$globalConfig.goServer + "file/mkdir" ,{fileDir:parentDir,fileName:name}).then((response) => {
+                    await this.$axios.post(this.$globalConfig.goServer + "file/mkdir", {
+                        fileDir: parentDir,
+                        fileName: name
+                    }).then((response) => {
                     });
-                    let dirReader=entry.createReader()
+                    let dirReader = entry.createReader()
                     dirReader.readEntries(async function (entries) {
-                        for(let centry of entries){
-                            _this.uploadEntry(parentDir+"/"+name,centry)
+                        for (let centry of entries) {
+                            _this.uploadEntry(parentDir + "/" + name, centry)
                         }
                     })
                 }
             },
-            dropUpload(e){
+            dropUpload(e) {
                 e.preventDefault(); //取消默认浏览器拖拽效果
-                let selectNode=this.$store.getters.getSelectedNode
+                let selectNode = this.$store.getters.getSelectedNode
                 var fileDir = selectNode.dirPath + "/" + selectNode.title;
-                let _this=this;
-                if(!selectNode){
+                let _this = this;
+                if (!selectNode) {
                     this.$message.error("请选择上传的目录")
                     return;
                 }
@@ -664,25 +769,25 @@
                 if (fileList.length == 0) {
                     return false;
                 }
-                for(var i=0;i<fileList.length;i++){
-                    let item=e.dataTransfer.items[i]
-                    let entry=item.webkitGetAsEntry()
-                    this.uploadEntry(fileDir,entry)
+                for (var i = 0; i < fileList.length; i++) {
+                    let item = e.dataTransfer.items[i]
+                    let entry = item.webkitGetAsEntry()
+                    this.uploadEntry(fileDir, entry)
                     _this.selectChange([selectNode])
                 }
 
             },
-            initData(){
+            initData() {
                 let _this = this;
-                let selectedNode=_this.$store.getters.getSelectedNode
-                if(selectedNode!=null) {
+                let selectedNode = _this.$store.getters.getSelectedNode
+                if (selectedNode != null) {
                     let dirPath = selectedNode.dirPath
                     let fileName = selectedNode.fileName
                     let root = this.$refs.tree.data[0]
                     let curParent = root;
                     if (dirPath && fileName) {
                         let newDirPath = dirPath.replace(/[/\\|/|\\]+/, "\\")
-                        if(newDirPath=="\\"){
+                        if (newDirPath == "\\") {
                             for (let [index, tnode] of new Map(curParent.children.map((tnode, i) => [i, tnode]))) {
                                 if (fileName == tnode.title) {
                                     _this.selectChange([tnode])
@@ -722,22 +827,22 @@
                     }
                 }
             },
-            listRoot(title){
+            listRoot(title) {
                 let vueThis = this;
                 vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?root=true&fileDir=/").then((response) => {
                     var resultData = response.data
                     vueThis.data5 = [
                         {
                             title: title,
-                            fileName:"",
+                            fileName: "",
                             expand: true,
-                            dirPath:'/',
-                            contextmenu: vueThis.$store.getters.currentWorkspace==0?false:true,
+                            dirPath: '/',
+                            contextmenu: vueThis.$store.getters.currentWorkspace == 0 ? false : true,
                             isDir: true,
                             root: true,
                             children: resultData.data
                         }];
-                    vueThis.$nextTick(()=>{
+                    vueThis.$nextTick(() => {
                         vueThis.initData()
                     })
 
@@ -746,7 +851,7 @@
         }
         ,
         mounted() {
-            let title=this.$store.getters.currentWorkspace=="0"?"公共文档库":"个人文档库";
+            let title = this.$store.getters.currentWorkspace == "0" ? "公共文档库" : "个人文档库";
             this.listRoot(title);
             this.preventDefault()
             document.getElementById('area').addEventListener("drop",

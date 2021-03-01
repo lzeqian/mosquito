@@ -33,4 +33,7 @@ func init() {
 	beego.Router("/share/isShareFile", &controllers.ShareController{}, "get:IsShareFile")
 	beego.Router("/docs/?:shareKey", &controllers.ShareController{}, "get:ShareStatic")
 	beego.Router("/login", &controllers.LoginController{}, "post:Login")
+	beego.Router("/template/groups", &controllers.TemplateController{}, "get:GetTemplateGroup")
+	beego.Router("/template/list", &controllers.TemplateController{}, "get:GetTemplateList")
+	beego.Router("/template/gen", &controllers.TemplateController{}, "post:GenerateFileFromTemplate")
 }

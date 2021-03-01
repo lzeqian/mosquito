@@ -1,7 +1,13 @@
 package database
 
-import "time"
+import (
+	"github.com/jinzhu/gorm"
+	"time"
+)
 
+/**
+  分享文件信息
+*/
 type UserLink struct {
 	ID             uint64 `gorm:"primary_key"`
 	CreatedAt      time.Time
@@ -17,6 +23,8 @@ type UserLink struct {
 	JoinKey        string //默认加入key http://ip/docJoin/Sfymd3D
 }
 
+func (_ *UserLink) InitDatabase(gdb *gorm.DB) {
+}
 func InsertLink(link UserLink) {
 	link.ID, _ = snowFake.NextID()
 	link.CreatedAt = time.Now()

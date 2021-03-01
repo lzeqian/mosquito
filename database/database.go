@@ -8,6 +8,10 @@ import (
 	"github.com/sony/sonyflake"
 )
 
+type Table interface {
+	InitDatabase(gdb *gorm.DB)
+}
+
 var snowFakeSetting = sonyflake.Settings{
 	MachineID: func() (u uint16, e error) {
 		return 1, nil
@@ -34,14 +38,23 @@ var db = getOrmDb()
 
 func getOrmDb() (rdb *gorm.DB) {
 	if !ifInitDb {
-		dbPath := beego.AppConfig.String("db.path")
+		dbPath := beego.AppConfig.String("db.conn")
+		dbDialet := beego.AppConfig.String("db.dialet")
 		dbMaxConns, _ := beego.AppConfig.Int("db.maxOpenConns")
 		dbMaxIdleConns, _ := beego.AppConfig.Int("db.maxIdleConns")
-		db, _ := gorm.Open("sqlite3", dbPath)
+		db, _ := gorm.Open(dbDialet, dbPath)
 		db.DB().SetMaxIdleConns(dbMaxIdleConns)
 		db.DB().SetMaxOpenConns(dbMaxConns)
-		db.AutoMigrate(&UserLink{})
 		gdb = db
+		tableList := []Table{
+			&UserLink{},
+			&FileTemplateGroup{},
+			&FileTemplate{},
+		}
+		for _, table := range tableList {
+			db.AutoMigrate(table)
+			table.InitDatabase(gdb)
+		}
 		ifInitDb = true
 	}
 	return gdb

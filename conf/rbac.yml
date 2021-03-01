@@ -60,6 +60,10 @@ fileSystemPermMapping:
       - read
       - createFile
       - write
+  - path: /template/gen
+    act:
+      - createFile
+      - write
   - path: /file/mkdir
     act:
       - createDir
