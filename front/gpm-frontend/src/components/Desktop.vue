@@ -120,7 +120,7 @@
                 >
            <FileSystem  ref="fileSystemRef"></FileSystem>
             <!--文件系统右键菜单-->
-            <div class="fileSystemContextmenu" v-if="fileSystemContextmenuVisible">
+            <div class="fileSystemContextmenu" v-if="fileSystemContextmenuVisible && (($store.getters.currentWorkspace==0 && !$store.getters.getSelectedNode.root) || $store.getters.currentWorkspace==1)">
                 <div class="returnPreStep" @mouseover="mouseOver('.returnPreStep','rgb(217,217,217)')"
                      @mouseleave="mouseLeave('.returnPreStep')" @click="$refs.fileSystemRef.returnPreStep()">
                     返回上一级
