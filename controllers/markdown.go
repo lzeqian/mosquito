@@ -98,6 +98,15 @@ func (c *MarkDownController) CancelVuePress() {
 	beego.DelStaticPath(markdown.AppPath)
 	ServeJSON(c.Controller, "")
 }
+func checkIfVp(remoteDir string) bool {
+	nodes, _ := fileSystem.ListDir(remoteDir, "")
+	for _, nodeTmp := range nodes {
+		if nodeTmp.FileName == ".vuepress" {
+			return true
+		}
+	}
+	return false
+}
 
 /**
   构建vuepress
@@ -130,6 +139,10 @@ func (c *MarkDownController) BuildVuePress() {
 	//同时创建目录名称，比如 a目录下的b目录 目录名称为 a_b
 	targetLocalDir := homeDir + tools.PathSeparator + ".vphome" + tools.PathSeparator + curFileName
 	os.Mkdir(homeDir+tools.PathSeparator+".vphome"+tools.PathSeparator+curFileName, os.ModePerm)
+	if !checkIfVp(fileDir + tools.PathSeparator + fileName) {
+		ServeJSON(c.Controller, errors.New("当前目录非vuepress项目无法构建"))
+		return
+	}
 	copyRemoteToLocal(fileDir+tools.PathSeparator+fileName, targetLocalDir)
 	cmdfileDir := homeDir + tools.PathSeparator + ".vphome"
 	destPath := targetLocalDir

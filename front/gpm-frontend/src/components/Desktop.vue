@@ -120,7 +120,7 @@
                 >
            <FileSystem  ref="fileSystemRef"></FileSystem>
             <!--文件系统右键菜单-->
-            <div class="fileSystemContextmenu" v-if="fileSystemContextmenuVisible && (($store.getters.currentWorkspace==0 && !$store.getters.getSelectedNode.root) || $store.getters.currentWorkspace==1)">
+            <div class="fileSystemContextmenu" v-if="fileSystemContextmenuVisible && $store.getters.getSelectedNode && (($store.getters.currentWorkspace==0 && !$store.getters.getSelectedNode.root) || $store.getters.currentWorkspace==1)">
                 <div class="returnPreStep" @mouseover="mouseOver('.returnPreStep','rgb(217,217,217)')"
                      @mouseleave="mouseLeave('.returnPreStep')" @click="$refs.fileSystemRef.returnPreStep()">
                     返回上一级
@@ -172,7 +172,7 @@
                      @mouseleave="mouseLeave('.fileSystemCreateVp')" @click="$refs.fileSystemRef.createVpFileInCur()">
                     <font color="green">新建vuepress(VP)</font>
                 </div>
-                <div class="fileSystemBuildVp" @mouseover="mouseOver('.fileSystemBuildVp','rgb(217,217,217)')"
+                <div class="fileSystemBuildVp" v-if="$store.getters.getSelectedNode.isDir" @mouseover="mouseOver('.fileSystemBuildVp','rgb(217,217,217)')"
                      @mouseleave="mouseLeave('.fileSystemBuildVp')" @click="$refs.fileSystemRef.buildVpFileInCur()">
                     <font color="green"> 构建vuepress(BP)</font>
                 </div>

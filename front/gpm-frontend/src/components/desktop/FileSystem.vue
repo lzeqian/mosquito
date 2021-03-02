@@ -113,6 +113,7 @@
                 return this.$store.getters.currentWorkspace
             },
             selectNode() {
+                //当前选中的文件或者目录，需要打开
                 return this.$store.getters.getSelectedNode
             },
         },
@@ -234,6 +235,15 @@
                         })
                     });
                 })
+            },
+            buildVpFileInCur(){
+                let _this = this;
+                //当前目录
+                let selectNode = _this.selectNode;
+                //当前选择的节点
+                let selectedItem=_this.selectedItem;
+                _this.$store.commit('showLoading')
+                _this.buildVpFile(selectNode)
             },
             createFileInCur(title,suffix) {
                 let _this = this;
@@ -398,7 +408,7 @@
                 window.fileSystemVueThis = vueThis
                 vueThis.curDir='/';
                 vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?root=true&fileDir=/").then((response) => {
-                    vueThis.dataArray = {
+                    let curRoot = {
                         title: "",
                         fileName:"",
                         expand: true,
@@ -408,8 +418,9 @@
                         root: true,
                         children:response.data.data
                     }
-                    vueThis.selectedItem=vueThis.dataArray
-                    vueThis.$store.commit("setSelecedNode", vueThis.dataArray)
+                    vueThis.dataArray = response.data.data //挂载子节点
+                    vueThis.selectedItem=curRoot
+                    vueThis.$store.commit("setSelecedNode", curRoot)
                     func && func();
                 })
             },

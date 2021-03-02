@@ -75,7 +75,7 @@
                 if (localStorage.getItem("token")) {
                     this.$store.state.isLogin = true
                 }
-                if (vueThis.$route.name != "blankViewer") {
+                if (vueThis.$route.name != "blankViewer" && vueThis.$route.name!=null) {
                     vueThis.loadEditorContent((vueThis, data) => {
                         vueThis.$store.commit("setSelectedNodeCacheData", data)
                         let initInterval=setInterval(()=>{
