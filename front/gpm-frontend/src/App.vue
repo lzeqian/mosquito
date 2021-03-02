@@ -3,7 +3,7 @@
         <Login v-if="!$store.state.isLogin"></Login>
         <Desktop v-if="$store.state.isLogin && $store.getters.currentDirType=='desktop'"></Desktop>
         <Home v-if="$store.state.isLogin && $store.getters.currentDirType=='tree'"></Home>
-        <Spin fix :style="{zIndex:1000}" v-show="$store.state.isSpinShow">
+        <Spin fix :style="{zIndex:10000}" v-show="$store.state.isSpinShow">
             <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
             <div style="color: red">编译中，请稍后。。。</div>
         </Spin>
