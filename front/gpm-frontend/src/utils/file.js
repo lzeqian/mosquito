@@ -61,6 +61,17 @@ function buildVpFile(selectNode) {
         });
     }
 }
+function cancelVpFile(){
+    let _this=this;
+    let selectNode=this.$store.getters.getSelectedNode
+    this.$axios.post(this.$globalConfig.goServer + "md/cancelVp",{fileDir:selectNode.dirPath,fileName:selectNode.title}).then((response) => {
+        if(response.data.code==0) {
+            _this.$Message.info("取消映射成功")
+        }
+    }).catch(()=>{
+
+    });
+}
 function createVpFile(selectNode,func){
     if (selectNode.isDir) {
         let code = prompt("请输入vuepress名称：");
@@ -122,7 +133,7 @@ function createTextFun(dirPath,suffix,title,func) {
 function createDir(selectNode,title,func) {
     let _this=this;
     if (selectNode.isDir) {
-        _this._createDir();
+        _this._createDir(selectNode,title,func);
     } else {
         _this.$Message.error("请选择一个目录");
     }
@@ -246,6 +257,7 @@ export default{
     uploadFileFun,
     deleteFile,
     buildVpFile,
+    cancelVpFile,
     createVpFile,
     createTextFile,
     createTextFun,

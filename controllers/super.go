@@ -74,6 +74,17 @@ func GetAuthorization(ctx *context.Context) string {
 	}
 	return tokenString
 }
+func GetWorkSpace(ctx *context.Context) []string {
+	workspace := ctx.Request.Header["Workspace"]
+	//如果请求头中不存在，判断参数中是否存在
+	if len(workspace) == 0 {
+		workspaceParam := ctx.Request.FormValue("Workspace")
+		if workspaceParam != "" {
+			workspace = []string{workspaceParam}
+		}
+	}
+	return workspace
+}
 func CheckSharePrivileges(ctx *context.Context, shareKeyString string) models.Result {
 	requestPath := ctx.Request.URL.Path
 	result := models.Result{Code: 2, Data: "您无权限执行该操作333"}

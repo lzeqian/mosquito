@@ -6,14 +6,16 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
-	"github.com/astaxie/beego/utils"
+	"gpm/database"
 	"gpm/models"
+	"gpm/service"
 	"gpm/tools"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -55,19 +57,13 @@ func (c *MarkDownController) CreateVuePress() {
 	fileSystem.SaveTextFile(destPath, "README.md", "#测试", 0777)
 	//创建.vuepress/config.js
 	fileSystem.CreateFile(destPath+tools.PathSeparator+".vuepress", "config.js")
-	fileSystem.SaveTextFile(destPath+tools.PathSeparator+".vuepress", "config.js", "module.exports = {\r\n"+
-		"	title: '测试',\r\n"+
-		"	description: '测试',\r\n"+
-		"	base: '/"+fileName+"/',\r\n"+
-		"	themeConfig: {\r\n"+
-		"		sidebar: \"auto\",\r\n"+
-		"		displayAllHeaders: true,\r\n"+
-		"		nav: [\r\n"+
-		"			{ text: 'Home', link: '/' },\r\n"+
-		"			{ text: 'baidu', link: 'https://www.baidu.com' }\r\n"+
-		"		]\r\n"+
-		"	}\r\n"+
-		"}", 0777)
+	configJsTemplateByte, e := ioutil.ReadFile("files/vuepress/config.js")
+	if e != nil {
+		ServeJSON(c.Controller, e)
+		return
+	}
+	configJsTemplate := strings.ReplaceAll(string(configJsTemplateByte), "${base}", "/"+fileName+"/")
+	fileSystem.SaveTextFile(destPath+tools.PathSeparator+".vuepress", "config.js", configJsTemplate, 0777)
 	ServeJSON(c.Controller, "")
 }
 func copyRemoteToLocal(remoteDir string, localDir string) {
@@ -81,6 +77,26 @@ func copyRemoteToLocal(remoteDir string, localDir string) {
 			ioutil.WriteFile(localDir+tools.PathSeparator+nodeTmp.Title, allBytes, 0777)
 		}
 	}
+}
+func (c *MarkDownController) CancelVuePress() {
+	markdown := database.VuePress{}
+	requestBody := c.Ctx.Input.RequestBody
+	json.Unmarshal(requestBody, &markdown)
+	workspaceArr := GetWorkSpace(c.Ctx)
+	workspace := 0
+	//如果是个人空间需要在个人路径上加上用户名
+	if len(workspaceArr) > 0 {
+		workspace, _ = strconv.Atoi(workspaceArr[0])
+	}
+	markdown.Workspace = workspace
+	markdown = database.SearchVuePress(markdown)
+	if markdown.ID == 0 {
+		ServeJSON(c.Controller, errors.New("未构建的vp项目，无需取消"))
+		return
+	}
+	database.DeleteVuePress(markdown)
+	beego.DelStaticPath(markdown.AppPath)
+	ServeJSON(c.Controller, "")
 }
 
 /**
@@ -96,6 +112,16 @@ func (c *MarkDownController) BuildVuePress() {
 	homeDir := user.HomeDir
 	//将当前项目copy到本地用户目录.vphome
 	os.Mkdir(homeDir+tools.PathSeparator+".vphome", os.ModePerm)
+	packageJsonByte, err := ioutil.ReadFile("files/vuepress/package.json")
+	if err != nil {
+		ServeJSON(c.Controller, err)
+		return
+	}
+	err = ioutil.WriteFile(homeDir+tools.PathSeparator+".vphome"+tools.PathSeparator+"package.json", packageJsonByte, 0777)
+	if err != nil {
+		ServeJSON(c.Controller, err)
+		return
+	}
 	re3, _ := regexp.Compile(`[/|\\]+`)
 	curFileName := re3.ReplaceAllString(fileDir+tools.PathSeparator+fileName, "_")
 	if strings.HasPrefix(curFileName, "_") {
@@ -113,34 +139,50 @@ func (c *MarkDownController) BuildVuePress() {
 	f, err := os.OpenFile(configJs, os.O_RDONLY, 0600)
 	defer f.Close()
 	if err != nil {
-		fmt.Println(err)
+		ServeJSON(c.Controller, err)
+		return
 	} else {
 		configJsContent, _ := ioutil.ReadAll(f)
 		configJsContentStr1 = string(configJsContent)
 		fmt.Println(configJsContentStr1)
 	}
 	if err != nil {
-		fmt.Println(err)
-	}
-	configJsContentStrSplit := strings.Split(configJsContentStr1, "= ")
-	configJsonStr := configJsContentStrSplit[1]
-	reg := regexp.MustCompile("([a-zA-Z]\\w*):")
-	regStr := reg.ReplaceAllString(configJsonStr, `"$1":`)
-	regStr = strings.ReplaceAll(regStr, "'", "\"")
-	regStr = strings.ReplaceAll(regStr, "`", "\"")
-	regStr = strings.Replace(regStr, `"http":`, "http:", -1)
-	regStr = strings.Replace(regStr, `"https":`, "https:", -1)
-	data := make(map[string]interface{})
-	fmt.Println(regStr)
-	jerr := json.Unmarshal([]byte(regStr), &data)
-	if jerr != nil {
-		ServeJSON(c.Controller, jerr)
-	}
-	if data["base"] == nil || data["base"] == "" {
-		ServeJSON(c.Controller, errors.New("必须设置base上下文路径"))
+		ServeJSON(c.Controller, err)
 		return
 	}
-	mapping := data["base"].(string)
+	reg := regexp.MustCompile(".*base: '(?P<mapping>.+)'.*")
+	match := reg.FindStringSubmatch(configJsContentStr1)
+	groupNames := reg.SubexpNames()
+	mapping := ""
+	for i, name := range groupNames {
+		if name == "mapping" { // 第一个分组为空（也就是整个匹配）
+			mapping = match[i]
+		}
+	}
+	if mapping == "" {
+		ServeJSON(c.Controller, errors.New("必须设置base上下文路径,请确认配置满足 base: '上下文路径',"))
+		return
+	}
+
+	token := c.Ctx.Input.Header("Authorization")
+	clwas, err := tools.GetTokenInfo(token)
+	workspaceArr := GetWorkSpace(c.Ctx)
+	workspace := 0
+	//如果是个人空间需要在个人路径上加上用户名
+	if len(workspaceArr) > 0 {
+		workspace, _ = strconv.Atoi(workspaceArr[0])
+	}
+	realMapping := service.GetVuePressMappingV1(mapping, workspace, clwas.Name)
+	//检查mapping是否已经映射
+	queryVp := database.FindVuePress(realMapping)
+	if queryVp.ID != 0 && (queryVp.FileDir != fileDir || queryVp.FileName != fileName || queryVp.Workspace != workspace) {
+		ServeJSON(c.Controller, errors.New("映射路径"+realMapping+"已经配置,请选择其他的路径"))
+		return
+	}
+	//将新生成映射路径写入临时配置文件,比如个人的映射路径为/admin/mydoc/
+
+	regStr := reg.ReplaceAllString(configJsContentStr1, "	base: '"+realMapping+"',")
+	ioutil.WriteFile(configJs, []byte(regStr), 0777)
 	//vuepress build docs
 	osType := runtime.GOOS
 	cmd := ""
@@ -158,29 +200,25 @@ func (c *MarkDownController) BuildVuePress() {
 		cdDir = strings.ReplaceAll(cmdfileDir, "\\", "/")
 		cdCom = "cd"
 	}
-	if execCommand(cmd, []string{param1, cdCom, cdDir, "&&", "vuepress", "build", curFileName}) {
-		/**
-		  写入配置，配置格式:
-		  {
-		     "/test/":"d:/abcd/ddd"
-		      "/ggg/":"d:/abcd/ddd"
-		  }
-		*/
 
-		configFile := homeDir + tools.PathSeparator + ".vpcofig"
-		if !utils.FileExists(configFile) {
-			os.Create(configFile)
-		}
-		bytes, _ := ioutil.ReadFile(configFile)
-		maps := make(map[string]interface{})
-		json.Unmarshal(bytes, &maps)
-		maps[mapping] = destPath + tools.PathSeparator + ".vuepress" + tools.PathSeparator + "dist"
-
-		resultByte, _ := json.Marshal(maps)
-		ioutil.WriteFile(configFile, resultByte, 0777)
-
-		beego.SetStaticPath(mapping, destPath+tools.PathSeparator+".vuepress"+tools.PathSeparator+"dist")
-		ServeJSON(c.Controller, mapping)
+	vuepress := database.VuePress{
+		PressHome:     curFileName,
+		AppPath:       realMapping,
+		ShareUserName: clwas.Name,
+		FileDir:       fileDir,
+		FileName:      fileName,
+		Workspace:     workspace,
+	}
+	searchVp := database.SearchVuePress(vuepress)
+	if searchVp.ID == 0 {
+		database.InsertVuePress(vuepress)
+	} else {
+		vuepress.ID = searchVp.ID
+		database.UpdateVuePress(vuepress)
+	}
+	if execCommand(cmd, []string{param1, cdCom, cdDir, "&&", "npm", "i", "&&", "vuepress", "build", curFileName}) {
+		beego.SetStaticPath(realMapping, destPath+tools.PathSeparator+".vuepress"+tools.PathSeparator+"dist")
+		ServeJSON(c.Controller, realMapping)
 	}
 
 }

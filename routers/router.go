@@ -10,6 +10,7 @@ func init() {
 	beego.Router("/home/listSub", &controllers.TreeController{}, "get:ListSubTree")
 	beego.Router("/md/createVp", &controllers.MarkDownController{}, "post:CreateVuePress")
 	beego.Router("/md/buildVp", &controllers.MarkDownController{}, "post:BuildVuePress")
+	beego.Router("/md/cancelVp", &controllers.MarkDownController{}, "post:CancelVuePress")
 	beego.Router("/file/download", &controllers.FileController{}, "get:DownloadFile")
 	beego.Router("/file/upload", &controllers.FileController{}, "post:UploadFile")
 	beego.Router("/file/uploadOfficeFile", &controllers.FileController{}, "post:UploadOfficeFile")

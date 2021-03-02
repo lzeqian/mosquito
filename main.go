@@ -1,13 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/plugins/cors"
-	"github.com/astaxie/beego/utils"
+	"gpm/database"
 	_ "gpm/routers"
 	"gpm/web"
-	"io/ioutil"
 	"os"
 	"os/user"
 )
@@ -16,15 +14,19 @@ func main() {
 	user, _ := user.Current()
 	PthSep := string(os.PathSeparator)
 	homeDir := user.HomeDir
-	configFile := homeDir + PthSep + ".vpcofig"
-	if utils.FileExists(configFile) {
-		bytes, _ := ioutil.ReadFile(configFile)
-		maps := make(map[string]interface{})
-		json.Unmarshal(bytes, &maps)
-		for mapping := range maps {
-			beego.SetStaticPath(mapping, maps[mapping].(string))
-		}
+	vpArray := database.GetAllVuePress()
+	for _, vp := range vpArray {
+		beego.SetStaticPath(vp.AppPath, homeDir+PthSep+".vphome"+PthSep+vp.PressHome+PthSep+"/.vuepress/dist")
 	}
+	//configFile := homeDir + PthSep + ".vpcofig"
+	//if utils.FileExists(configFile) {
+	//	bytes, _ := ioutil.ReadFile(configFile)
+	//	maps := make(map[string]interface{})
+	//	json.Unmarshal(bytes, &maps)
+	//	for mapping := range maps {
+	//		beego.SetStaticPath(mapping, maps[mapping].(string))
+	//	}
+	//}
 	beego.SetStaticPath("/js", "static/js")
 	beego.SetStaticPath("/css", "static/css")
 	beego.SetStaticPath("/fonts", "static/fonts")

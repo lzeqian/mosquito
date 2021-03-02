@@ -57,6 +57,9 @@
                 <DropdownItem @click.native="handleContextMenuBuildVp" style="color: green"
                               v-if="selectNode!=null && checkIfVb(selectNode)">构建vuepress
                 </DropdownItem>
+                <DropdownItem @click.native="handleContextMenuCannelVp" style="color: green"
+                              v-if="selectNode!=null && checkIfVb(selectNode)">取消映射
+                </DropdownItem>
             </template>
         </Tree>
         <Spin fix v-show="isSpinShow">
@@ -262,11 +265,20 @@
                 let _this = this;
                 let selectNode = this.$store.getters.getSelectedNode
                 _this.templateObject.fileDir=selectNode.dirPath+"/"+selectNode.fileName
-                debugger
                 this.$axios.post(this.$globalConfig.goServer + "/template/gen",_this.templateObject).then((response) => {
                     if (response.data.code == 0) {
                         _this.$Message.info('创建成功');
-                        _this.selectChange([selectNode])
+                        _this.selectChange([selectNode],()=>{
+                            _this.$set(selectNode, 'selected', false)
+                            for(let c of selectNode.children){
+                                console.log(c.fileName)
+                                if(c.fileName==_this.templateObject.fileName){
+                                    _this.$store.commit("setSelecedNode", c)
+                                    _this.selectChange([ _this.$store.getters.getSelectedNode])
+                                    break;
+                                }
+                            }
+                        })
                     }
                 })
             },
@@ -421,8 +433,10 @@
                 _this.buildVpFile(selectNode)
 
             },
+            handleContextMenuCannelVp(){
+                this.cancelVpFile()
+            },
             handleContextMenuCopy() {
-                debugger
                 let _this = this;
                 let selectNodes = this.$refs.tree.getSelectedNodes()
                 if (selectNodes.length == 0) {
@@ -453,23 +467,21 @@
                 this.createVpFile(selectNode, (code) => {
                     selectNode.children.push({
                         title: code,
-                        dirPath: fileDir,
+                        fileName:code,
+                        dirPath: selectNode.root?"/":fileDir,
                         expand: true,
                         contextmenu: true,
                         isDir: true,
                         selected: true,
                         children: []
                     })
-                    this.$router.push({
-                        path: _this.redirect || '/mdeditor',
-                        query: {dirPath: fileDir, fileName: code, content: ""}
-                    });
                     _this.$set(selectNode, 'selected', false)
                     _this.$store.commit("setSelecedNode", selectNode.children[selectNode.children.length - 1])
-                    _this.selectChange([vueThis.selectNode])
+                    _this.selectChange([ _this.$store.getters.getSelectedNode])
                 })
             },
             handleContextMenuCreateDir() {
+                let _this=this;
                 let selectNode = this.selectNode
                 this.createDir(this.selectNode, "请输入设置的文件夹名称", (fileDir, code) => {
                     if (!selectNode.children) {
@@ -683,7 +695,7 @@
              * 树节点被选中时触发的编辑器打开和父节点展开事件
              * @param selectedList
              */
-            selectChange(selectedList) {
+            selectChange(selectedList,func) {
                 if (selectedList.length == 0) {
                     this.routePush({}, '/blank', "空白预览")
                 }
@@ -696,6 +708,7 @@
                         vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?fileDir=" + node.dirPath + "&fileName=" + node.fileName + "&root=" + node.root).then((response) => {
                             node.children = response.data.data //挂载子节点
                             node.expand = true    //展开子节点
+                            func && func();
                         })
                     } else {
                         let mapping = this.$globalConfig.editorMapping

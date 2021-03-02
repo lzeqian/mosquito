@@ -74,14 +74,7 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 	requestPath := ctx.Request.URL.Path
 	dirPath := getDirPath(ctx)
 	//初始化fileSystem，workspace确定是个人空间还是公共空间
-	workspace := ctx.Request.Header["Workspace"]
-	//如果请求头中不存在，判断参数中是否存在
-	if len(workspace) == 0 {
-		workspaceParam := ctx.Request.FormValue("Workspace")
-		if workspaceParam != "" {
-			workspace = []string{workspaceParam}
-		}
-	}
+	workspace := controllers.GetWorkSpace(ctx)
 	//如果是个人空间需要在个人路径上加上用户名
 	if len(workspace) > 0 && workspace[0] == "1" {
 		controllers.RequestFileSystem("1")
