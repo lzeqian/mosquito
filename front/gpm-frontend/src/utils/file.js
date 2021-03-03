@@ -248,8 +248,30 @@ function copyFile (func) {
     } else {
         _this.$Message.error("请选择文件");
     }
-
-
+}
+function createFileFromTemplateBack (templateObject,func) {
+    let _this = this;
+    this.$axios.post(_this.$globalConfig.goServer + "/template/gen",templateObject).then((response) => {
+        if (response.data.code == 0) {
+            func && func()
+        }
+    })
+}
+function loadTemplateGroup(func){
+    let _this = this;
+    this.$axios.get(_this.$globalConfig.goServer + "template/groups").then((response) => {
+        if (response.data.code == 0) {
+            func&&func(response.data.data);
+        }
+    })
+}
+function loadTemplate(groupId,func){
+    let _this = this;
+    this.$axios.get(_this.$globalConfig.goServer + "/template/list?groupId="+groupId).then((response) => {
+        if (response.data.code == 0) {
+            func && func(response.data.data)
+        }
+    })
 }
 export default{
     downloadFile,
@@ -269,5 +291,8 @@ export default{
     copyFile,
     createDir,
     _createDir,
-    deleteDir
+    deleteDir,
+    createFileFromTemplateBack,
+    loadTemplateGroup,
+    loadTemplate
 }

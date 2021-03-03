@@ -46,18 +46,19 @@
         padding-right: 40px;
         padding-left: 10px;
     }
-    /deep/ .ivu-modal-header{
+    #showEditorMadal /deep/ .ivu-modal-header{
+        /*注意选择当前元素必须在最前面，过滤子组件元素并生效使用/deep/ */
         display: none;
     }
-    /deep/ .ivu-modal-content{
+    #showEditorMadal /deep/ .ivu-modal-content{
         border-radius: 2px;
         height: 100%;
     }
-    /deep/ .ivu-modal{
+    #showEditorMadal /deep/  .ivu-modal{
         height: 100%;
         top: 0px;
     }
-    /deep/ .ivu-modal-body{
+    #showEditorMadal /deep/ .ivu-modal-body{
         padding: 0px;
     }
 </style>
@@ -80,7 +81,7 @@
                 </a>
             </div>
         </div>
-        <Modal width="80%"
+        <Modal id="showEditorMadal" width="80%"
                v-model="showEditorMadal"
                title="编辑器"
                :footer-hide="true"
@@ -88,6 +89,32 @@
             <div :style="{height: documentHeight+'px'}">
             <router-view></router-view>
             </div>
+        </Modal>
+        <Modal
+                v-model="showTemplate"
+                style="height:200px"
+                title="模板选择"
+                @on-ok="createFileFromTemplate"
+                :z-index="10002">
+            <Form :model="templateObject" :label-width="80">
+                <FormItem label="模板组">
+                    <Select v-model="templateObject.templateGroupId" style="width:200px" @on-change="changeTemplateGroup">
+                        <Option v-for="groupItem in templateGroupData" :value="groupItem.value" :key="groupItem.value">{{
+                            groupItem.label}}
+                        </Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="模板">
+                    <Select v-model="templateObject.templateId" style="width:200px" @on-change="changeTemplateGroup">
+                        <Option v-for="item in templateData" :value="item.value" :key="item.value">{{
+                            item.label}}
+                        </Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="文件名称">
+                    <Input v-model="templateObject.fileName"  style="width: 300px" />
+                </FormItem>
+            </Form>
         </Modal>
     </div>
 
@@ -106,6 +133,24 @@
                 showEditorMadal:false,
                 documentHeight:window.innerHeight,
                 currentVisible:false,
+                showShare: false,
+                showTemplate: false,
+                templateGroupData: [],
+                templateData: [],
+                templateObject: {
+                    templateGroupId: "",
+                    templateId: "",
+                    fileName: "",
+                    fileDir:""
+                },
+                shareObject: {
+                    shareMode: 2,
+                    shareKey: "",
+                    joinKey: "",
+                    assignUserMode: 0,
+                    shareUrl: "",
+                    joinUrl: ""
+                },
             }
         },
         computed:{
@@ -221,6 +266,66 @@
             },
             createTextFileInCur() {
                 this.createFileInCur("请输入文件名称：",null)
+            },
+            createWordFileInCur() {
+                this.createFileInCur("请输入Word：", ".docx");
+            },
+            createExcelFileInCur() {
+                this.createFileInCur("请输入Excel：", ".xlsx");
+            },
+            createPptFileInCur() {
+                this.createFileInCur("请输入Ppt：", ".pptx");
+            },
+            canceldVpFileInCur(){
+                this.cancelVpFile()
+            },
+            /*
+            * 点击右键 从模板创建触发事件
+            * */
+            createFileFromTempalteInCur(){
+                let _this = this;
+                this.showTemplate = true;
+                _this.loadTemplateGroup((templateGroup)=>{
+                    _this.templateGroupData = templateGroup;
+                    if (_this.templateGroupData.length > 0) {
+                        _this.templateObject.templateGroupId = _this.templateGroupData[0].value;
+                    }
+                    _this.changeTemplateGroup();
+                    let selectNode = _this.$store.getters.getSelectedNode
+                    _this.templateObject.fileDir=selectNode.dirPath
+
+                });
+            },
+            /*
+            * 选择模板后点击确定后创建文件逻辑
+            * */
+            createFileFromTemplate() {
+                let _this = this;
+                let selectNode = this.$store.getters.getSelectedNode
+                _this.templateObject.fileDir=selectNode.dirPath+"/"+selectNode.fileName
+                this.createFileFromTemplateBack(_this.templateObject,()=>{
+                    _this.refreshCurView(()=>{
+                        _this.$nextTick(()=>{
+                            let items=_this.dataArray.filter(item=>{
+                                return item.title==_this.templateObject.fileName
+                            })
+                            _this.selectClick(items[0],'fileItem'+_this.templateObject.fileName)
+                        })
+                    });
+                })
+            },
+            /*
+            * 当模板组选择后，自动选择第一个模板默认
+            * */
+            changeTemplateGroup() {
+                let _this = this;
+                _this.loadTemplate(_this.templateObject.templateGroupId,(templdateData)=>{
+                    _this.templateData = templdateData;
+                    if (_this.templateData.length > 0) {
+                        _this.templateObject.templateId = _this.templateData[0].value;
+                        _this.templateObject.fileName=_this.templateData[0].templatePath.substring(_this.templateData[0].templatePath.lastIndexOf("/")+1)
+                    }
+                })
             },
             createVpFileInCur() {
                 let _this = this;

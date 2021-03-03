@@ -113,7 +113,7 @@
                     </Select>
                 </FormItem>
                 <FormItem label="模板">
-                    <Select v-model="templateObject.templateId" style="width:200px" @on-change="changeTemplateGroup">
+                    <Select v-model="templateObject.templateId" style="width:200px">
                         <Option v-for="item in templateData" :value="item.value" :key="item.value">{{
                             item.label}}
                         </Option>
@@ -219,29 +219,12 @@
                 })
             },
             changeTemplateGroup() {
-                this.loadTemplate(this.templateObject.templateGroupId)
-            },
-            loadTemplateGroup(func){
                 let _this = this;
-                this.$axios.get(this.$globalConfig.goServer + "template/groups").then((response) => {
-                    if (response.data.code == 0) {
-                        _this.templateGroupData = response.data.data;
-                        if (_this.templateGroupData.length > 0) {
-                            _this.templateObject.templateGroupId = _this.templateGroupData[0].value;
-                            func&&func();
-                        }
-                    }
-                })
-            },
-            loadTemplate(groupId){
-                let _this = this;
-                this.$axios.get(this.$globalConfig.goServer + "/template/list?groupId="+_this.templateObject.templateGroupId).then((response) => {
-                    if (response.data.code == 0) {
-                        _this.templateData = response.data.data;
-                        if (_this.templateData.length > 0) {
-                            _this.templateObject.templateId = _this.templateData[0].value;
-                            _this.templateObject.fileName=_this.templateData[0].templatePath.substring(_this.templateData[0].templatePath.lastIndexOf("/")+1)
-                        }
+                _this.loadTemplate(_this.templateObject.templateGroupId,(templdateData)=>{
+                    _this.templateData = templdateData;
+                    if (_this.templateData.length > 0) {
+                        _this.templateObject.templateId = _this.templateData[0].value;
+                        _this.templateObject.fileName=_this.templateData[0].templatePath.substring(_this.templateData[0].templatePath.lastIndexOf("/")+1)
                     }
                 })
             },
@@ -251,8 +234,12 @@
             handleContextMenuCreateFileFromTemplate() {
                 let _this = this;
                 this.showTemplate = true;
-                _this.loadTemplateGroup(()=>{
-                    _this.loadTemplate(_this.templateObject.templateGroupId)
+                _this.loadTemplateGroup((templateGroup)=>{
+                    _this.templateGroupData = templateGroup;
+                    if (_this.templateGroupData.length > 0) {
+                        _this.templateObject.templateGroupId = _this.templateGroupData[0].value;
+                    }
+                    _this.changeTemplateGroup();
                     let selectNode = this.$store.getters.getSelectedNode
                     _this.templateObject.fileDir=selectNode.dirPath
 
@@ -265,22 +252,20 @@
                 let _this = this;
                 let selectNode = this.$store.getters.getSelectedNode
                 _this.templateObject.fileDir=selectNode.dirPath+"/"+selectNode.fileName
-                this.$axios.post(this.$globalConfig.goServer + "/template/gen",_this.templateObject).then((response) => {
-                    if (response.data.code == 0) {
-                        _this.$Message.info('创建成功');
-                        _this.selectChange([selectNode],()=>{
-                            _this.$set(selectNode, 'selected', false)
-                            for(let c of selectNode.children){
-                                console.log(c.fileName)
-                                if(c.fileName==_this.templateObject.fileName){
-                                    _this.$store.commit("setSelecedNode", c)
-                                    _this.selectChange([ _this.$store.getters.getSelectedNode])
-                                    break;
-                                }
+                this.createFileFromTemplateBack(_this.templateObject,()=>{
+                    _this.$Message.info('创建成功');
+                    _this.selectChange([selectNode],()=>{
+                        _this.$set(selectNode, 'selected', false)
+                        for(let c of selectNode.children){
+                            console.log(c.fileName)
+                            if(c.fileName==_this.templateObject.fileName){
+                                _this.$store.commit("setSelecedNode", c)
+                                _this.selectChange([ _this.$store.getters.getSelectedNode])
+                                break;
                             }
-                        })
-                    }
-                })
+                        }
+                    })
+                });
             },
             /**
              * 分享文件

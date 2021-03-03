@@ -167,6 +167,22 @@
                      @mouseleave="mouseLeave('.fileSystemCreateFile')" @click="$refs.fileSystemRef.createTextFileInCur()">
                     <font color="red">  新建文件(NF)</font>
                 </div>
+                <div class="fileSystemCreateFileFromTemplate" @mouseover="mouseOver('.fileSystemCreateFileFromTemplate','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCreateFileFromTemplate')" @click="$refs.fileSystemRef.createFileFromTempalteInCur()">
+                    <font color="red">  从模板新建</font>
+                </div>
+                <div class="fileSystemCreateWord" @mouseover="mouseOver('.fileSystemCreateWord','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCreateWord')" @click="$refs.fileSystemRef.createWordFileInCur()">
+                    <font color="red">  新建word</font>
+                </div>
+                <div class="fileSystemCreateExcel" @mouseover="mouseOver('.fileSystemCreateExcel','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCreateExcel')" @click="$refs.fileSystemRef.createExcelFileInCur()">
+                    <font color="red">  新建excel</font>
+                </div>
+                <div class="fileSystemCreatePpt" @mouseover="mouseOver('.fileSystemCreatePpt','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCreatePpt')" @click="$refs.fileSystemRef.createPptFileInCur()">
+                    <font color="red">  新建ppt</font>
+                </div>
                 <hr/>
                 <div class="fileSystemCreateVp" @mouseover="mouseOver('.fileSystemCreateVp','rgb(217,217,217)')"
                      @mouseleave="mouseLeave('.fileSystemCreateVp')" @click="$refs.fileSystemRef.createVpFileInCur()">
@@ -175,6 +191,10 @@
                 <div class="fileSystemBuildVp" v-if="$store.getters.getSelectedNode.isDir" @mouseover="mouseOver('.fileSystemBuildVp','rgb(217,217,217)')"
                      @mouseleave="mouseLeave('.fileSystemBuildVp')" @click="$refs.fileSystemRef.buildVpFileInCur()">
                     <font color="green"> 构建vuepress(BP)</font>
+                </div>
+                <div class="fileSystemCancelVp" v-if="$store.getters.getSelectedNode.isDir" @mouseover="mouseOver('.fileSystemCancelVp','rgb(217,217,217)')"
+                     @mouseleave="mouseLeave('.fileSystemCancelVp')" @click="$refs.fileSystemRef.canceldVpFileInCur()">
+                    <font color="green"> 取消映射</font>
                 </div>
             </div>
         </Modal>
