@@ -69,6 +69,11 @@
     <div class="fileSystem">
         <div style="margin-bottom: 20px" >
             当前目录: <span v-html="curDirHtml"></span>
+            <span  style="position:absolute;right: 20px;float:left">
+                <input type="text" id="searchTextRef" v-model="searchText" v-show="showSearch" @keyup.enter="searchItem"/>
+                <Button icon="ios-search" size="small" type="text" @click.stop="showSearch=!showSearch;$('#searchTextRef')[0].focus()"></Button>
+            </span>
+
         </div>
         <hr/>
         <div class="fileContainer" v-if="selectedItem && selectedItem.children" >
@@ -144,6 +149,8 @@
                 currentVisible:false,
                 showShare: false,
                 showTemplate: false,
+                showSearch:false,
+                searchText:"",
                 templateGroupData: [],
                 templateData: [],
                 templateObject: {
@@ -305,6 +312,15 @@
                     _this.templateObject.fileDir=selectNode.dirPath
 
                 });
+            },
+            searchItem(){
+                let _this=this;
+                let items=_this.dataArray.filter(item=>{
+                    return item.title.indexOf(_this.searchText)>=0
+                })
+                if(items.length>0)
+                    _this.selectClick(items[0],'fileItem'+items[0].fileName)
+                _this.showSearch=false;
             },
             /*
             * 选择模板后点击确定后创建文件逻辑
