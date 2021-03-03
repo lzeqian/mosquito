@@ -100,6 +100,9 @@
                 editor.create();
                 if(vueThis.content && vueThis.content!="")
                     vueThis.editor.txt.html(vueThis.content)
+                else{
+                    vueThis.editor.txt.html("")
+                }
             },
         },
         created(){

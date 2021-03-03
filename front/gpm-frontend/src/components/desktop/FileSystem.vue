@@ -61,10 +61,13 @@
     #showEditorMadal /deep/ .ivu-modal-body{
         padding: 0px;
     }
+    #showEditorMadal /deep/ .ivu-modal-close{
+        z-index: 10000;
+    }
 </style>
 <template>
     <div class="fileSystem">
-        <div style="margin-bottom: 20px">
+        <div style="margin-bottom: 20px" >
             当前目录: <span v-html="curDirHtml"></span>
         </div>
         <hr/>
@@ -81,12 +84,18 @@
                 </a>
             </div>
         </div>
-        <Modal id="showEditorMadal" width="80%"
+        <Modal id="showEditorMadal" width="80%" ref="editorMadal"
                v-model="showEditorMadal"
                title="编辑器"
+               :fullscreen="fullscreen"
                :footer-hide="true"
         >
-            <div :style="{height: documentHeight+'px'}">
+            <p slot="close">
+                <i class="ivu-icon ivu-icon-ios-close"></i><br/>
+                <Button icon="ios-browsers-outline" size="small" type="text" style="margin-left: 4px;z-index: 10000" @click.stop="fullScreenWindow"></Button>
+            </p>
+
+                <div :style="{height: documentHeight+'px'}">
             <router-view></router-view>
             </div>
         </Modal>
@@ -120,7 +129,7 @@
 
 </template>
 <script>
-
+    var currentVue=null
     export default {
         name: 'FileSystem',
         data() {
@@ -151,6 +160,7 @@
                     shareUrl: "",
                     joinUrl: ""
                 },
+                fullscreen:false
             }
         },
         computed:{
@@ -529,13 +539,15 @@
                     func && func();
                 })
             },
+            fullScreenWindow(){
+                this.fullscreen=!this.fullscreen
+            }
         },
         components: {},
         created(){
             this.initData();
         },
         mounted() {
-
         }
     }
 </script>
