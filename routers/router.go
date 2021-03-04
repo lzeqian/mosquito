@@ -39,4 +39,7 @@ func init() {
 	beego.Router("/template/groups", &controllers.TemplateController{}, "get:GetTemplateGroup")
 	beego.Router("/template/list", &controllers.TemplateController{}, "get:GetTemplateList")
 	beego.Router("/template/gen", &controllers.TemplateController{}, "post:GenerateFileFromTemplate")
+	beego.Router("/fav/collectFile", &controllers.FavoriteController{}, "post:CollectFile")
+	beego.Router("/fav/cancelFavFile", &controllers.FavoriteController{}, "delete:CancelFavFile")
+	beego.Router("/fav/search", &controllers.FavoriteController{}, "get:SearchFavFile")
 }

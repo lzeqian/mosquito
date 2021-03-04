@@ -53,6 +53,7 @@ func getOrmDb() (rdb *gorm.DB) {
 			&FileTemplateGroup{},
 			&FileTemplate{},
 			&VuePress{},
+			&Favorite{},
 		}
 		for _, table := range tableList {
 			db.AutoMigrate(table)

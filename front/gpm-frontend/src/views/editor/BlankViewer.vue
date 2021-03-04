@@ -14,19 +14,19 @@
             <Col span="7" style="margin-right:10px">
                 <Card>
                     <p slot="title">
-                        <Icon type="ios-star"></Icon>
+                        <Icon type="ios-settings"></Icon>
                         收藏列表
                     </p>
                     <a href="#" slot="extra" >
                         <Button icon="ios-search" size="small" type="text"></Button>
+                        <Button icon="ios-refresh-circle" size="small" type="text" @click="searchFavoriteInner"></Button>
                     </a>
                     <ul>
                         <li v-for="item in favList" :key="item.name">
-                            <a :href="item.url" target="_blank">{{ item.name }}</a>
-                            <span>
-                    <Icon type="ios-star" v-for="n in 4" :key="n"></Icon><Icon type="ios-star" v-if="item.rate >= 9.5"></Icon><Icon type="ios-star-half" v-else></Icon>
-                    {{ item.rate }}
-                </span>
+                            <a @click="gotoFileLocation(item)" target="_blank">{{ item.FileName }}</a>
+                            <Button icon="logo-linkedin" size="small" type="text" style="position:absolute;right:20px" @click="gotoFileLocation(item)"></Button>
+                            <Button icon="md-remove-circle" size="small" type="text" style="position:absolute;right:40px;color:red" @click="cancelFav(item.ID)"></Button>
+
                         </li>
                     </ul>
                 </Card>
@@ -104,6 +104,10 @@
                 let _this=this;
                 _this.searchVuePressInner();
             },
+            "favKeyword":()=>{
+                let _this=this;
+                _this.searchFavoriteInner();
+            },
         },
         methods:{
             cancelShare(id){
@@ -117,16 +121,22 @@
                     })
                 }
             },
-            searchVuePressInner(){
+            searchVuePressInner(keyword){
                 let _this=this;
-                _this.searchVuePress("", (data) => {
+                _this.searchVuePress(keyword||"", (data) => {
                     _this.vpList = data
                 })
             },
-            searchShareFileInner(){
+            searchShareFileInner(keyword){
                 let _this=this;
-                _this.searchShareFile("",(data)=>{
+                _this.searchShareFile(keyword||"",(data)=>{
                     _this.shareList=data
+                })
+            },
+            searchFavoriteInner(keyword){
+                let _this=this;
+                _this.searchFavorite(keyword||"",(data)=>{
+                    _this.favList=data
                 })
             },
             cancelVp(item){
@@ -136,6 +146,12 @@
                     _this.searchVuePressInner();
                 })
 
+            },
+            cancelFav(id){
+                let _this=this;
+                this.cancelFavorite(id,()=>{
+                    _this.searchFavoriteInner();
+                })
             },
             gotoUrl(shareKey) {
                 let jurl=window.location.protocol + this.$globalConfig.goServer + "docs/" + shareKey;
@@ -178,6 +194,7 @@
             let _this=this;
             _this.searchVuePressInner()
             _this.searchShareFileInner();
+            _this.searchFavoriteInner();
         }
     }
 </script>

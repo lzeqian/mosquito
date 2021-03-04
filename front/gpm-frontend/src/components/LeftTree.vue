@@ -16,6 +16,8 @@
                     >上传
                     </Upload>
                 </DropdownItem>
+                <DropdownItem @click.native="handleContextCollect" v-if="selectNode!=null">收藏
+                </DropdownItem>
                 <DropdownItem @click.native="handleContextDownload" v-if="selectNode!=null && !selectNode.isDir">下载
                 </DropdownItem>
                 <DropdownItem @click.native="handleContextShare"
@@ -346,6 +348,13 @@
                 }
                 let selectNode = selectNodes[0];
                 this.downloadFile(selectNode)
+            },
+            handleContextCollect(){
+                let selectNode = this.$store.getters.getSelectedNode
+                this.collectFavorite({
+                    fileDir:selectNode.dirPath,
+                    fileName:selectNode.fileName
+                })
             },
             /**
              * 从跟节点遍历获取当前节点父节点
@@ -805,7 +814,6 @@
                             let curDirPath = dirPathSplit[j]
                             if (curDirPath != null && curDirPath != "") {
                                 for (let [index, node] of new Map(curParent.children.map((node, i) => [i, node]))) {
-                                    console.log("比较目录:"+curDirPath+"和title:"+node.title)
                                     if (curDirPath == node.title) {
                                         if (node.isDir) {
                                             await _this.loadSubNode(node,curParent,(replateNode,rcurParent,childrenData)=>{
@@ -817,9 +825,7 @@
                                                     let funFileName=fileName;
                                                     //选择目录下的文件
                                                     for (let [index, tnode] of new Map(funParent.children.map((tnode, i) => [i, tnode]))) {
-                                                        console.log(funFileName+"--->"+tnode.title)
                                                         if (fileName == tnode.title) {
-                                                            console.log(tnode.dirPath+"---"+tnode.title)
                                                             _this.selectChange([tnode])
                                                             break;
                                                         }
