@@ -7,6 +7,7 @@ import (
 
 func init() {
 	beego.Router("/home/tree", &controllers.TreeController{})
+	beego.Router("/console", &controllers.TreeController{}, "get:Root")
 	beego.Router("/home/listSub", &controllers.TreeController{}, "get:ListSubTree")
 	beego.Router("/md/createVp", &controllers.MarkDownController{}, "post:CreateVuePress")
 	beego.Router("/md/buildVp", &controllers.MarkDownController{}, "post:BuildVuePress")

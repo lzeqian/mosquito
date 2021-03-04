@@ -28,6 +28,9 @@ func (c *TreeController) Get() {
 	}
 	ServeJSON(c.Controller, files)
 }
+func (c *TreeController) Root() {
+	c.TplName = "index.tpl"
+}
 
 /**
   获取子目录结构

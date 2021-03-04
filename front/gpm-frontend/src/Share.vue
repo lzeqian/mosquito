@@ -42,7 +42,7 @@
             return {
                 loading: true,
                 contentTitle: '',
-                shareKey: window.shareKey||'764fe063'
+                shareKey: window.shareKey || '68ac2f331'
             }
         },
         watch: {},
@@ -53,45 +53,45 @@
                 if (localStorage.getItem("token")) {
                     this.$store.state.isLogin = true
                 }
-                if (vueThis.$route.name != "blankViewer") {
-                    vueThis.loadEditorContentByShareKey(vueThis.shareKey, (vueThis, shareData) => {
-                        if(shareData.ID==0){
-                            vueThis.$Message.error({
-                                content: "分享key不存在，请尝试其他key"
-                            });
-                            return;
+                vueThis.loadEditorContentByShareKey(vueThis.shareKey, (vueThis, shareData) => {
+                    if (shareData.ID == 0) {
+                        vueThis.$Message.error({
+                            content: "分享key不存在，请尝试其他key"
+                        });
+                        vueThis.routePush({}, '/404', "空白预览")
+                        return;
+                    }
+                    vueThis.$store.commit("setShareData", shareData)
+                    let node = {
+                        dirPath: shareData["FileDir"],
+                        fileName: shareData["FileName"],
+                        title: shareData["FileName"],
+                    }
+                    this.$store.commit("setSelecedNode", node)
+                    let mapping = vueThis.$globalConfig.editorMapping
+                    for (let key in mapping) {
+                        let re;
+                        eval("re=/^.+(" + key + ")$/")
+                        if (re.test(node.title)) {
+                            this.routePush(node, ...mapping[key])
                         }
-                        vueThis.$store.commit("setShareData", shareData)
-                        let node = {
-                            dirPath: shareData["FileDir"],
-                            fileName: shareData["FileName"],
-                            title: shareData["FileName"],
-                        }
-                        this.$store.commit("setSelecedNode", node)
-                        let mapping = vueThis.$globalConfig.editorMapping
-                        for (let key in mapping) {
-                            let re;
-                            eval("re=/^.+(" + key + ")$/")
-                            if (re.test(node.title)) {
-                                this.routePush(node, ...mapping[key])
-                            }
-                        }
-                        vueThis.loadEditorContent((vueThis, data) => {
-                            vueThis.$store.commit("setSelectedNodeCacheData", data)
-                            let initInterval = setInterval(() => {
-                                if (vueThis.$route && vueThis.$route.matched && vueThis.$route.matched.length > 0) {
-                                    let vueRouteComponents = vueThis.$route.matched[0].instances.default
-                                    if (vueRouteComponents) {
-                                        if (vueRouteComponents.initData) {
-                                            vueRouteComponents.initData(data)
-                                            clearInterval(initInterval)
-                                        }
+                    }
+                    vueThis.loadEditorContent((vueThis, data) => {
+                        vueThis.$store.commit("setSelectedNodeCacheData", data)
+                        let initInterval = setInterval(() => {
+                            if (vueThis.$route && vueThis.$route.matched && vueThis.$route.matched.length > 0) {
+                                let vueRouteComponents = vueThis.$route.matched[0].instances.default
+                                if (vueRouteComponents) {
+                                    if (vueRouteComponents.initData) {
+                                        vueRouteComponents.initData(data)
+                                        clearInterval(initInterval)
                                     }
                                 }
-                            }, 100)
-                        })
+                            }
+                        }, 100)
                     })
-                }
+                })
+
             }
 
         },

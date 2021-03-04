@@ -11,6 +11,7 @@ import FlowEditor from '../views/editor/FlowEditor'
 import BlankViewer from '../views/editor/BlankViewer'
 import MindEditor from "../components/mind/editor";
 import OfficeEditor from "../views/editor/OfficeEditor";
+import Err404 from "../views/editor/Err404";
 Vue.use(VueRouter)
 
   const routes = [
@@ -18,6 +19,11 @@ Vue.use(VueRouter)
       path: '/',
       name: 'default',
       redirect: '/blank'
+    },
+    {
+      path: '/404',
+      name: 'default',
+      component: Err404
     },
     {
       path: '/blank',

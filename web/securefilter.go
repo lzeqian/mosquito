@@ -16,6 +16,7 @@ import (
 )
 
 var IgnoreList = []string{
+	"/console",
 	"/login",
 	"/file/viewerFromServer",
 	"/share/getShareFile",
