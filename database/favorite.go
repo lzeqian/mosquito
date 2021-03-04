@@ -53,6 +53,6 @@ func SearchFavorite(ifavorite Favorite) (rpress Favorite) {
 }
 func SearchUserFavorite(fileName string, shareUser string) (ruserLink []Favorite) {
 	var favorite []Favorite
-	db.Or(db.Where("app_path like ?", "%"+fileName+"%"), db.Where("file_name like ?", "%"+fileName+"%")).Where("user_name=?", shareUser).Find(&favorite)
+	db.Where("file_name like ?", "%"+fileName+"%").Where("user_name=?", shareUser).Find(&favorite)
 	return favorite
 }

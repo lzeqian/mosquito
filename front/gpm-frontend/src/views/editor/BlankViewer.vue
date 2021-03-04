@@ -18,7 +18,8 @@
                         收藏列表
                     </p>
                     <a href="#" slot="extra" >
-                        <Button icon="ios-search" size="small" type="text"></Button>
+                        <input type="text"  v-model="favKeyword" style="width: 80px" v-show="showFavSearch" @keyup.enter="searchFavoriteByKeyword"/>
+                        <Button icon="ios-search" size="small" type="text" @click="showFavSearch=!showFavSearch;"></Button>
                         <Button icon="ios-refresh-circle" size="small" type="text" @click="searchFavoriteInner"></Button>
                     </a>
                     <ul>
@@ -39,7 +40,8 @@
                         分享列表
                     </p>
                     <a href="#" slot="extra" >
-                        <Button icon="ios-search" size="small" type="text"></Button>
+                        <input type="text"  v-model="shareKeyword" style="width: 80px" v-show="showShareSearch" @keyup.enter="searchShareFileByKeyword"/>
+                        <Button icon="ios-search" size="small" type="text" @click="showShareSearch=!showShareSearch;"></Button>
                         <Button icon="ios-refresh-circle" size="small" type="text" @click="searchShareFileInner"></Button>
                     </a>
                     <ul>
@@ -59,7 +61,8 @@
                         vuepress列表
                     </p>
                     <a href="#" slot="extra" >
-                        <Button icon="ios-search" size="small" type="text"></Button>
+                        <input type="text"  v-model="vpKeyword" style="width: 80px" v-show="showVpSearch" @keyup.enter="searchVuePressByKeyword"/>
+                        <Button icon="ios-search" size="small" type="text" @click="showVpSearch=!showVpSearch;"></Button>
                         <Button icon="ios-refresh-circle" size="small" type="text" @click="searchVuePressInner"></Button>
                     </a>
                     <ul>
@@ -85,8 +88,11 @@
         data() {
             return {
                 shareKeyword:"",//共享文档
+                showShareSearch:false,
                 favKeyword:"",//收藏文档
+                showFavSearch:false,
                 vpKeyword:"", //vuepress列表
+                showVpSearch:false,
                 shareList: [
                     ],
                 favList: [
@@ -96,18 +102,7 @@
             }
         },
         watch:{
-            "shareKeyword":()=>{
-                let _this=this;
-                _this.searchShareFileInner();
-            },
-            "vpKeyword":()=>{
-                let _this=this;
-                _this.searchVuePressInner();
-            },
-            "favKeyword":()=>{
-                let _this=this;
-                _this.searchFavoriteInner();
-            },
+
         },
         methods:{
             cancelShare(id){
@@ -127,17 +122,29 @@
                     _this.vpList = data
                 })
             },
+            searchVuePressByKeyword(){
+                let _this=this;
+                _this.searchVuePressInner(_this.vpKeyword)
+            },
             searchShareFileInner(keyword){
                 let _this=this;
                 _this.searchShareFile(keyword||"",(data)=>{
                     _this.shareList=data
                 })
             },
+            searchShareFileByKeyword(){
+                let _this=this;
+                _this.searchShareFileInner(_this.shareKeyword)
+            },
             searchFavoriteInner(keyword){
                 let _this=this;
                 _this.searchFavorite(keyword||"",(data)=>{
                     _this.favList=data
                 })
+            },
+            searchFavoriteByKeyword(){
+                let _this=this;
+                _this.searchFavoriteInner(_this.favKeyword)
             },
             cancelVp(item){
                 let _this=this;
