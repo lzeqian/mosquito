@@ -61,12 +61,13 @@ function buildVpFile(selectNode) {
         });
     }
 }
-function cancelVpFile(){
+function cancelVpFile(inputSelectNode,func){
     let _this=this;
-    let selectNode=this.$store.getters.getSelectedNode
+    let selectNode=inputSelectNode||this.$store.getters.getSelectedNode
     this.$axios.post(this.$globalConfig.goServer + "md/cancelVp",{fileDir:selectNode.dirPath,fileName:selectNode.title}).then((response) => {
         if(response.data.code==0) {
             _this.$Message.info("取消映射成功")
+            func && func()
         }
     }).catch(()=>{
 
@@ -257,22 +258,6 @@ function createFileFromTemplateBack (templateObject,func) {
         }
     })
 }
-function loadTemplateGroup(func){
-    let _this = this;
-    this.$axios.get(_this.$globalConfig.goServer + "template/groups").then((response) => {
-        if (response.data.code == 0) {
-            func&&func(response.data.data);
-        }
-    })
-}
-function loadTemplate(groupId,func){
-    let _this = this;
-    this.$axios.get(_this.$globalConfig.goServer + "/template/list?groupId="+groupId).then((response) => {
-        if (response.data.code == 0) {
-            func && func(response.data.data)
-        }
-    })
-}
 export default{
     downloadFile,
     uploadFile,
@@ -292,7 +277,5 @@ export default{
     createDir,
     _createDir,
     deleteDir,
-    createFileFromTemplateBack,
-    loadTemplateGroup,
-    loadTemplate
+    createFileFromTemplateBack
 }

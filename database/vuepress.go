@@ -49,3 +49,8 @@ func SearchVuePress(ipress VuePress) (rpress VuePress) {
 	db.Where("file_dir=?", ipress.FileDir).Where("file_name=?", ipress.FileName).Where("workspace=?", ipress.Workspace).Find(&tpress)
 	return tpress
 }
+func SearchUserVuePress(fileName string, shareUser string) (ruserLink []VuePress) {
+	var vuePress []VuePress
+	db.Or(db.Where("app_path like ?", "%"+fileName+"%"), db.Where("file_name like ?", "%"+fileName+"%")).Where("share_user_name=?", shareUser).Find(&vuePress)
+	return vuePress
+}

@@ -64,7 +64,7 @@
                 <Split v-model="split1">
                 <Sider slot="left" ref="leftSider" style="width: 100%" :style="{background: '#fff',minWidth:'0px',maxWidth:'auto',flex:'0 0 auto'}"
                        :collapsedWidth="0" v-model="isCollapsed" hide-trigger collapsible  :collapsed-width="0">
-                    <LeftTree :isCollapsed="isCollapsed"></LeftTree>
+                    <LeftTree ref="leftTree" :isCollapsed="isCollapsed"></LeftTree>
                 </Sider>
                 <Layout slot="right" :style="{padding: '0 0px 0px',zIndex: 10}" style="height: 99%">
 <!--                    <Header :style="{padding: 0}" class="layout-header-bar">-->

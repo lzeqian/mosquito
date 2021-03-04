@@ -48,6 +48,11 @@ func FindLink(fileDir string, fileName string) (ruserLink UserLink) {
 	db.Where("file_dir=?", fileDir).Where("file_name=?", fileName).Find(&userLink)
 	return userLink
 }
+func SearchLink(fileName string, shareUser string) (ruserLink []UserLink) {
+	var userLinks []UserLink
+	db.Where("file_name like ?", "%"+fileName+"%").Where("share_user_name=?", shareUser).Find(&userLinks)
+	return userLinks
+}
 func CancelLink(shareKey string) {
 	tx := db.Begin()
 	tx.Where("share_key=?", shareKey).Delete(&UserLink{})

@@ -15,6 +15,11 @@ Vue.use(VueRouter)
 
   const routes = [
     {
+      path: '/',
+      name: 'default',
+      redirect: '/blank'
+    },
+    {
       path: '/blank',
       name: 'blankViewer',
       component: BlankViewer

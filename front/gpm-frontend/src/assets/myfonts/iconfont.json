@@ -6,6 +6,118 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "15808916",
+      "name": "多人-人群",
+      "font_class": "duoren-renqun",
+      "unicode": "e769",
+      "unicode_decimal": 59241
+    },
+    {
+      "icon_id": "5651479",
+      "name": "个人",
+      "font_class": "geren",
+      "unicode": "e670",
+      "unicode_decimal": 58992
+    },
+    {
+      "icon_id": "591743",
+      "name": "C",
+      "font_class": "c",
+      "unicode": "e683",
+      "unicode_decimal": 59011
+    },
+    {
+      "icon_id": "5618155",
+      "name": "CSS",
+      "font_class": "CSS",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    },
+    {
+      "icon_id": "5916396",
+      "name": "BAT",
+      "font_class": "BAT",
+      "unicode": "e613",
+      "unicode_decimal": 58899
+    },
+    {
+      "icon_id": "5916430",
+      "name": "SH",
+      "font_class": "SH",
+      "unicode": "e623",
+      "unicode_decimal": 58915
+    },
+    {
+      "icon_id": "10135197",
+      "name": "cmd",
+      "font_class": "cmd",
+      "unicode": "e8aa",
+      "unicode_decimal": 59562
+    },
+    {
+      "icon_id": "12600648",
+      "name": "cpp",
+      "font_class": "cpp",
+      "unicode": "e61a",
+      "unicode_decimal": 58906
+    },
+    {
+      "icon_id": "12600749",
+      "name": "java",
+      "font_class": "java",
+      "unicode": "e63a",
+      "unicode_decimal": 58938
+    },
+    {
+      "icon_id": "13304030",
+      "name": "ruby",
+      "font_class": "ruby",
+      "unicode": "e68e",
+      "unicode_decimal": 59022
+    },
+    {
+      "icon_id": "13304033",
+      "name": "python",
+      "font_class": "python",
+      "unicode": "e690",
+      "unicode_decimal": 59024
+    },
+    {
+      "icon_id": "13304145",
+      "name": "vue",
+      "font_class": "vue",
+      "unicode": "e6b9",
+      "unicode_decimal": 59065
+    },
+    {
+      "icon_id": "521022",
+      "name": "公共配置",
+      "font_class": "gonggongpeizhi",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "12872684",
+      "name": "公共-筛选",
+      "font_class": "gonggong-shaixuan",
+      "unicode": "e65e",
+      "unicode_decimal": 58974
+    },
+    {
+      "icon_id": "17215593",
+      "name": "xmind",
+      "font_class": "xmind",
+      "unicode": "e630",
+      "unicode_decimal": 58928
+    },
+    {
+      "icon_id": "4517825",
+      "name": "流程图",
+      "font_class": "liuchengtu",
+      "unicode": "e740",
+      "unicode_decimal": 59200
+    },
+    {
       "icon_id": "13042656",
       "name": "人数",
       "font_class": "renshu",

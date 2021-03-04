@@ -287,11 +287,8 @@
             },
             cancelShare() {
                 let _this = this;
-                this.$axios.put(this.$globalConfig.goServer + "share/cancelShareFile?preShareKey=" + this.preShareKey).then((resp) => {
-                    if (resp.data.code == 0) {
-                        _this.$Message.info('取消分享成功');
-                        _this.preShareKey = null;
-                    }
+                _this.cancelShareFile(this.preShareKey,()=>{
+                    _this.preShareKey = null;
                 })
             },
             gotoDesktop() {
@@ -686,6 +683,10 @@
                 }
                 const node = selectedList[selectedList.length - 1]
                 if (node) {
+                    //取消选择
+                    for(let sn of this.$refs.tree.getSelectedNodes()){
+                        this.$set(sn, 'selected', false)
+                    }
                     this.$store.commit("setSelecedNode", node)
                     var vueThis = this;
                     this.$set(node, 'selected', true)
@@ -775,7 +776,10 @@
                 }
 
             },
-            initData() {
+            initWorkspace(workspace,func){
+
+            },
+            async initData() {
                 let _this = this;
                 let selectedNode = _this.$store.getters.getSelectedNode
                 if (selectedNode != null) {
@@ -784,7 +788,7 @@
                     let root = this.$refs.tree.data[0]
                     let curParent = root;
                     if (dirPath && fileName) {
-                        let newDirPath = dirPath.replace(/[/\\|/|\\]+/, "\\")
+                        let newDirPath = dirPath.replace(/[/\\|/|\\]+/g, "\\")
                         if (newDirPath == "\\") {
                             for (let [index, tnode] of new Map(curParent.children.map((tnode, i) => [i, tnode]))) {
                                 if (fileName == tnode.title) {
@@ -794,26 +798,34 @@
                             }
                             return;
                         }
+                        // newDirPath=\abc\uuu  fileName=aa.md
                         let dirPathSplit = newDirPath.split("\\");
-                        //选择目录
+                        //展开所有目录，注意只是展开到\abc\uuu
                         for (let j = 0; j < dirPathSplit.length; j++) {
                             let curDirPath = dirPathSplit[j]
                             if (curDirPath != null && curDirPath != "") {
                                 for (let [index, node] of new Map(curParent.children.map((node, i) => [i, node]))) {
+                                    console.log("比较目录:"+curDirPath+"和title:"+node.title)
                                     if (curDirPath == node.title) {
                                         if (node.isDir) {
-                                            _this.$axios.get(_this.$globalConfig.goServer + "home/listSub?fileDir=" + node.dirPath + "&fileName=" + node.title + "&root=" + node.root).then((response) => {
-                                                node.children = response.data.data //挂载子节点
-                                                node.expand = true    //展开子节点
-                                                _this.$nextTick(() => {
+                                            await _this.loadSubNode(node,curParent,(replateNode,rcurParent,childrenData)=>{
+                                                replateNode.children = childrenData //挂载子节点
+                                                replateNode.expand = true    //展开子节点
+                                                _this.$set(replateNode, 'expand', true)
+                                                let callback=()=>{
+                                                    let funParent=rcurParent;
+                                                    let funFileName=fileName;
                                                     //选择目录下的文件
-                                                    for (let [index, tnode] of new Map(curParent.children.map((tnode, i) => [i, tnode]))) {
+                                                    for (let [index, tnode] of new Map(funParent.children.map((tnode, i) => [i, tnode]))) {
+                                                        console.log(funFileName+"--->"+tnode.title)
                                                         if (fileName == tnode.title) {
+                                                            console.log(tnode.dirPath+"---"+tnode.title)
                                                             _this.selectChange([tnode])
                                                             break;
                                                         }
                                                     }
-                                                })
+                                                }
+                                                _this.$nextTick(callback)
                                             })
                                         }
                                         curParent = node
@@ -822,10 +834,19 @@
                                 }
                             }
                         }
+                        //选中对应curParent相应的文件或者目录
+                        for (let [index, tnode] of new Map(curParent.children.map((tnode, i) => [i, tnode]))) {
+                            if (fileName == tnode.title) {
+                                _this.selectChange([tnode])
+                                break;
+                            }
+                        }
+
+
                     }
                 }
             },
-            listRoot(title) {
+            listRoot(title,func) {
                 let vueThis = this;
                 vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?root=true&fileDir=/").then((response) => {
                     var resultData = response.data
@@ -843,6 +864,7 @@
                     vueThis.$nextTick(() => {
                         vueThis.initData()
                     })
+                    func && func()
 
                 })
             }

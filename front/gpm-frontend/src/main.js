@@ -26,6 +26,8 @@ Vue.prototype.randomUuid=randomUuid
 //文件操作相关函数
 import fileFunction from  './utils/file'
 Object.assign(Vue.prototype,fileFunction)
+import backFunction from  './utils/back'
+Object.assign(Vue.prototype,backFunction)
 Vue.prototype.$axios.interceptors.request.use(
     config => {
         if (config.method == 'get') {

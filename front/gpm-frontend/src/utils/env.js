@@ -12,5 +12,8 @@ export const GlobalConfig={
         "\\.doc|\\.docx|\\.ppt|\\.pptx":['/officeeditor',"office编辑器"],
         "\\.png|\\.PNG|\\.JPG|\\.jpg|\\.JPEG|\\.jpeg|\\.gif|\\.GIF":['/imageviewer',"pdf预览器"],
         "\\.mind":['/mindeditor',"pdf预览器"],
+    },
+    icon:{
+
     }
 }

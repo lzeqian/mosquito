@@ -98,6 +98,22 @@ func (c *MarkDownController) CancelVuePress() {
 	beego.DelStaticPath(markdown.AppPath)
 	ServeJSON(c.Controller, "")
 }
+
+/**
+  搜索分享文件
+   :param fileDir 当前文件目录。
+   :param fileName 当前文件名。
+*/
+func (c *MarkDownController) SearchVuePress() {
+	keyword := c.GetString("keyword")
+	token := c.Ctx.Input.Header("Authorization")
+	clwas, err := tools.GetTokenInfo(token)
+	if err != nil {
+		ServeJSON(c.Controller, errors.New("token错误"))
+		return
+	}
+	ServeJSON(c.Controller, database.SearchUserVuePress(keyword, clwas.Name))
+}
 func checkIfVp(remoteDir string) bool {
 	nodes, _ := fileSystem.ListDir(remoteDir, "")
 	for _, nodeTmp := range nodes {

@@ -42,7 +42,9 @@ func getOrmDb() (rdb *gorm.DB) {
 		dbDialet := beego.AppConfig.String("db.dialet")
 		dbMaxConns, _ := beego.AppConfig.Int("db.maxOpenConns")
 		dbMaxIdleConns, _ := beego.AppConfig.Int("db.maxIdleConns")
+		logMode, _ := beego.AppConfig.Bool("db.logMode")
 		db, _ := gorm.Open(dbDialet, dbPath)
+		db.LogMode(logMode)
 		db.DB().SetMaxIdleConns(dbMaxIdleConns)
 		db.DB().SetMaxOpenConns(dbMaxConns)
 		gdb = db
