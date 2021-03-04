@@ -333,6 +333,7 @@
                 let _this = this;
                 this.editFile((code) => {
                     _this.$set(selectNode, 'title', code)
+                    _this.$set(selectNode, 'fileName', code)
                 })
             },
             handleContextMenuUpload() {

@@ -123,6 +123,7 @@ func (s *FtpFileSystem) ListDir(dirPth string, trimPrefix string) ([]models.Node
 			filename := strings.TrimSpace(splitFile[3])
 			node := models.Node{
 				Title:       filename,
+				FileName:    filename,
 				Expand:      false,
 				Contextmenu: true,
 				IsDir:       true,
@@ -156,6 +157,7 @@ func (s *FtpFileSystem) ListDir(dirPth string, trimPrefix string) ([]models.Node
 				filename = strings.TrimSpace(splitFile[3])
 			}
 			node.Title = filename
+			node.FileName = filename
 			node.IsDir = isDir
 			nodeList[index] = node
 		}

@@ -20,7 +20,7 @@
                     <a href="#" slot="extra" >
                         <input type="text"  v-model="favKeyword" style="width: 80px" v-show="showFavSearch" @keyup.enter="searchFavoriteByKeyword"/>
                         <Button icon="ios-search" size="small" type="text" @click="showFavSearch=!showFavSearch;"></Button>
-                        <Button icon="ios-refresh-circle" size="small" type="text" @click="searchFavoriteInner"></Button>
+                        <Button icon="ios-refresh-circle" size="small" type="text" @click="searchFavoriteInner('')"></Button>
                     </a>
                     <ul>
                         <li v-for="item in favList" :key="item.name">
@@ -42,7 +42,7 @@
                     <a href="#" slot="extra" >
                         <input type="text"  v-model="shareKeyword" style="width: 80px" v-show="showShareSearch" @keyup.enter="searchShareFileByKeyword"/>
                         <Button icon="ios-search" size="small" type="text" @click="showShareSearch=!showShareSearch;"></Button>
-                        <Button icon="ios-refresh-circle" size="small" type="text" @click="searchShareFileInner"></Button>
+                        <Button icon="ios-refresh-circle" size="small" type="text" @click="searchShareFileInner('')"></Button>
                     </a>
                     <ul>
                         <li v-for="item in shareList" :key="item.name">
@@ -63,7 +63,7 @@
                     <a href="#" slot="extra" >
                         <input type="text"  v-model="vpKeyword" style="width: 80px" v-show="showVpSearch" @keyup.enter="searchVuePressByKeyword"/>
                         <Button icon="ios-search" size="small" type="text" @click="showVpSearch=!showVpSearch;"></Button>
-                        <Button icon="ios-refresh-circle" size="small" type="text" @click="searchVuePressInner"></Button>
+                        <Button icon="ios-refresh-circle" size="small" type="text" @click="searchVuePressInner('')"></Button>
                     </a>
                     <ul>
                         <li v-for="item in vpList" :key="item.name">

@@ -52,6 +52,7 @@ func (s *SambaFileSystem) ListRoot() ([]models.Node, error) {
 		for index, fi := range fileArray {
 			node := models.Node{
 				Title:       fi,
+				FileName:    fi,
 				Expand:      false,
 				Contextmenu: true,
 				IsDir:       true,
@@ -65,8 +66,14 @@ func (s *SambaFileSystem) ListRoot() ([]models.Node, error) {
 	return s.ListDir("", "")
 }
 func (s *SambaFileSystem) IsDir(destPath string) (bool, error) {
+	if destPath == tools.PathSeparator {
+		return true, nil
+	}
 	formatDestPath := s.getPath(destPath)
 	fi, err := s.fs.Lstat(formatDestPath)
+	if fi == nil {
+		return false, err
+	}
 	return fi.IsDir(), err
 }
 func (s *SambaFileSystem) getTargetPath(dirPth string, cfileName string) string {
@@ -85,7 +92,9 @@ func (s *SambaFileSystem) getPath(dirPth string) string {
 		s.fs, _ = s.session.Mount(s.shareName)
 	}
 	formatDirPath = strings.TrimLeft(formatDirPath, tools.PathSeparator)
-	formatDirPath = tools.TrimLeft(strings.Split(formatDirPath, s.shareName)[1])
+	if strings.Contains(formatDirPath, s.shareName) {
+		formatDirPath = tools.TrimLeft(strings.Split(formatDirPath, s.shareName)[1])
+	}
 	return formatDirPath
 }
 
@@ -98,16 +107,24 @@ func (s *SambaFileSystem) getPath(dirPth string) string {
   path:=""
 */
 func (s *SambaFileSystem) ListDir(dirPth string, trimPrefix string) ([]models.Node, error) {
+	if dirPth == tools.PathSeparator {
+		return s.ListRoot()
+	}
 	fileArray, _ := s.fs.ReadDir(s.getPath(dirPth))
 	nodeList := make([]models.Node, len(fileArray))
+	showDirPath := dirPth
+	if trimPrefix != "" {
+		showDirPath = strings.TrimPrefix(dirPth, trimPrefix)
+	}
 	for index, fi := range fileArray {
 		node := models.Node{
 			Title:       fi.Name(),
+			FileName:    fi.Name(),
 			Expand:      false,
 			Contextmenu: true,
 			IsDir:       true,
 			Children:    []models.Node{},
-			DirPath:     dirPth,
+			DirPath:     showDirPath,
 		}
 		if fi.IsDir() {
 			node.IsDir = true
@@ -156,7 +173,7 @@ func (sam *SambaFileSystemFactory) Create(prefix string) (FileSystem, error) {
 	sambaport := beego.AppConfig.String(prefix + "sambaport")
 	sambauser := beego.AppConfig.String(prefix + "sambauser")
 	sambapassword := beego.AppConfig.String(prefix + "sambapassword")
-	rootpath := beego.AppConfig.String(prefix + ".rootpath")
+	rootpath := beego.AppConfig.String(prefix + "rootpath")
 
 	conn, err := net.Dial("tcp", sambahost+":"+sambaport)
 	if err != nil {
@@ -175,9 +192,12 @@ func (sam *SambaFileSystemFactory) Create(prefix string) (FileSystem, error) {
 	}
 	formatRootPath := tools.FormatPath(rootpath)
 	shareName := tools.GetRootName(formatRootPath)
-	shareMount, _ := session.Mount(shareName)
+	var shareMount *smb2.Share = nil
+	if shareName != "" {
+		shareMount, _ = session.Mount(shareName)
+	}
 	fileSystem := SambaFileSystem{RootPath: formatRootPath, session: *session, fs: shareMount, shareName: shareName}
-	return &fileSystem, nil
+	return &fileSystem, err
 }
 func (s *SambaFileSystemFactory) Name() string {
 	return "service.SambaFileSystemFactory"

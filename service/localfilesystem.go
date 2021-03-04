@@ -87,12 +87,15 @@ func (s *LocalFileSystem) DeleteFile(parentDir string, fileName string) error {
 func (s *LocalFileSystem) ExistFile(parentDir string, fileName string) (bool, error) {
 	destPath := s.RootPath + tools.PathSeparator + parentDir + tools.PathSeparator + fileName
 	_, err := os.Stat(destPath)
+	//存在该文件
 	if err == nil {
 		return true, nil
 	}
+	//接口正常返回不存在
 	if os.IsNotExist(err) {
 		return false, nil
 	}
+	//异常返回错误，同时不存在
 	return false, err
 }
 func (s *LocalFileSystem) CreateFile(parentDir string, fileName string) error {

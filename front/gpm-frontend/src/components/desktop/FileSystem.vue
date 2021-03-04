@@ -212,6 +212,7 @@
                     let _this=this;
                     this.renameFile(newText,()=>{
                         _this.$set(selectNode, 'title', newText)
+                        _this.$set(selectNode, 'fileName', newText)
                         e.target.setAttribute("oriText",newText)
                     },(reason)=>{
                         e.target.setAttribute("oriText",oriText)
