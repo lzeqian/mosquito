@@ -132,7 +132,7 @@
             </a>&nbsp;
             <a @click="gotoPerson">
                 <svg class="icon" aria-hidden="true">
-                    <use xlink:href="#icon-renshu" style="color: blue"></use>
+                    <use :xlink:href="$store.getters.currentWorkspace == '0'?'#icon-duoren-renqun':'#icon-renshu'" style="color: blue"></use>
                 </svg>
             </a>
         </div>
