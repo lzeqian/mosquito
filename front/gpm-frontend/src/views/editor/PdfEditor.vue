@@ -40,6 +40,7 @@
                 let path=fileName.endsWith(".pdf")?"file/download":"file/transPdf";
                 let token=localStorage.getItem("token")
                 if(this.$store.getters.getEditorMode=="share"){
+                    let shareKey=this.$store.getters.getShareData["ShareKey"]
                     path = encodeURIComponent(this.$globalConfig.goServer + path + "?fileDir=" + dirPath + "&fileName=" + fileName + (token ? "&token=" + token : "") + "&shareKey=" + shareKey, "utf-8");
                 }else {
                     path = encodeURIComponent(this.$globalConfig.goServer + path + "?fileDir=" + dirPath + "&fileName=" + fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace, "utf-8");

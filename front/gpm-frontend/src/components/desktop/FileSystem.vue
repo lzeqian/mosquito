@@ -90,7 +90,7 @@
             </div>
         </div>
         <Modal id="showEditorMadal" width="80%" ref="editorMadal"
-               v-model="showEditorMadal"
+               v-model="showEditorMadal" @on-visible-change="visibleChange"
                title="编辑器"
                :fullscreen="fullscreen"
                :footer-hide="true"
@@ -198,6 +198,11 @@
             }
         },
         methods: {
+            visibleChange(vc){
+                if(!vc){
+                    this.routePush({}, '/blank', "空白预览")
+                }
+            },
             focurCurFile(e){
                 e.target.style.overflow='visible'
                 e.target.style.textOverflow='clip'

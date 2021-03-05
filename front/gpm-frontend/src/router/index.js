@@ -9,6 +9,7 @@ import WordEditor from '../views/editor/backup/WordEditor'
 import ImageViewer from '../views/editor/ImageViewer'
 import FlowEditor from '../views/editor/FlowEditor'
 import BlankViewer from '../views/editor/BlankViewer'
+import DefaultViewer from '../views/editor/DefaultViewer'
 import MindEditor from "../components/mind/editor";
 import OfficeEditor from "../views/editor/OfficeEditor";
 import Err404 from "../views/editor/Err404";
@@ -18,12 +19,17 @@ Vue.use(VueRouter)
     {
       path: '/',
       name: 'default',
-      redirect: '/blank'
+      redirect: '/default'
     },
     {
       path: '/404',
-      name: 'default',
+      name: 'err404',
       component: Err404
+    },
+    {
+      path: '/default',
+      name: 'defaultViewer',
+      component: DefaultViewer
     },
     {
       path: '/blank',

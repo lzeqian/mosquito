@@ -73,11 +73,13 @@
                         let re;
                         eval("re=/^.+(" + key + ")$/")
                         if (re.test(node.title)) {
+                            debugger
                             this.routePush(node, ...mapping[key])
+                            if(node.title.endsWith(".pdf")){
+                                return;
+                            }
                         }
-                        if(node.title.endsWith(".pdf")){
-                            return;
-                        }
+
                     }
                     vueThis.loadEditorContent((vueThis, data) => {
                         vueThis.$store.commit("setSelectedNodeCacheData", data)

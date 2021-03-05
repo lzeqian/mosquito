@@ -295,13 +295,13 @@
             },
             gotoDesktop() {
                 this.$store.commit("updateDirTree", "desktop")
-                this.routePush({}, '/blank', "空白预览")
+                this.routePush({}, '/default', "空白预览")
             },
             gotoPerson() {
                 let workspace = this.$store.getters.currentWorkspace == "1" ? "0" : "1";
                 let title = this.$store.getters.currentWorkspace == "1" ? "公共文档库" : "个人文档库";
                 this.$store.commit("updateWorkspace", workspace)
-                this.routePush({}, '/blank', "空白预览")
+                this.routePush({}, '/default', "空白预览")
                 this.listRoot(title)
             },
             handleUpload(file) {
@@ -394,7 +394,7 @@
                     parentNode.children.splice(index, 1)
                     _this.$set(parentNode, 'selected', true)
                     _this.$store.commit("setSelecedNode", parentNode)
-                    _this.routePush({}, '/blank', "空白预览")
+                    _this.routePush({}, '/default', "空白预览")
                 })
             },
             /**
@@ -408,7 +408,7 @@
                     parentNode.children.splice(index, 1)
                     _this.$set(parentNode, 'selected', true)
                     _this.$store.commit("setSelecedNode", parentNode)
-                    _this.routePush({}, '/blank', "空白预览")
+                    _this.routePush({}, '/default', "空白预览")
                 })
             },
             /**
@@ -689,7 +689,7 @@
              */
             selectChange(selectedList,func) {
                 if (selectedList.length == 0) {
-                    this.routePush({}, '/blank', "空白预览")
+                    this.routePush({}, '/default', "空白预览")
                 }
                 const node = selectedList[selectedList.length - 1]
                 if (node) {
@@ -718,7 +718,7 @@
                         }
                     }
                     //没有push直接跳转到白板页面
-                    this.routePush({}, '/blank', "空白预览")
+                    this.routePush({}, '/default', "空白预览")
                 }
             },
             preventDefault() {

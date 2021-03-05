@@ -30,7 +30,13 @@
         methods: {
             async initData() {
                 if(docEditor){
-                    docEditor.destroyEditor();
+                    try {
+                        docEditor.destroyEditor();
+                    }
+                    catch(err){
+                        console.log(err)
+                        return;
+                    }
                 }
                 let selectedNode=this.$store.getters.getSelectedNode
                 var dirPath = selectedNode.dirPath
