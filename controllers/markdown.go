@@ -147,34 +147,17 @@ func (c *MarkDownController) BuildVuePress() {
 		ServeJSON(c.Controller, err)
 		return
 	}
-	re3, _ := regexp.Compile(`[/|\\]+`)
-	curFileName := re3.ReplaceAllString(fileDir+tools.PathSeparator+fileName, "_")
-	if strings.HasPrefix(curFileName, "_") {
-		curFileName = strings.TrimPrefix(curFileName, "_")
+	token := c.Ctx.Input.Header("Authorization")
+	clwas, err := tools.GetTokenInfo(token)
+	workspaceArr := GetWorkSpace(c.Ctx)
+	workspace := 0
+	//如果是个人空间需要在个人路径上加上用户名
+	if len(workspaceArr) > 0 {
+		workspace, _ = strconv.Atoi(workspaceArr[0])
 	}
-	//同时创建目录名称，比如 a目录下的b目录 目录名称为 a_b
-	targetLocalDir := homeDir + tools.PathSeparator + ".vphome" + tools.PathSeparator + curFileName
-	os.Mkdir(homeDir+tools.PathSeparator+".vphome"+tools.PathSeparator+curFileName, os.ModePerm)
-	if !checkIfVp(fileDir + tools.PathSeparator + fileName) {
-		ServeJSON(c.Controller, errors.New("当前目录非vuepress项目无法构建"))
-		return
-	}
-	copyRemoteToLocal(fileDir+tools.PathSeparator+fileName, targetLocalDir)
-	cmdfileDir := homeDir + tools.PathSeparator + ".vphome"
-	destPath := targetLocalDir
-	configJs := destPath + tools.PathSeparator + ".vuepress" + tools.PathSeparator + "config.js"
-	//,err:=ioutil.ReadFile(configJs)
-	configJsContentStr1 := ""
-	f, err := os.OpenFile(configJs, os.O_RDONLY, 0600)
-	defer f.Close()
-	if err != nil {
-		ServeJSON(c.Controller, err)
-		return
-	} else {
-		configJsContent, _ := ioutil.ReadAll(f)
-		configJsContentStr1 = string(configJsContent)
-		fmt.Println(configJsContentStr1)
-	}
+	readFileDir := fileDir + fileName + "/.vuepress"
+	readFileName := "config.js"
+	configJsContentStr1, err := fileSystem.ReadText(readFileDir, readFileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return
@@ -192,15 +175,44 @@ func (c *MarkDownController) BuildVuePress() {
 		ServeJSON(c.Controller, errors.New("必须设置base上下文路径,请确认配置满足 base: '上下文路径',"))
 		return
 	}
-
-	token := c.Ctx.Input.Header("Authorization")
-	clwas, err := tools.GetTokenInfo(token)
-	workspaceArr := GetWorkSpace(c.Ctx)
-	workspace := 0
-	//如果是个人空间需要在个人路径上加上用户名
-	if len(workspaceArr) > 0 {
-		workspace, _ = strconv.Atoi(workspaceArr[0])
+	filePrefix := "public_"
+	if workspace == 1 {
+		filePrefix = clwas.Name + "_"
 	}
+	curFileName := filePrefix + strings.ReplaceAll(mapping, "/", "")
+	//re3, _ := regexp.Compile(`[/|\\]+`)
+	//curFileName := re3.ReplaceAllString(fileDir+tools.PathSeparator+fileName, "_")
+	//if strings.HasPrefix(curFileName, "_") {
+	//	curFileName = strings.TrimPrefix(curFileName, "_")
+	//}
+	//同时创建目录名称，比如 a目录下的b目录 目录名称为 a_b
+	targetLocalDir := homeDir + tools.PathSeparator + ".vphome" + tools.PathSeparator + curFileName
+	os.Mkdir(homeDir+tools.PathSeparator+".vphome"+tools.PathSeparator+curFileName, os.ModePerm)
+	if !checkIfVp(fileDir + tools.PathSeparator + fileName) {
+		ServeJSON(c.Controller, errors.New("当前目录非vuepress项目无法构建"))
+		return
+	}
+	copyRemoteToLocal(fileDir+tools.PathSeparator+fileName, targetLocalDir)
+	cmdfileDir := homeDir + tools.PathSeparator + ".vphome"
+	destPath := targetLocalDir
+	configJs := destPath + tools.PathSeparator + ".vuepress" + tools.PathSeparator + "config.js"
+	//,err:=ioutil.ReadFile(configJs)
+	//configJsContentStr1 := ""
+	//f, err := os.OpenFile(configJs, os.O_RDONLY, 0600)
+	//defer f.Close()
+	//if err != nil {
+	//	ServeJSON(c.Controller, err)
+	//	return
+	//} else {
+	//	configJsContent, _ := ioutil.ReadAll(f)
+	//	configJsContentStr1 = string(configJsContent)
+	//	fmt.Println(configJsContentStr1)
+	//}
+	//if err != nil {
+	//	ServeJSON(c.Controller, err)
+	//	return
+	//}
+
 	realMapping := service.GetVuePressMappingV1(mapping, workspace, clwas.Name)
 	//检查mapping是否已经映射
 	queryVp := database.FindVuePress(realMapping)
@@ -224,7 +236,7 @@ func (c *MarkDownController) BuildVuePress() {
 		cdDir = strings.ReplaceAll(cmdfileDir, "/", "\\")
 		cdCom = "pushd"
 	} else {
-		cmd = "/bin/sh/"
+		cmd = "/bin/bash"
 		param1 = "-c"
 		cdDir = strings.ReplaceAll(cmdfileDir, "\\", "/")
 		cdCom = "cd"
@@ -245,7 +257,8 @@ func (c *MarkDownController) BuildVuePress() {
 		vuepress.ID = searchVp.ID
 		database.UpdateVuePress(vuepress)
 	}
-	if execCommand(cmd, []string{param1, cdCom, cdDir, "&&", "npm", "i", "&&", "vuepress", "build", curFileName}) {
+	fmt.Println(cmd + " " + param1 + " " + cdCom + " " + cdDir + " " + "&& npm i && vuepress build " + curFileName)
+	if execCommand(cmd, []string{param1, cdCom + " " + cdDir + " " + "&& npm i && vuepress build " + curFileName}) {
 		beego.SetStaticPath(realMapping, destPath+tools.PathSeparator+".vuepress"+tools.PathSeparator+"dist")
 		ServeJSON(c.Controller, realMapping)
 	}

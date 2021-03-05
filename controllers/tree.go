@@ -29,6 +29,11 @@ func (c *TreeController) Get() {
 	ServeJSON(c.Controller, files)
 }
 func (c *TreeController) Root() {
+	goServer := beego.AppConfig.String("front.goServer")
+	documentServer := beego.AppConfig.String("front.documentServer")
+	injectJs := "<script type=\"text/javascript\">window.goServer=\"" + goServer + "\"</script>"
+	injectJs += "<script type=\"text/javascript\">window.documentServer=\"" + documentServer + "\"</script>"
+	c.Data["InjectScript"] = injectJs
 	c.TplName = "index.tpl"
 }
 

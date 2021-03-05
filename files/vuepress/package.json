@@ -8,6 +8,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "vuepress":"1.8.2",
     "@maginapp/vuepress-plugin-flowchart": "^1.0.2",
     "markdown-it-katex": "^2.0.3",
     "markdown-it-footnote": "^3.0.2",

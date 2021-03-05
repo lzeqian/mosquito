@@ -391,12 +391,13 @@ func (this *FileController) TranslateDoc() {
 		cmd = "cmd"
 		param1 = "/C"
 	} else {
-		cmd = "/bin/sh/"
+		cmd = "/bin/bash"
 		param1 = "-c"
 	}
 
 	pandocPath := beego.AppConfig.String("pandocpath")
-	if execCommand(cmd, []string{param1, pandocPath, destPath, "-o", genDestFileName}) {
+	commandParam := pandocPath + " " + destPath + " -o " + genDestFileName
+	if execCommand(cmd, []string{param1, commandParam}) {
 		readBytes, _ := ioutil.ReadFile(genDestFileName)
 		this.Ctx.ResponseWriter.Write(readBytes)
 	}

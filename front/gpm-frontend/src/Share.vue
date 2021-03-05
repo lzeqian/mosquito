@@ -42,7 +42,7 @@
             return {
                 loading: true,
                 contentTitle: '',
-                shareKey: window.shareKey || '68ac2f331'
+                shareKey: window.shareKey || '1a0459ed'
             }
         },
         watch: {},
@@ -74,6 +74,9 @@
                         eval("re=/^.+(" + key + ")$/")
                         if (re.test(node.title)) {
                             this.routePush(node, ...mapping[key])
+                        }
+                        if(node.title.endsWith(".pdf")){
+                            return;
                         }
                     }
                     vueThis.loadEditorContent((vueThis, data) => {

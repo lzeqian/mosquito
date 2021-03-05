@@ -127,6 +127,11 @@ func (c *ShareController) IsShareFile() {
 */
 func (c *ShareController) ShareStatic() {
 	shareKey := c.Ctx.Input.Param(":shareKey")
-	c.Data["ShareKey"] = shareKey
+	goServer := beego.AppConfig.String("front.goServer")
+	documentServer := beego.AppConfig.String("front.documentServer")
+	injectJs := "<script type=\"text/javascript\">window.goServer='" + goServer + "'</script>"
+	injectJs += "<script type=\"text/javascript\">window.documentServer='" + documentServer + "'</script>"
+	injectJs += "<script type=\"text/javascript\">window.shareKey='" + shareKey + "'</script>"
+	c.Data["InjectScript"] = injectJs
 	c.TplName = "share.tpl"
 }
