@@ -4,6 +4,7 @@ RUN mkdir -p /application/conf
 RUN mkdir -p /application/files
 RUN mkdir -p /application/static
 RUN mkdir -p /application/views
+RUN mkdir -p /upload
 WORKDIR /application
 ADD conf/ /application/conf/
 ADD files/ /application/files/

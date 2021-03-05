@@ -338,7 +338,11 @@ func (this *FileController) UploadToServer() {
 	os.Mkdir(uploadDir+tools.PathSeparator+projectName, os.ModePerm)
 	uuid := uuid.NewV4()
 	cdirPath := uuid.String() + "_" + projectName + fh.Filename
-	this.SaveToFile("myfile", uploadDir+tools.PathSeparator+projectName+tools.PathSeparator+cdirPath)
+	err := this.SaveToFile("myfile", uploadDir+tools.PathSeparator+projectName+tools.PathSeparator+cdirPath)
+	if err != nil {
+		ServeJSON(this.Controller, err)
+		return
+	}
 	result := make(map[string]interface{})
 	result["errno"] = 0
 	result["data"] = []string{uploadAccessAdress + "/file/viewerFromServer?filePath=" + tools.PathSeparator + projectName + tools.PathSeparator + cdirPath}
