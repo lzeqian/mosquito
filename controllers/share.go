@@ -133,5 +133,5 @@ func (c *ShareController) ShareStatic() {
 	injectJs += "<script type=\"text/javascript\">window.documentServer='" + documentServer + "'</script>"
 	injectJs += "<script type=\"text/javascript\">window.shareKey='" + shareKey + "'</script>"
 	c.Data["InjectScript"] = injectJs
-	c.TplName = "share.tpl"
+	c.TplName = "share.html"
 }

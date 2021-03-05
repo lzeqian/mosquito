@@ -34,7 +34,7 @@ func (c *TreeController) Root() {
 	injectJs := "<script type=\"text/javascript\">window.goServer=\"" + goServer + "\"</script>"
 	injectJs += "<script type=\"text/javascript\">window.documentServer=\"" + documentServer + "\"</script>"
 	c.Data["InjectScript"] = injectJs
-	c.TplName = "index.tpl"
+	c.TplName = "index.html"
 }
 
 /**
