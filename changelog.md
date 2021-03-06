@@ -1,0 +1,6 @@
+# 1.0.2.2-SNAPSHOT [2020-12-7]
+- Feature：支持office预览功能 [jiaozi]
+- Feature：支持office用户共享功能 [jiaozi]
+# 1.0.2.1-SNAPSHOT [2020-12-7]
+- Feature： 去除路由传参，localstorage打开历史编辑文档[jiaozi]
+- Feature：桌面方式菜单功能新增 [jiaozi]
