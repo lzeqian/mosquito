@@ -27,28 +27,25 @@ func ServeJSON(controller beego.Controller, data interface{}) {
 	controller.ServeJSON()
 }
 
-var globalFileSystem service.FileSystem
-var personFileSystem service.FileSystem
-
 const FileSystemKey = "fileSystem"
 
-func InitFileSystem() {
-	if globalFileSystem == nil {
-		fsaf := service.FileSystemAbstractFactory{}
-		fsaf.InitFactory()
-		fileSystemLocal, _ := fsaf.ConstructFactory()
-		globalFileSystem = fileSystemLocal
-		fileSystemPerson, _ := fsaf.ConstructFactoryCustom("person")
-		personFileSystem = fileSystemPerson
-	}
+func InitFileSystem() (globalFileSystem service.FileSystem, personFileSystem service.FileSystem) {
+	fsaf := service.FileSystemAbstractFactory{}
+	fsaf.InitFactory()
+	fileSystemLocal, _ := fsaf.ConstructFactory()
+	fileSystemPerson, _ := fsaf.ConstructFactoryCustom("person")
+	return fileSystemLocal, fileSystemPerson
+
 }
 func GetFileSystem(ctx *context.Context) service.FileSystem {
-	return ctx.Input.GetData(FileSystemKey).(service.FileSystem)
+	fileSystem := ctx.Input.GetData(FileSystemKey)
+	if fileSystem != nil {
+		return fileSystem.(service.FileSystem)
+	}
+	return nil
 }
 func RequestFileSystem(ctx *context.Context, tp string) {
-	if globalFileSystem == nil {
-		InitFileSystem()
-	}
+	globalFileSystem, personFileSystem := InitFileSystem()
 	if "" == tp || "0" == tp {
 		ctx.Input.SetData(FileSystemKey, globalFileSystem)
 		return
@@ -57,13 +54,11 @@ func RequestFileSystem(ctx *context.Context, tp string) {
 }
 func PubInit(controller beego.Controller, ctx *context.Context, controllerName, actionName string, app interface{}) {
 	controller.Init(ctx, controllerName, actionName, app)
-	if globalFileSystem == nil {
+	fileSystem := GetFileSystem(ctx)
+	if fileSystem != nil && fileSystem.Ping() != nil {
 		InitFileSystem()
-	} else {
-		if globalFileSystem.Ping() != nil {
-			InitFileSystem()
-		}
 	}
+
 }
 func GetAuthorization(ctx *context.Context) string {
 	//获取请求头的授权头token，未获取到则获取token参数

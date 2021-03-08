@@ -119,6 +119,9 @@ func (s *LocalFileSystem) Rename(srcDir string, src string, dest string) error {
 func (s *LocalFileSystem) Ping() error {
 	return nil
 }
+func (s *LocalFileSystem) Close() error {
+	return nil
+}
 
 /**
 ---------------------------------------

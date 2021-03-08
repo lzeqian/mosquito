@@ -11,6 +11,7 @@ import (
 )
 
 type SambaFileSystem struct {
+	conn      net.Conn
 	RootPath  string
 	fs        *smb2.Share
 	shareName string
@@ -89,7 +90,11 @@ func (s *SambaFileSystem) getPath(dirPth string) string {
 	formatDirPath := tools.FormatPath(dirPth)
 	if s.RootPath == tools.PathSeparator {
 		s.shareName = tools.GetRootName(formatDirPath)
-		s.fs, _ = s.session.Mount(s.shareName)
+		var err error
+		s.fs, err = s.session.Mount(s.shareName)
+		if err != nil {
+			panic(err)
+		}
 	}
 	formatDirPath = strings.TrimLeft(formatDirPath, tools.PathSeparator)
 	if strings.Contains(formatDirPath, s.shareName) {
@@ -158,6 +163,11 @@ func (s *SambaFileSystem) Ping() error {
 	_, err := s.session.ListSharenames()
 	return err
 }
+func (s *SambaFileSystem) Close() error {
+	s.session.Logoff()
+	s.conn.Close()
+	return nil
+}
 
 /**
 ---------------------------------------
@@ -196,7 +206,7 @@ func (sam *SambaFileSystemFactory) Create(prefix string) (FileSystem, error) {
 	if shareName != "" {
 		shareMount, _ = session.Mount(shareName)
 	}
-	fileSystem := SambaFileSystem{RootPath: formatRootPath, session: *session, fs: shareMount, shareName: shareName}
+	fileSystem := SambaFileSystem{RootPath: formatRootPath, conn: conn, session: *session, fs: shareMount, shareName: shareName}
 	return &fileSystem, err
 }
 func (s *SambaFileSystemFactory) Name() string {

@@ -99,6 +99,10 @@ type FileSystem interface {
 	       检查当前文件系统是否正确连接，如果异常 net.OpError
 		**/
 	Ping() error
+	/**
+	  关闭文件系统
+	*/
+	Close() error
 }
 
 type FileSystemFactoryI interface {

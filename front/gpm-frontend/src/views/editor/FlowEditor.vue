@@ -103,7 +103,7 @@
         </div>
 
         <!-- body部分 -->
-        <div class="body"  style="height:100%">
+        <div class="body"  style="height:95%">
             <div class="page">
                 <div class="tools">
                     <div v-for="(item, index) in tools" :key="index">

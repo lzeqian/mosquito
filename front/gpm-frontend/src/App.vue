@@ -60,7 +60,8 @@
         watch: {
             "$store.getters.getSelectedNode": {
                 handler: function (val, oldVal) {
-                    this.initData()
+                    if(this.$store.getters.getSelectedNode && !this.$store.getters.getSelectedNode.isDir)
+                        this.initData()
                 }
             },
             '$route'(to,from) {

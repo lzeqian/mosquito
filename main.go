@@ -52,6 +52,7 @@ func main() {
 	beego.SetStaticPath("/pdf", "static/pdf")
 	beego.SetStaticPath("/src", "static/src")
 	beego.SetStaticPath("/static", "static/static")
+	beego.InsertFilter("/*", beego.AfterExec, web.FilterLast, false, false)
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},

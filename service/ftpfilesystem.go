@@ -195,6 +195,9 @@ func (s *FtpFileSystem) Ping() error {
 	_, err := s.fs.List("/")
 	return err
 }
+func (s *FtpFileSystem) Close() error {
+	return nil
+}
 
 /**
 ---------------------------------------

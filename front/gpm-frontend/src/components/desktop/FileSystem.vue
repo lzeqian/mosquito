@@ -140,7 +140,7 @@
         data() {
             return {
                 dataArray: [],
-                curDirHtml: '<a href=javascript:window.fileSystemVueThis.clickToPath("/","",true,true)>/ </a>',
+                curDirHtml: '<a href=javascript:window.fileSystemVueThis.clickToPath("/","",true,null)>/ </a>',
                 curDir: '/',
                 selectedItem:null, //当前选中的目录，selectNode表示当前选择的节点可以是目录也可以是文件
                 selectedRef:null,

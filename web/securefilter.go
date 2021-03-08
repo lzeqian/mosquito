@@ -107,9 +107,7 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 		//个人不需要权限控制
 		return nil
 	} else {
-		controllers.InitFileSystem()
 		controllers.RequestFileSystem(ctx, "0")
-
 	}
 	//获取当前路径需要验证的用户权限
 	actList := service.GetPathRequirePerm(requestPath)
@@ -231,5 +229,11 @@ var FilterUser = func(ctx *context.Context) {
 		byteJson, _ := json.Marshal(result)
 		ctx.WriteString(string(byteJson))
 		return
+	}
+}
+var FilterLast = func(ctx *context.Context) {
+	fileSystem := controllers.GetFileSystem(ctx)
+	if fileSystem != nil {
+		fileSystem.Close()
 	}
 }
