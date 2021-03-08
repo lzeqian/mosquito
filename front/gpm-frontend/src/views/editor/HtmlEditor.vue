@@ -10,9 +10,11 @@
 </template>
 <script>
     import E from "wangeditor";
+    import hotkeys from 'hotkeys-js';
     const { $ } = E
+    import jquery from "jquery"
     const { BtnMenu, DropListMenu, PanelMenu, DropList, Panel, Tooltip } = E.menuConstructors
-    var vueThis=null;
+    let vueThis=null;
     class AlertMenu extends BtnMenu {
         constructor(editor) {
             const $elem = E.$(
@@ -92,8 +94,6 @@
                         Workspace: vueThis.$store.getters.currentWorkspace,
                     }
                 }
-
-
                 editor.config.uploadImgHeaders = requestHeader
                 editor.config.uploadFileName = 'myfile'
                 editor.config.menus = editor.config.menus.concat(menuKey)
@@ -109,9 +109,19 @@
         },
         mounted() {
             vueThis=this;
-            setTimeout(function(){
-
-            },1000)
+            if (!window.regEditorTextCtrlSHotKey) {
+                window.regEditorTextCtrlSHotKey = true
+                document.onkeydown=((e) => {
+                    let currenKey = e.keyCode || e.which || e.charCode;
+                    if (currenKey == 83 && e.ctrlKey) {
+                        e.preventDefault()
+                        let html=vueThis.editor.txt.html()
+                        vueThis.saveEditorContent({
+                            value: html,
+                        })
+                    }
+                })
+            }
         }
     }
 </script>
