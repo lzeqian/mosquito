@@ -65,7 +65,7 @@ func (c *TemplateController) GenerateFileFromTemplate() {
 	fileName := inputMap["fileName"]
 	templateId := inputMap["templateId"]
 	fileTemplate := database.GetFileTemplate(templateId)
-	existFile, err := fileSystem.ExistFile(fileDir, fileName)
+	existFile, err := GetFileSystem(c.Ctx).ExistFile(fileDir, fileName)
 	if existFile {
 		ServeJSON(c.Controller, errors.New("文件"+fileName+"已存在无法创建,请重新输入文件名"))
 		return
@@ -76,7 +76,7 @@ func (c *TemplateController) GenerateFileFromTemplate() {
 		ServeJSON(c.Controller, err)
 		return
 	}
-	err = fileSystem.SaveByte(fileDir, fileName, btCache, os.ModePerm)
+	err = GetFileSystem(c.Ctx).SaveByte(fileDir, fileName, btCache, os.ModePerm)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return

@@ -11,6 +11,7 @@ import (
 	"github.com/astaxie/beego/context"
 	"github.com/satori/go.uuid"
 	"gpm/models"
+	"gpm/service"
 	"gpm/tools"
 	"io"
 	"io/ioutil"
@@ -42,7 +43,7 @@ func (c *FileController) Init(ctx *context.Context, controllerName, actionName s
 func (this *FileController) DownloadFile() {
 	fileDir := this.GetString("fileDir")
 	fileName := this.GetString("fileName")
-	readBytes, _ := fileSystem.ReadByte(fileDir, fileName)
+	readBytes, _ := GetFileSystem(this.Ctx).ReadByte(fileDir, fileName)
 	this.Ctx.Output.Header("Content-type", "application/force-download")
 	this.Ctx.Output.Header("Content-Disposition", "attachment;filename="+fileName)
 	this.Ctx.Output.Header("Pragma", "No-cache")
@@ -60,9 +61,9 @@ func (c *FileController) DeleteFile() {
 	fileDir := c.GetString("fileDir")
 	fileName := c.GetString("fileName")
 	destPath := fileDir + tools.PathSeparator + fileName
-	isDir, _ := fileSystem.IsDir(destPath)
+	isDir, _ := GetFileSystem(c.Ctx).IsDir(destPath)
 	if !isDir {
-		err := fileSystem.DeleteFile(fileDir, fileName)
+		err := GetFileSystem(c.Ctx).DeleteFile(fileDir, fileName)
 		ServeJSON(c.Controller, err)
 		return
 	}
@@ -79,7 +80,7 @@ func (this *FileController) UploadFile() {
 	f, h, _ := this.GetFile("myfile") //获取上传的文件
 	fileName := h.Filename
 	fileByte, _ := ioutil.ReadAll(f)
-	err := fileSystem.SaveByte(fileDir, fileName, fileByte, 0777)
+	err := GetFileSystem(this.Ctx).SaveByte(fileDir, fileName, fileByte, 0777)
 	if err != nil {
 		ServeJSON(this.Controller, err)
 		return
@@ -126,7 +127,7 @@ func (this *FileController) UploadOfficeFile() {
 		buf.ReadFrom(res.Body)
 		bufBytes := buf.Bytes()
 		if len(bufBytes) > 0 {
-			err1 := fileSystem.SaveByte(fileDir, fileName, bufBytes, 0777)
+			err1 := GetFileSystem(this.Ctx).SaveByte(fileDir, fileName, bufBytes, 0777)
 			if err1 != nil {
 				resultJson["error"] = 1
 				this.ServeJSON()
@@ -150,7 +151,7 @@ func (c *FileController) SaveFile() {
 	if err != nil {
 		ServeJSON(c.Controller, err)
 	}
-	err1 := fileSystem.SaveTextFile(markdown.FileDir, markdown.FileName, string(markdown.Value), 0777)
+	err1 := GetFileSystem(c.Ctx).SaveTextFile(markdown.FileDir, markdown.FileName, string(markdown.Value), 0777)
 	if err1 != nil {
 		ServeJSON(c.Controller, err1)
 		return
@@ -166,10 +167,10 @@ func (c *FileController) SaveFile() {
 func (c *FileController) QueryFile() {
 	fileDir := c.GetString("fileDir")
 	fileName := c.GetString("fileName")
-	text, _ := fileSystem.ReadText(fileDir, fileName)
+	text, _ := GetFileSystem(c.Ctx).ReadText(fileDir, fileName)
 	ServeJSON(c.Controller, text)
 }
-func createFile(markdown models.Markdown) (err error) {
+func createFile(fileSystem service.FileSystem, markdown models.Markdown) (err error) {
 	filesuffix := path.Ext(markdown.FileName)
 	var rerr error
 	rerr = fileSystem.CreateFile(markdown.FileDir, markdown.FileName)
@@ -205,13 +206,13 @@ func (c *FileController) CreateFile() {
 	markdown := models.Markdown{}
 	data := c.Ctx.Input.RequestBody
 	json.Unmarshal(data, &markdown)
-	exist, _ := fileSystem.ExistFile(markdown.FileDir, markdown.FileName)
+	exist, _ := GetFileSystem(c.Ctx).ExistFile(markdown.FileDir, markdown.FileName)
 	if exist {
 		ServeJSON(c.Controller, errors.New("文件已存在"))
 		return
 	}
 	//err := fileSystem.CreateFile(markdown.FileDir, markdown.FileName)
-	err := createFile(markdown)
+	err := createFile(GetFileSystem(c.Ctx), markdown)
 
 	if err != nil {
 		ServeJSON(c.Controller, err)
@@ -229,12 +230,12 @@ func (c *FileController) CopyFile() {
 	markdown := models.Markdown{}
 	data := c.Ctx.Input.RequestBody
 	json.Unmarshal(data, &markdown)
-	readByte, err := fileSystem.ReadByte(markdown.FileDir, markdown.FileName)
+	readByte, err := GetFileSystem(c.Ctx).ReadByte(markdown.FileDir, markdown.FileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return
 	}
-	err = fileSystem.SaveByte(markdown.FileDir, markdown.NewFileName, readByte, os.ModePerm)
+	err = GetFileSystem(c.Ctx).SaveByte(markdown.FileDir, markdown.NewFileName, readByte, os.ModePerm)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return
@@ -251,7 +252,7 @@ func (c *FileController) CreateDir() {
 	markdown := models.Markdown{}
 	data := c.Ctx.Input.RequestBody
 	json.Unmarshal(data, &markdown)
-	err := fileSystem.Mkdir(markdown.FileDir, markdown.FileName)
+	err := GetFileSystem(c.Ctx).Mkdir(markdown.FileDir, markdown.FileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return
@@ -273,12 +274,12 @@ func (c *FileController) DeleteDir() {
 	} else {
 		listFileDir = fileDir + tools.PathSeparator + fileName
 	}
-	nodeList, _ := fileSystem.ListDir(listFileDir, "")
+	nodeList, _ := GetFileSystem(c.Ctx).ListDir(listFileDir, "")
 	if len(nodeList) > 0 {
 		ServeJSON(c.Controller, errors.New("存在多个子元素，请删除后继续"))
 		return
 	}
-	err := fileSystem.RmDir(fileDir, fileName)
+	err := GetFileSystem(c.Ctx).RmDir(fileDir, fileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return
@@ -295,12 +296,12 @@ func (c *FileController) RenameFile() {
 	markdown := models.Markdown{}
 	data := c.Ctx.Input.RequestBody
 	err := json.Unmarshal(data, &markdown)
-	exist, _ := fileSystem.ExistFile(markdown.FileDir, markdown.NewFileName)
+	exist, _ := GetFileSystem(c.Ctx).ExistFile(markdown.FileDir, markdown.NewFileName)
 	if exist {
 		ServeJSON(c.Controller, errors.New("文件已存在"))
 		return
 	}
-	err = fileSystem.Rename(markdown.FileDir, markdown.FileName, markdown.NewFileName)
+	err = GetFileSystem(c.Ctx).Rename(markdown.FileDir, markdown.FileName, markdown.NewFileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return
@@ -376,7 +377,7 @@ func (this *FileController) ViewerFromServer() {
 func (this *FileController) TranslateDoc() {
 	fileDir := this.GetString("fileDir")
 	fileName := this.GetString("fileName")
-	srcFileBytes, _ := fileSystem.ReadByte(fileDir, fileName)
+	srcFileBytes, _ := GetFileSystem(this.Ctx).ReadByte(fileDir, fileName)
 	destPath := os.TempDir() + tools.PathSeparator + fileName
 	//拷贝文件内容到服务器中。
 	ioutil.WriteFile(destPath, srcFileBytes, 0777)
@@ -416,7 +417,7 @@ func (this *FileController) TranslatePdf() {
 	fileDir := this.GetString("fileDir")
 	fileName := this.GetString("fileName")
 	//PthSep := string(os.PathSeparator)
-	srcFileBytes, _ := fileSystem.ReadByte(fileDir, fileName)
+	srcFileBytes, _ := GetFileSystem(this.Ctx).ReadByte(fileDir, fileName)
 	destPath := os.TempDir() + tools.PathSeparator + fileName
 	//拷贝文件内容到服务器中。
 	ioutil.WriteFile(destPath, srcFileBytes, 0777)

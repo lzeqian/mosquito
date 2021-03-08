@@ -64,7 +64,7 @@
                 }
             },
             '$route'(to,from) {
-                if (this.$route.name == "blankViewer") {
+                if (this.$route.name == "blankViewer" || this.$route.name == "defaultViewer" ) {
                     this.$store.commit("setSelecedNode", null)
                 }
             }
@@ -75,7 +75,7 @@
                 if (localStorage.getItem("token")) {
                     this.$store.state.isLogin = true
                 }
-                if (vueThis.$route.name != "blankViewer" && vueThis.$route.name!=null) {
+                if (vueThis.$route.name != "blankViewer" && vueThis.$route.name != "defaultViewer" && vueThis.$route.name!=null) {
                     vueThis.loadEditorContent((vueThis, data) => {
                         vueThis.$store.commit("setSelectedNodeCacheData", data)
                         let initInterval=setInterval(()=>{

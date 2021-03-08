@@ -41,37 +41,37 @@ func (c *MarkDownController) CreateVuePress() {
 	fileName := markdown.FileName
 	destPath := fileDir + tools.PathSeparator + fileName
 	//创建目录
-	err := fileSystem.Mkdir(fileDir, fileName)
+	err := GetFileSystem(c.Ctx).Mkdir(fileDir, fileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return
 	}
 	//创建.vuepress目录
-	fileSystem.Mkdir(destPath, ".vuepress")
+	GetFileSystem(c.Ctx).Mkdir(destPath, ".vuepress")
 	//创建文件README.md
-	fileErr := fileSystem.CreateFile(destPath, "README.md")
+	fileErr := GetFileSystem(c.Ctx).CreateFile(destPath, "README.md")
 	if fileErr != nil {
 		ServeJSON(c.Controller, fileErr)
 		return
 	}
-	fileSystem.SaveTextFile(destPath, "README.md", "#测试", 0777)
+	GetFileSystem(c.Ctx).SaveTextFile(destPath, "README.md", "#测试", 0777)
 	//创建.vuepress/config.js
-	fileSystem.CreateFile(destPath+tools.PathSeparator+".vuepress", "config.js")
+	GetFileSystem(c.Ctx).CreateFile(destPath+tools.PathSeparator+".vuepress", "config.js")
 	configJsTemplateByte, e := ioutil.ReadFile("files/vuepress/config.js")
 	if e != nil {
 		ServeJSON(c.Controller, e)
 		return
 	}
 	configJsTemplate := strings.ReplaceAll(string(configJsTemplateByte), "${base}", "/"+fileName+"/")
-	fileSystem.SaveTextFile(destPath+tools.PathSeparator+".vuepress", "config.js", configJsTemplate, 0777)
+	GetFileSystem(c.Ctx).SaveTextFile(destPath+tools.PathSeparator+".vuepress", "config.js", configJsTemplate, 0777)
 	ServeJSON(c.Controller, "")
 }
-func copyRemoteToLocal(remoteDir string, localDir string) {
+func copyRemoteToLocal(fileSystem service.FileSystem, remoteDir string, localDir string) {
 	nodes, _ := fileSystem.ListDir(remoteDir, "")
 	for _, nodeTmp := range nodes {
 		if nodeTmp.IsDir {
 			os.Mkdir(localDir+tools.PathSeparator+nodeTmp.Title, os.ModePerm)
-			copyRemoteToLocal(remoteDir+tools.PathSeparator+nodeTmp.Title, localDir+tools.PathSeparator+nodeTmp.Title)
+			copyRemoteToLocal(fileSystem, remoteDir+tools.PathSeparator+nodeTmp.Title, localDir+tools.PathSeparator+nodeTmp.Title)
 		} else {
 			allBytes, _ := fileSystem.ReadByte(remoteDir, nodeTmp.Title)
 			ioutil.WriteFile(localDir+tools.PathSeparator+nodeTmp.Title, allBytes, 0777)
@@ -114,7 +114,7 @@ func (c *MarkDownController) SearchVuePress() {
 	}
 	ServeJSON(c.Controller, database.SearchUserVuePress(keyword, clwas.Name))
 }
-func checkIfVp(remoteDir string) bool {
+func checkIfVp(fileSystem service.FileSystem, remoteDir string) bool {
 	nodes, _ := fileSystem.ListDir(remoteDir, "")
 	for _, nodeTmp := range nodes {
 		if nodeTmp.FileName == ".vuepress" {
@@ -157,7 +157,7 @@ func (c *MarkDownController) BuildVuePress() {
 	}
 	readFileDir := fileDir + fileName + "/.vuepress"
 	readFileName := "config.js"
-	configJsContentStr1, err := fileSystem.ReadText(readFileDir, readFileName)
+	configJsContentStr1, err := GetFileSystem(c.Ctx).ReadText(readFileDir, readFileName)
 	if err != nil {
 		ServeJSON(c.Controller, err)
 		return
@@ -188,11 +188,11 @@ func (c *MarkDownController) BuildVuePress() {
 	//同时创建目录名称，比如 a目录下的b目录 目录名称为 a_b
 	targetLocalDir := homeDir + tools.PathSeparator + ".vphome" + tools.PathSeparator + curFileName
 	os.Mkdir(homeDir+tools.PathSeparator+".vphome"+tools.PathSeparator+curFileName, os.ModePerm)
-	if !checkIfVp(fileDir + tools.PathSeparator + fileName) {
+	if !checkIfVp(GetFileSystem(c.Ctx), fileDir+tools.PathSeparator+fileName) {
 		ServeJSON(c.Controller, errors.New("当前目录非vuepress项目无法构建"))
 		return
 	}
-	copyRemoteToLocal(fileDir+tools.PathSeparator+fileName, targetLocalDir)
+	copyRemoteToLocal(GetFileSystem(c.Ctx), fileDir+tools.PathSeparator+fileName, targetLocalDir)
 	cmdfileDir := homeDir + tools.PathSeparator + ".vphome"
 	destPath := targetLocalDir
 	configJs := destPath + tools.PathSeparator + ".vuepress" + tools.PathSeparator + "config.js"

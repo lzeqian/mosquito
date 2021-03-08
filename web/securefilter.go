@@ -78,7 +78,7 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 	workspace := controllers.GetWorkSpace(ctx)
 	//如果是个人空间需要在个人路径上加上用户名
 	if len(workspace) > 0 && workspace[0] == "1" {
-		controllers.RequestFileSystem("1")
+		controllers.RequestFileSystem(ctx, "1")
 		if dirPath != "" {
 			//if requestPath == "/home/listSub" || dirPath==tools.PathSeparator {
 			authorization := controllers.GetAuthorization(ctx)
@@ -95,9 +95,9 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 					//	targetDirPath="";
 					//}
 					setDirPath(ctx, tools.PathSeparator+userInfo["userFullName"].(string)+(targetDirPath))
-					_, err := controllers.GetFileSystem().IsDir(tools.PathSeparator + userInfo["userFullName"].(string))
+					_, err := controllers.GetFileSystem(ctx).IsDir(tools.PathSeparator + userInfo["userFullName"].(string))
 					if err != nil {
-						controllers.GetFileSystem().Mkdir(tools.PathSeparator, userInfo["userFullName"].(string))
+						controllers.GetFileSystem(ctx).Mkdir(tools.PathSeparator, userInfo["userFullName"].(string))
 					}
 				}
 
@@ -107,7 +107,9 @@ func checkFileSystemPerm(ctx *context.Context, userName string) error {
 		//个人不需要权限控制
 		return nil
 	} else {
-		controllers.RequestFileSystem("0")
+		controllers.InitFileSystem()
+		controllers.RequestFileSystem(ctx, "0")
+
 	}
 	//获取当前路径需要验证的用户权限
 	actList := service.GetPathRequirePerm(requestPath)
@@ -175,7 +177,7 @@ var FilterUser = func(ctx *context.Context) {
 	checkResult := checkShare(ctx)
 	fmt.Println(ctx.Request.URL.Path + "----" + strconv.Itoa(checkResult.Code))
 	if checkResult.Code == 0 {
-		controllers.RequestFileSystem("1")
+		controllers.RequestFileSystem(ctx, "1")
 		return
 	}
 	if checkResult.Code == 1 {

@@ -27,38 +27,41 @@ func ServeJSON(controller beego.Controller, data interface{}) {
 	controller.ServeJSON()
 }
 
-var fileSystem service.FileSystem
 var globalFileSystem service.FileSystem
 var personFileSystem service.FileSystem
 
-func initFileSystem() {
-	fsaf := service.FileSystemAbstractFactory{}
-	fsaf.InitFactory()
-	fileSystemLocal, _ := fsaf.ConstructFactory()
-	globalFileSystem = fileSystemLocal
-	fileSystemPerson, _ := fsaf.ConstructFactoryCustom("person")
-	personFileSystem = fileSystemPerson
-}
-func GetFileSystem() service.FileSystem {
-	return fileSystem
-}
-func RequestFileSystem(tp string) {
+const FileSystemKey = "fileSystem"
+
+func InitFileSystem() {
 	if globalFileSystem == nil {
-		initFileSystem()
+		fsaf := service.FileSystemAbstractFactory{}
+		fsaf.InitFactory()
+		fileSystemLocal, _ := fsaf.ConstructFactory()
+		globalFileSystem = fileSystemLocal
+		fileSystemPerson, _ := fsaf.ConstructFactoryCustom("person")
+		personFileSystem = fileSystemPerson
+	}
+}
+func GetFileSystem(ctx *context.Context) service.FileSystem {
+	return ctx.Input.GetData(FileSystemKey).(service.FileSystem)
+}
+func RequestFileSystem(ctx *context.Context, tp string) {
+	if globalFileSystem == nil {
+		InitFileSystem()
 	}
 	if "" == tp || "0" == tp {
-		fileSystem = globalFileSystem
+		ctx.Input.SetData(FileSystemKey, globalFileSystem)
 		return
 	}
-	fileSystem = personFileSystem
+	ctx.Input.SetData(FileSystemKey, personFileSystem)
 }
 func PubInit(controller beego.Controller, ctx *context.Context, controllerName, actionName string, app interface{}) {
 	controller.Init(ctx, controllerName, actionName, app)
 	if globalFileSystem == nil {
-		initFileSystem()
+		InitFileSystem()
 	} else {
 		if globalFileSystem.Ping() != nil {
-			initFileSystem()
+			InitFileSystem()
 		}
 	}
 }

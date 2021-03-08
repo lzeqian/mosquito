@@ -22,7 +22,7 @@ func (c *TreeController) Init(ctx *context.Context, controllerName, actionName s
 获取根目录结构
 */
 func (c *TreeController) Get() {
-	files, e := fileSystem.ListRoot()
+	files, e := GetFileSystem(c.Ctx).ListRoot()
 	if e != nil {
 		ServeJSON(c.Controller, e)
 	}
@@ -64,7 +64,7 @@ func (c *TreeController) ListSubTree() {
 			}
 		}
 	}
-	isDir, _ := fileSystem.IsDir(destPath)
+	isDir, _ := GetFileSystem(c.Ctx).IsDir(destPath)
 	if isDir {
 		authorization := c.Ctx.Request.Header["Authorization"]
 		trimPrefix := ""
@@ -73,7 +73,7 @@ func (c *TreeController) ListSubTree() {
 			userInfo := service.GetUser(myCustomClaims.Name)
 			trimPrefix = tools.PathSeparator + userInfo["userFullName"].(string)
 		}
-		files, _ := fileSystem.ListDir(destPath, trimPrefix)
+		files, _ := GetFileSystem(c.Ctx).ListDir(destPath, trimPrefix)
 		ServeJSON(c.Controller, files)
 	} else {
 		c.Data["json"] = &models.Result{}
