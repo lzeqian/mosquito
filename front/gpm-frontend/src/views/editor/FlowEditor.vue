@@ -9,7 +9,7 @@
             <el-menu mode="horizontal" @select="onMenu" background-color="#f8f8f8">
                 <el-menu-item class="logo">
 
-                    <img src="/favicon.ico"/>
+                    <img src="/img/log.png"/>
 
                 </el-menu-item>
                 <el-submenu index="file">
@@ -103,7 +103,7 @@
         </div>
 
         <!-- body部分 -->
-        <div class="body"  style="height:95%">
+        <div class="body"  style="height:100%">
             <div class="page">
                 <div class="tools">
                     <div v-for="(item, index) in tools" :key="index">

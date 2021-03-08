@@ -108,7 +108,6 @@
                         this.$axios.post(this.$globalConfig.goServer + "login", {
                             ...this.form
                         }).then((resp) => {
-                            debugger
                                 this.$store.commit("login",resp.data.data)
                         });
                     }
