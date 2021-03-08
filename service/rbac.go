@@ -15,7 +15,7 @@ import (
   读取rbac配置文件"conf/rbac.yaml"
 */
 func getRbacContent() map[string]interface{} {
-	yamlFile, _ := ioutil.ReadFile("conf/rbac.yml")
+	yamlFile, _ := ioutil.ReadFile("rbac/rbac.yml")
 	resultMap := make(map[string]interface{})
 	err := yaml.Unmarshal(yamlFile, resultMap)
 	if err != nil {

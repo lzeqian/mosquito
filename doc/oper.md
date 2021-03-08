@@ -2,6 +2,10 @@
 ## 普通安装
 
 ### 系统依赖项目
+#### onlyoffice
+```javascript
+ docker run -i -t -d  --network=host --dns=8.8.8.8 onlyoffice/documentserver
+```
 #### vuepress
 项目依赖vuepress构建markdown项目。
 
@@ -83,7 +87,7 @@ window根目录下shengcheng gpm.exe，linux下生成gpm。
 $ ./gpm
 2020/10/26 14:53:59.981 [I] [asm_amd64.s:1373]  http server Running on http://:8080
 ```
-浏览器测试接口
+浏览器测试接口,默认账号密码:admin/123456，用户名和密码在rbac/rbac.yml中设置，md5加密。
 ```$xslt
 http://localhost:8080/console
 ```
@@ -129,4 +133,4 @@ docker run -d -p 80:80  -v /etc/mosquito:/application/rbac --env-file ./.envfile
 ```
 chmod +x ./run.sh && ./run.sh
 ```
-
+修改密码在：/etc/mosquito/rbac.yml

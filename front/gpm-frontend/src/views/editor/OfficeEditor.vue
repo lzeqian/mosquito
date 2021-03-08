@@ -29,6 +29,10 @@
         },
         methods: {
             async initData() {
+                if(!DocsAPI || !DocsAPI.DocEditor){
+                    this.mounted()
+                    return;
+                }
                 if(docEditor){
                     try {
                         docEditor.destroyEditor();

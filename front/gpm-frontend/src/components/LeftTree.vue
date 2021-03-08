@@ -690,6 +690,7 @@
             selectChange(selectedList,func) {
                 if (selectedList.length == 0) {
                     this.routePush({}, '/default', "空白预览")
+                    return;
                 }
                 const node = selectedList[selectedList.length - 1]
                 if (node) {
@@ -704,7 +705,7 @@
                         vueThis.$axios.get(this.$globalConfig.goServer + "home/listSub?fileDir=" + node.dirPath + "&fileName=" + node.fileName + "&root=" + node.root).then((response) => {
                             node.children = response.data.data //挂载子节点
                             node.expand = true    //展开子节点
-                            func && func();
+                            func && typeof(func)=="function" && func();
                         })
                     } else {
                         let mapping = this.$globalConfig.editorMapping
