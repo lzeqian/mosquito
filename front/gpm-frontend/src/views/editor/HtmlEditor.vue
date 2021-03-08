@@ -3,18 +3,23 @@
 </style>
 <template>
 
-    <div ref="element" style="height: 100%;padding-left: 5px">
-        <div  id="div1" style="height: 100%"></div>
+    <div ref="element" id="element" style="height: 100%;padding-left: 5px">
+        <div style="height: 100%" @keydown="editorKeyDownSave">
+            <div id="div1" style="height: 100%"></div>
+        </div>
     </div>
 
 </template>
 <script>
     import E from "wangeditor";
     import hotkeys from 'hotkeys-js';
-    const { $ } = E
+
+    const {$} = E
     import jquery from "jquery"
-    const { BtnMenu, DropListMenu, PanelMenu, DropList, Panel, Tooltip } = E.menuConstructors
-    let vueThis=null;
+
+    const {BtnMenu, DropListMenu, PanelMenu, DropList, Panel, Tooltip} = E.menuConstructors
+    let vueThis = null;
+
     class AlertMenu extends BtnMenu {
         constructor(editor) {
             const $elem = E.$(
@@ -24,15 +29,17 @@
             )
             super($elem, editor)
         }
+
         // 菜单点击事件
         clickHandler() {
             // 做任何你想做的事情
             // 可参考【常用 API】文档，来操作编辑器
-            let html=this.editor.txt.html()
+            let html = this.editor.txt.html()
             vueThis.saveEditorContent({
                 value: html,
             })
         }
+
         // 菜单是否被激活（如果不需要，这个函数可以空着）
         // 1. 激活是什么？光标放在一段加粗、下划线的文本时，菜单栏里的 B 和 U 被激活，如下图
         // 2. 什么时候执行这个函数？每次编辑器区域的选区变化（如鼠标操作、键盘操作等），都会触发各个菜单的 tryChangeActive 函数，重新计算菜单的激活状态
@@ -48,48 +55,46 @@
             // this.unActive()
         }
     }
+
     export default {
         data() {
             return {
                 content: "",
-                editor:null
+                editor: null
             }
         },
-        computed:{
-        },
-        watch:{
-            content(n,o){
-                if(this.editor)
+        computed: {},
+        watch: {
+            content(n, o) {
+                if (this.editor)
                     this.editor.txt.html(n)
             }
         },
-        components: {
-
-        },
+        components: {},
         methods: {
             initData(data) {
-                var vueThis=this;
+                var vueThis = this;
                 vueThis.content = data
-                let selectedNode=vueThis.$store.getters.getSelectedNode
+                let selectedNode = vueThis.$store.getters.getSelectedNode
                 const editor = new E("#div1");
-                vueThis.editor=editor
-                vueThis.editor.config.height = vueThis.$refs.element.offsetHeight-50;
+                vueThis.editor = editor
+                vueThis.editor.config.height = vueThis.$refs.element.offsetHeight - 50;
 
                 const menuKey = 'alertMenuKey' // 菜单 key ，各个菜单不能重复
                 editor.menus.extend('alertMenuKey', AlertMenu)
-                editor.config.uploadImgServer =vueThis.$globalConfig.goServer + '/file/uploadToServer'
+                editor.config.uploadImgServer = vueThis.$globalConfig.goServer + '/file/uploadToServer'
                 editor.config.uploadImgParams = {
-                    projectName:selectedNode.fileName
+                    projectName: selectedNode.fileName
                 }
-                let requestHeader={}
-                if(vueThis.$store.getters.getEditorMode=="share"){
-                    let shareKey=vueThis.$store.getters.getShareData["ShareKey"]
-                    requestHeader={
+                let requestHeader = {}
+                if (vueThis.$store.getters.getEditorMode == "share") {
+                    let shareKey = vueThis.$store.getters.getShareData["ShareKey"]
+                    requestHeader = {
                         Authorization: localStorage.getItem("token"),
                         "Share-Key": shareKey
                     }
-                }else{
-                    requestHeader={
+                } else {
+                    requestHeader = {
                         Authorization: localStorage.getItem("token"),
                         Workspace: vueThis.$store.getters.currentWorkspace,
                     }
@@ -98,30 +103,27 @@
                 editor.config.uploadFileName = 'myfile'
                 editor.config.menus = editor.config.menus.concat(menuKey)
                 editor.create();
-                if(vueThis.content && vueThis.content!="")
+                if (vueThis.content && vueThis.content != "")
                     vueThis.editor.txt.html(vueThis.content)
-                else{
+                else {
                     vueThis.editor.txt.html("")
                 }
             },
+            editorKeyDownSave(e) {
+                let _this=this;
+                let currenKey = e.keyCode || e.which || e.charCode;
+                if (currenKey == 83 && e.ctrlKey) {
+                    e.preventDefault()
+                    let html = _this.editor.txt.html()
+                    _this.saveEditorContent({
+                        value: html,
+                    })
+                }
+            }
         },
-        created(){
+        created() {
         },
         mounted() {
-            vueThis=this;
-            if (!window.regEditorTextCtrlSHotKey) {
-                window.regEditorTextCtrlSHotKey = true
-                document.onkeydown=((e) => {
-                    let currenKey = e.keyCode || e.which || e.charCode;
-                    if (currenKey == 83 && e.ctrlKey) {
-                        e.preventDefault()
-                        let html=vueThis.editor.txt.html()
-                        vueThis.saveEditorContent({
-                            value: html,
-                        })
-                    }
-                })
-            }
         }
     }
 </script>

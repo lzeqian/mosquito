@@ -1,5 +1,5 @@
 <template>
-    <div style="height: 99%;">
+    <div style="height: 99%;" @keydown="editorKeyDownSave">
         <header-menu></header-menu>
 
         <main-editor ref="mainEditor"></main-editor>
@@ -48,6 +48,17 @@
         methods:{
             initData(data){
                 this.$refs.mainEditor.childInitData(data)
+            },
+            editorKeyDownSave(e) {
+                let _this=this;
+                let currenKey = e.keyCode || e.which || e.charCode;
+                if (currenKey == 83 && e.ctrlKey) {
+                    e.preventDefault()
+                    let saveData=JSON.stringify(_this.$store.getters.getMinder.exportJson())
+                    _this.saveEditorContent({
+                        value: saveData,
+                    })
+                }
             }
         },
         mounted() {

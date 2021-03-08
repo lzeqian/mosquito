@@ -3,7 +3,7 @@
 </style>
 <template>
 
-    <div style="height: 100%">
+    <div style="height: 100%" @keydown="editorKeyDownSave">
         <!-- 顶部导航栏 -->
         <div class="headers">
             <el-menu mode="horizontal" @select="onMenu" background-color="#f8f8f8">
@@ -97,10 +97,13 @@
                 </el-submenu>
 
             </el-menu>
+            <el-menu mode="horizontal" background-color="#f8f8f8">
+                <Button :icon="scalePropIcon" size="small" type="text" @click.stop="scaleProp" style="height: 100%"></Button>
+            </el-menu>
         </div>
 
         <!-- body部分 -->
-        <div class="body">
+        <div class="body"  style="height:95%">
             <div class="page">
                 <div class="tools">
                     <div v-for="(item, index) in tools" :key="index">
@@ -119,7 +122,7 @@
                     </div>
                 </div>
                 <div id="topology-canvas" class="full" @contextmenu="onContextMenu($event)"></div>
-                <div class="props" :style="props.expand ? 'overflow: visible' : ''">
+                <div ref="props" class="props" :style="props.expand ? 'overflow: visible' : ''">
                     <CanvasProps :props.sync="props" @change="onUpdateProps"></CanvasProps>
                 </div>
                 <div class="context-menu" v-if="contextmenu.left" :style="this.contextmenu">
@@ -155,6 +158,7 @@
     export default {
         data() {
             return {
+                scalePropIcon:'md-arrow-dropright',
                 tools: Tools,
                 canvas:null,
                 props: {
@@ -247,6 +251,24 @@
             // this.open();
         },
         methods: {
+            editorKeyDownSave(e) {
+                let _this=this;
+                let currenKey = e.keyCode || e.which || e.charCode;
+                if (currenKey == 83 && e.ctrlKey) {
+                    e.preventDefault()
+                    _this.saveEditorContent({
+                        value: JSON.stringify(canvas.data),
+                    })
+                }
+            },
+            scaleProp(){
+                if(this.scalePropIcon=="md-arrow-dropright"){
+                    this.$refs.props.style.width=0;
+                }else{
+                    this.$refs.props.style.width="2.4rem";
+                }
+                this.scalePropIcon=(this.scalePropIcon=="md-arrow-dropright"?"md-arrow-dropleft":"md-arrow-dropright")
+            },
             onMenu(key, keyPath) {
                 if (!key || key.indexOf('/') === 0) {
                     return
@@ -448,6 +470,7 @@
                 input.click();
             },
             handle_downloadSrc(data) {
+                let _this=this;
                 let selectedNode=_this.$store.getters.getSelectedNode
                 let dirName=selectedNode.dirPath;
                 let fileName=selectedNode.fileName;
@@ -464,6 +487,7 @@
                 })
             },
             handle_savePng(data) {
+                let _this=this;
                 let selectedNode=_this.$store.getters.getSelectedNode
                 let fileName=selectedNode.fileName;
                 canvas.saveAsImage(fileName.split(".flow")[0]+'.png');
