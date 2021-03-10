@@ -627,10 +627,10 @@
         box-sizing: border-box;
     }
 
-    body {
-        font-size: 0.12rem;
-        line-height: 2;
-    }
+    /*body {*/
+    /*    font-size: 0.12rem;*/
+    /*    line-height: 2;*/
+    /*}*/
 
     *,
     *:before,
