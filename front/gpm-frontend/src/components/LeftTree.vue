@@ -23,6 +23,9 @@
                 <DropdownItem @click.native="handleContextShare"
                               v-if="selectNode!=null && !selectNode.isDir && $store.getters.currentWorkspace==1">分享
                 </DropdownItem>
+                <DropdownItem @click.native="handleContextSendEmail"
+                              v-if="selectNode!=null && !selectNode.isDir">发送邮件
+                </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuCreateMd" style="color: #ed4014"
                               v-if="selectNode!=null && selectNode.isDir">新建md
                 </DropdownItem>
@@ -126,6 +129,22 @@
                 </FormItem>
             </Form>
         </Modal>
+        <Modal
+                v-model="showSendEmail"
+                title="模板选择"
+                @on-ok="sendEmail"
+                :z-index="10002">
+            <Form :model="emailObject" :label-width="80">
+                <FormItem label="主题">
+                    <Input v-model="emailObject.subject" style="width:80%">
+                    </Input>
+                </FormItem>
+                <FormItem label="收件人">
+                    <Input v-model="emailObject.receiver" style="width:80%">
+                    </Input>
+                </FormItem>
+            </Form>
+        </Modal>
         <div style="position: absolute;top:0px;right:5px">
             <a @click="gotoDesktop">
                 <svg class="icon" aria-hidden="true">
@@ -155,6 +174,13 @@
         },
         data() {
             return {
+                showSendEmail:false,
+                emailObject:{
+                    subject:"",
+                    receiver:"",
+                    fileName: "",
+                    fileDir:""
+                },
                 showShare: false,
                 showTemplate: false,
                 templateGroupData: [],
@@ -197,6 +223,18 @@
             }
         },
         methods: {
+            handleContextSendEmail(){
+                this.showSendEmail=true;
+            },
+            sendEmail(){
+                let _this = this;
+                let selectNode = this.$store.getters.getSelectedNode
+                _this.emailObject.fileDir=selectNode.dirPath
+                _this.emailObject.fileName=selectNode.fileName
+                this.sendEmailToBack(_this.emailObject,()=>{
+                    _this.$Message.info('发送成功');
+                });
+            },
             getShareUrl() {
                 this.shareObject.shareKey = randomUuid(8);
                 return window.location.protocol + this.$globalConfig.goServer + "docs/" + this.shareObject.shareKey;
@@ -591,40 +629,6 @@
                     }
                 }, [
                     h('span', [
-                        // h('Icon', {
-                        //     props: {
-                        //         type: function(){
-                        //             if(data.root){
-                        //                 return 'logo-windows'
-                        //             }else if(data.isDir){
-                        //                 if(vueThis.checkIfVb(data)){
-                        //                     return "ios-bug-outline"
-                        //                 }
-                        //                 return 'iconfont icon-xls'
-                        //             }else{
-                        //                 return 'ios-paper-outline'
-                        //             }
-                        //         }()
-                        //     },
-                        //     style: {
-                        //         fontFamily:'iconfont',
-                        //         marginRight: '8px',
-                        //         color:function(){
-                        //             if(data.isDir) {
-                        //                 if (data.expand) {
-                        //                     for (let c of data.children) {
-                        //                         if (c.title == ".vuepress") {
-                        //                             return "red"
-                        //                         }
-                        //                     }
-                        //                 }
-                        //                 return ""
-                        //             }
-                        //
-                        //         }()
-                        //
-                        //     }
-                        // }),
                         h('svg', {
                             attrs: {
                                 class: "icon",
@@ -918,13 +922,5 @@
         transition: font-size .2s ease .2s, transform .2s ease .2s;
         vertical-align: middle;
         font-size: 22px;
-    }
-
-    .icon {
-        width: 1em;
-        height: 1em;
-        vertical-align: -0.15em;
-        fill: currentColor;
-        overflow: hidden;
     }
 </style>

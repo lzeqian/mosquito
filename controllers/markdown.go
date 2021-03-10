@@ -155,7 +155,7 @@ func (c *MarkDownController) BuildVuePress() {
 	if len(workspaceArr) > 0 {
 		workspace, _ = strconv.Atoi(workspaceArr[0])
 	}
-	readFileDir := fileDir + fileName + "/.vuepress"
+	readFileDir := fileDir + tools.PathSeparator + fileName + "/.vuepress"
 	readFileName := "config.js"
 	configJsContentStr1, err := GetFileSystem(c.Ctx).ReadText(readFileDir, readFileName)
 	if err != nil {
@@ -258,7 +258,7 @@ func (c *MarkDownController) BuildVuePress() {
 		database.UpdateVuePress(vuepress)
 	}
 	fmt.Println(cmd + " " + param1 + " " + cdCom + " " + cdDir + " " + "&& npm i && vuepress build " + curFileName)
-	if execCommand(cmd, []string{param1, cdCom + " " + cdDir + " " + "&& npm i && vuepress build " + curFileName}) {
+	if tools.ExecCommand(cmd, []string{param1, cdCom + " " + cdDir + " " + "&& npm i && vuepress build " + curFileName}) {
 		beego.SetStaticPath(realMapping, destPath+tools.PathSeparator+".vuepress"+tools.PathSeparator+"dist")
 		ServeJSON(c.Controller, realMapping)
 	}

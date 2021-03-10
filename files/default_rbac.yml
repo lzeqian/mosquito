@@ -83,6 +83,9 @@ fileSystemPermMapping:
     act:
       - read
       - write
+  - path: /email/send
+    act:
+      - read
 userGroups:
 - groupCode: artemisdev
   groupName: Artemis开发部
@@ -108,4 +111,5 @@ users:
     userFullName: 管理员
     userGroup: admin
     userLog: /images/userlog.jpg
+    email: admin@jieztech.com
     userName: admin

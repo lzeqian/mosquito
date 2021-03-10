@@ -1,87 +1,28 @@
 <style scoped>
-    .layout {
-        border: 1px solid #d7dde4;
-        background: #f5f7f9;
-        position: relative;
-        border-radius: 4px;
-        overflow: hidden;
-        height: 100%;
-    }
-
-    .layout-header-bar {
-        background: #fff;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
-    }
-
-    .layout-logo-left {
-        width: 90%;
-        height: 130px;
-        background: #5b6270;
-        border-radius: 3px;
-        margin: 15px auto;
-    }
-
-    .menu-icon {
-        transition: all .3s;
-    }
-
-    .rotate-icon {
-        transform: rotate(-90deg);
-    }
-
-    .menu-item span {
-        display: inline-block;
-        overflow: hidden;
-        width: 69px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        vertical-align: bottom;
-        transition: width .2s ease .2s;
-    }
-
-    .menu-item i {
-        transform: translateX(0px);
-        transition: font-size .2s ease, transform .2s ease;
-        vertical-align: middle;
-        font-size: 16px;
-    }
-
-    .collapsed-menu span {
-        width: 0px;
-        transition: width .2s ease;
-    }
-
-    .collapsed-menu i {
-        transform: translateX(5px);
-        transition: font-size .2s ease .2s, transform .2s ease .2s;
-        vertical-align: middle;
-        font-size: 22px;
-    }
-
-    ivu-layout-sider {
-        width: 300px
+    .vditor-toc:before{
+        font-size: 0.15rem;
     }
 </style>
 <template>
 
-    <div style="height: 100%;padding-left: 7px">
-        <mavon-editor v-model="content" ref="md" :style="{height:'100%',maxHeight:'100%'}" @save="saveCode"  @imgAdd="handleEditorImgAdd"/>
-        <button ref="diy" type="button" @click="downloadFile"
-                class="op-icon fa fa-mavon-floppy-o"
-                aria-hidden="true" title="下载"></button>
-        <button ref="transDoc" type="button" @click="transDoc"
-                class="op-icon fa fa-mavon-floppy-o"
-                aria-hidden="true" title="转换doc"></button>
+    <div id="vditor" style="height: 100%;padding-left: 0px" @keydown="editorKeyDownSave">
+
     </div>
 
 </template>
 <script>
+    import Vditor from 'vditor'
+
+    import "vditor/src/assets/scss/index.scss";
+    let vueThis=null;
+    // import "~vditor/src/assets/scss/index"
     export default {
         data() {
             return {
                 isCollapsed: false,
                 data5: [],
-                content: ""
+                content: "",
+                contentEditor:null
             }
         },
         computed:{
@@ -89,58 +30,133 @@
         watch: {
         },
         methods: {
-            downloadFile(){
-                let selectedNode=this.$store.getters.getSelectedNode
-                let token=localStorage.getItem("token")
-                if(this.$store.getters.getEditorMode=="share") {
-                    let shareKey=this.$store.getters.getShareData["ShareKey"]
-                    window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName + (token ? "&token=" + token : "") + "&shareKey=" + shareKey
-                }else{
-                    window.location = this.$globalConfig.goServer + "file/download?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace
+            editorKeyDownSave(e) {
+                let _this=this;
+                let currenKey = e.keyCode || e.which || e.charCode;
+                if (currenKey == 83 && e.ctrlKey) {
+                    e.preventDefault()
+                    _this.saveEditorContent({
+                        value: _this.contentEditor.getValue(),
+                    })
                 }
-            },
-            transDoc(){
-                let selectedNode=this.$store.getters.getSelectedNode
-                let token=localStorage.getItem("token")
-                if(this.$store.getters.getEditorMode=="share") {
-                    let shareKey = this.$store.getters.getShareData["ShareKey"]
-                    window.location = this.$globalConfig.goServer + "file/transDoc?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName + (token ? "&token=" + token : "") + "&shareKey=" + shareKey
-                }else {
-                    window.location = this.$globalConfig.goServer + "file/transDoc?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName + (token ? "&token=" + token : "") + "&Workspace=" + this.$store.getters.currentWorkspace
-                }
-            },
-            handleEditorImgAdd(pos, $file){
-                var _this=this;
-                let selectedNode=this.$store.getters.getSelectedNode
-                const param = new FormData();
-                param.append('myfile', $file)
-                param.append('projectName', selectedNode.fileName)
-                this.$axios.post(this.$globalConfig.goServer + "file/uploadToServer", param).then(res => {
-                    let imageData=res.data.data;
-                    _this.$refs.md.$imglst2Url([[pos, imageData]])
-                })
-            },
-            /**
-             * 保存触发事件
-             * @param value 原始markdown文件
-             * @param render 解析的html文件
-             */
-            saveCode(saveVaue, render) {
-                this.saveEditorContent({
-                    value: saveVaue,
-                })
             },
             initData(data){
-                this.content = data
+                let _this=this;
+                if(!this.contentEditor) {
+                    this.contentEditor = new Vditor('vditor', {
+                        width:'100%',
+                        height:'100%',
+                        paddingLeft: "0",
+                        typewriterMode: true,
+                        outline: {
+                            enable: true,
+                            position: 'left'
+                        },
+                        toolbarConfig: {
+                            pin: false,
+                        },
+                        cache: {
+                            enable: false,
+                        },
+                        toolbar: [
+                            "emoji",
+                            "headings",
+                            "bold",
+                            "italic",
+                            "strike",
+                            "link",
+                            "|",
+                            "list",
+                            "ordered-list",
+                            "check",
+                            "outdent",
+                            "indent",
+                            "|",
+                            "quote",
+                            "line",
+                            "code",
+                            "inline-code",
+                            "insert-before",
+                            "insert-after",
+                            "|",
+                            "upload",
+                            "record",
+                            "table",
+                            "|",
+                            "undo",
+                            "redo",
+                            "|",
+                            "fullscreen",
+                            "edit-mode",
+                            {
+                                hotkey: "Ctrl-S",
+                                name: "save",
+                                tipPosition: "s",
+                                tip: "保存",
+                                className: "right",
+                                icon: `<img style="height: 16px" src='https://img.58cdn.com.cn/escstatic/docs/imgUpload/idocs/save.svg'/>`,
+                                click() {
+                                    vueThis.saveEditorContent({
+                                        value: vueThis.contentEditor.getValue(),
+                                    })
+                                }
+                            },
+                            {
+                                name: "more",
+                                toolbar: [
+                                    "both",
+                                    "code-theme",
+                                    "content-theme",
+                                    "export",
+                                    "outline",
+                                    "preview",
+                                    "devtools",
+                                    "info",
+                                    "help",
+                                ],
+                            },
+                            ],
+                        upload: {
+                            accept: 'image/*',
+                            multiple: false,
+                            url: this.$globalConfig.goServer + "file/uploadToServer",
+                            linkToImgUrl: 'file/uploadToServer',
+                            filename (name) {
+                                return name.replace(/[^(a-zA-Z0-9\u4e00-\u9fa5\.)]/g, '').
+                                replace(/[\?\\/:|<>\*\[\]\(\)\$%\{\}@~]/g, '').
+                                replace('/\\s/g', '')
+                            },
+                            handler(files) {
+                                let selectedNode=vueThis.$store.getters.getSelectedNode
+                                const param = new FormData();
+                                param.append('myfile', files[0])
+                                param.append('projectName', selectedNode.fileName)
+                                vueThis.$axios.post(vueThis.$globalConfig.goServer + "file/uploadToServer", param).then(res => {
+                                    let imageData=res.data.data;
+                                    let name = files[0] && files[0].name;
+                                    let succFileText = "";
+                                    if (vueThis.contentEditor && vueThis.contentEditor.currentMode === "wysiwyg") {
+                                        succFileText += `\n <img alt=${name} src="${imageData}">`;
+                                    } else {
+                                        succFileText += `  \n![${name}](${imageData})`;
+                                    }
+                                    document.execCommand("insertHTML", false, succFileText);
+
+                                })
+                            },
+                        },
+                        after: () => {
+                            this.contentEditor.setValue(data)
+                        },
+                    })
+                }else{
+                    this.contentEditor.setValue(data)
+                }
             }
         },
         mounted() {
-            var md = this.$refs.md;
-            var toolbar_left = md.$refs.toolbar_left;
-            var diy = this.$refs.diy;
-            toolbar_left.$el.append(diy);
-            var transDoc = this.$refs.transDoc;
-            toolbar_left.$el.append(transDoc);
+            vueThis=this;
+            document.documentElement.style.fontSize="28px";
         }
     }
 </script>

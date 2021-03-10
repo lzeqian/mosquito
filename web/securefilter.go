@@ -157,7 +157,6 @@ func checkShare(ctx *context.Context) models.Result {
   检验用户是否登录过滤器
 */
 var FilterUser = func(ctx *context.Context) {
-	fmt.Println("&&&&&&&&&&&&&&&" + ctx.Request.URL.Path)
 	if ctx.Request.Method == "OPTIONS" || collection.Collect(IgnoreList).Contains(ctx.Request.URL.Path) {
 		return
 	} else {

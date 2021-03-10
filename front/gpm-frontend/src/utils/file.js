@@ -258,6 +258,14 @@ function createFileFromTemplateBack (templateObject,func) {
         }
     })
 }
+function sendEmailToBack(emailObject,func) {
+    let _this = this;
+    this.$axios.post(_this.$globalConfig.goServer + "/email/send",emailObject).then((response) => {
+        if (response.data.code == 0) {
+            func && func()
+        }
+    })
+}
 export default{
     downloadFile,
     uploadFile,
@@ -277,5 +285,6 @@ export default{
     createDir,
     _createDir,
     deleteDir,
-    createFileFromTemplateBack
+    createFileFromTemplateBack,
+    sendEmailToBack
 }

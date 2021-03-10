@@ -43,4 +43,5 @@ func init() {
 	beego.Router("/fav/collectFile", &controllers.FavoriteController{}, "post:CollectFile")
 	beego.Router("/fav/cancelFavFile", &controllers.FavoriteController{}, "delete:CancelFavFile")
 	beego.Router("/fav/search", &controllers.FavoriteController{}, "get:SearchFavFile")
+	beego.Router("/email/send", &controllers.EmailController{}, "post:SeneMail")
 }

@@ -248,6 +248,7 @@
             canvasOptions.on = this.onMessage;
             canvas = new Topology('topology-canvas', canvasOptions);
             this.canvas=canvas
+            document.documentElement.style.fontSize="100px";
             // this.open();
         },
         methods: {

@@ -8,6 +8,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/hirochachacha/go-smb2 v1.0.3
 	github.com/jinzhu/gorm v1.9.16
+	github.com/jordan-wright/email v0.0.0-20210109023952-943e75fe5223
 	github.com/satori/go.uuid v1.2.0
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/sony/sonyflake v1.0.0
