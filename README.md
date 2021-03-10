@@ -40,6 +40,15 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
 ![](doc/images/excel.png)
 <b>7.ppt在线编辑</b>
 ![](doc/images/ppt.png)
+<b>8.图片在线编辑</b>
+![](doc/images/image.png)
+<b>9.其他文档功能包括：</b>
+- 在线代码编辑
+- 在线txt和html编辑
+- 在线pdf预览
+- 文档发送email
+- 通过模板生成文件
+
  ## 系统架构
  ![系统拓扑图](doc/images/topology.png)
  ### 前端依赖插件
