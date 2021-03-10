@@ -32,6 +32,14 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
 <b>3.vuepress</b>
 ![](doc/images/vuepress.png)
 
+<b>4.markdown(所见即所得类typora)</b>
+![](doc/images/markdown.png)
+<b>5.word在线编辑</b>
+![](doc/images/word.png)
+<b>6.excel在线编辑</b>
+![](doc/images/excel.png)
+<b>7.ppt在线编辑</b>
+![](doc/images/ppt.png)
  ## 系统架构
  ![系统拓扑图](doc/images/topology.png)
  ### 前端依赖插件
