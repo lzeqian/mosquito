@@ -55,7 +55,9 @@ func (_ *FileTemplate) InitDatabase(gdb *gorm.DB) {
 		}
 	}
 	initFileTemplate("files/templates/weekreport.xlsx", "周报模板", 1)
+	initFileTemplate("files/templates/weekmeeting.docx", "周会议模板", 1)
 	initFileTemplate("files/templates/mdlearn.md", "markdown学习模板", 2)
+
 }
 func GetAllFileTemplateGroup() []FileTemplateGroup {
 	var group []FileTemplateGroup
