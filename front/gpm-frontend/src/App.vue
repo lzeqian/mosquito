@@ -5,7 +5,7 @@
         <Home ref="home" v-if="$store.state.isLogin && $store.getters.currentDirType=='tree'"></Home>
         <Spin fix :style="{zIndex:10000}" v-show="$store.state.isSpinShow">
             <Icon type="ios-loading" size=18 class="demo-spin-icon-load"></Icon>
-            <div style="color: red">编译中，请稍后。。。</div>
+            <div style="color: red" v-html="$store.state.spinShowText"></div>
         </Spin>
     </div>
 </template>

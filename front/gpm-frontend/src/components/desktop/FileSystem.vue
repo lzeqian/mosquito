@@ -380,6 +380,7 @@
                 //当前选择的节点
                 let selectedItem=_this.selectedItem;
                 _this.$store.commit('showLoading')
+                _this.$store.commit("setLoadingText",'编译中，请稍后。。。')
                 _this.buildVpFile(selectNode)
             },
             createFileInCur(title,suffix) {

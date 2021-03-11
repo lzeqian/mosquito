@@ -7,6 +7,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     isSpinShow: false,
+    spinShowText:"编译中，请稍后。。。",
     selectedNode:null,
     selectedNodeCacheData:null,
     isLogin:false,
@@ -122,6 +123,9 @@ export default new Vuex.Store({
     },
     hideLoading (state) {
       state.isSpinShow = false
+    },
+    setLoadingText(state,title){
+      state.spinShowText=title;
     },
     setSelecedNode(state,selectedNode){
       state.selectedNode = selectedNode

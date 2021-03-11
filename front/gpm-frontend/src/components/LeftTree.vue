@@ -455,6 +455,7 @@
             handleContextMenuBuildVp() {
                 let _this = this;
                 _this.$store.commit('showLoading')
+                _this.$store.commit("setLoadingText",`编译中，请稍后(<a href='javascript:window.vueComponents.$store.commit(\"hideLoading\")'>后台运行</a>)。。。`)
                 let selectNodes = this.$refs.tree.getSelectedNodes()
                 if (selectNodes.length == 0) {
                     this.$Message.error("请选选择展开子目录");
@@ -746,38 +747,44 @@
                 let name = entry.name;
                 let _this = this;
                 if (entry.isFile) {
-                    entry.file(async function (file) {
+                    console.log("开始上传文件："+parentDir+"-"+entry.name)
+                   await entry.file(await async function (file) {
                         const param = new FormData();
                         param.append('myfile', file)
                         param.append('fileDir', parentDir)
+                        _this.$store.commit("setLoadingText",_this.$store.state.spinShowText+"<br/>上传文件："+entry.name)
                         await _this.$axios.post(_this.$globalConfig.goServer + "/file/upload", param).then(res => {
-
                         })
                     })
+                    console.log("上传完成"+parentDir+"-"+entry.name)
                 } else {
                     //服务器创建目录
+                    _this.$store.commit("setLoadingText",_this.$store.state.spinShowText+"<br/>新建目录："+name)
+                    console.debug("创建目录:"+parentDir+"-"+name)
                     await this.$axios.post(this.$globalConfig.goServer + "file/mkdir", {
                         fileDir: parentDir,
                         fileName: name
                     }).then((response) => {
                     });
                     let dirReader = entry.createReader()
-                    dirReader.readEntries(async function (entries) {
+                    await dirReader.readEntries(await async function (entries) {
                         for (let centry of entries) {
-                            _this.uploadEntry(parentDir + "/" + name, centry)
+                            await _this.uploadEntry(parentDir + "/" + name, centry)
                         }
                     })
                 }
             },
-            dropUpload(e) {
+            async dropUpload(e) {
+                let _this=this;
                 e.preventDefault(); //取消默认浏览器拖拽效果
                 let selectNode = this.$store.getters.getSelectedNode
-                var fileDir = selectNode.dirPath + "/" + selectNode.title;
-                let _this = this;
-                if (!selectNode) {
+                if(selectNode==null || !selectNode.isDir){
                     this.$message.error("请选择上传的目录")
                     return;
                 }
+                _this.$store.commit('showLoading')
+                _this.$store.commit("setLoadingText",`上传文件中。。`)
+                var fileDir = selectNode.dirPath + "/" + selectNode.title;
                 let fileList = e.dataTransfer.files; //获取文件对象
                 //检测是否是拖拽文件到页面的操作
                 if (fileList.length == 0) {
@@ -786,10 +793,10 @@
                 for (var i = 0; i < fileList.length; i++) {
                     let item = e.dataTransfer.items[i]
                     let entry = item.webkitGetAsEntry()
-                    this.uploadEntry(fileDir, entry)
+                    await this.uploadEntry(fileDir, entry)
                     _this.selectChange([selectNode])
                 }
-
+                _this.$store.commit('hideLoading')
             },
             initWorkspace(workspace,func){
 
