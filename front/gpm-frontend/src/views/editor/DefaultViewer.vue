@@ -161,8 +161,11 @@
                 })
             },
             gotoUrl(shareKey) {
-                let jurl=window.location.protocol + this.$globalConfig.goServer + "docs/" + shareKey;
-                window.open(jurl)
+                this.getGoServer(shareKey,(shareServer)=>{
+                    let jurl=window.location.protocol + shareServer + "docs/" + shareKey;
+                    window.open(jurl)
+                })
+
             },
             gotoVpUrl(appPath) {
                 let jurl=window.location.protocol + this.$globalConfig.goServer  + appPath.substring(1);

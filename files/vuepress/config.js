@@ -33,6 +33,7 @@ module.exports = {
     themeConfig: {
         sidebar: "auto",
         displayAllHeaders: true,
+        sidebarDepth: 6,
         nav: [
             { text: 'Home', link: '/' },
             { text: 'baidu', link: 'https://www.baidu.com' }

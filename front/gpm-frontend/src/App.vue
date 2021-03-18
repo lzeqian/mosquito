@@ -99,12 +99,14 @@
                         },100)
                     })
                 }
-            }
+            },
+
 
         },
         mounted() {
             window.vueComponents = this;
             this.initData()
+            this.initGoServer()
         }
     }
 </script>

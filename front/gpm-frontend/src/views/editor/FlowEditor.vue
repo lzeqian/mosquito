@@ -19,6 +19,7 @@
                     <!--                    <el-menu-item index="replace">导入本地文件...</el-menu-item>-->
 
                     <el-menu-item index="save">保存</el-menu-item>
+                    <el-menu-item index="saveNativePng">保存为png</el-menu-item>
                     <el-menu-item class="separator"></el-menu-item>
                     <el-menu-item index="downloadSrc">下载原始文件</el-menu-item>
                     <el-menu-item index="savePng">下载为PNG</el-menu-item>
@@ -492,6 +493,29 @@
                 let selectedNode=_this.$store.getters.getSelectedNode
                 let fileName=selectedNode.fileName;
                 canvas.saveAsImage(fileName.split(".flow")[0]+'.png');
+            },
+            handle_saveNativePng(data) {
+                let _this=this;
+                let selectedNode=_this.$store.getters.getSelectedNode
+                let fileName=selectedNode.fileName;
+                canvas.toImage(0, 'image/png',(blobData)=>{
+                    let formData = new FormData();
+                    fileName=fileName.substring(0,fileName.indexOf("."))+".png"
+                    formData.append('myfile',blobData,fileName)
+                    _this.$axios({
+                        url: _this.$globalConfig.goServer +'file/upload?fileDir='+selectedNode.dirPath,
+                        method: 'post',
+                        processData:  {"Content-Type":"multipart/form-data",},
+                        data: formData
+                    }).then(()=>{
+                        if(_this.$root.$children[0].$refs.home && _this.$root.$children[0].$refs.home.$refs.leftTree){
+                            let leftTree=_this.$root.$children[0].$refs.home.$refs.leftTree;
+                            let {index, parentNode} = leftTree.getParent(leftTree.$refs.tree.data[0], selectedNode)
+                            leftTree.selectChange([parentNode])
+                        }
+
+                    })
+                })
             },
             handle_undo(data) {
                 canvas.undo();

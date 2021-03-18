@@ -71,7 +71,27 @@ async function loadSubNode(node,curParent,func){
         func && func(node,curParent,response.data.data)
     });
 }
-
+function initGoServer(){
+    let _this=this;
+    _this.$axios.get(_this.$globalConfig.goServer + "share/getShareUrl").then((response) => {
+        if (response.data.code == 0) {
+            let serverJson=response.data.data;
+            _this.$globalConfig.goServer=serverJson["goServer"]
+            _this.$globalConfig.externGoServer=serverJson["externGoServer"]
+            _this.$globalConfig.documentServer=serverJson["documentServer"]
+            _this.$globalConfig.externDocumentServer=serverJson["externDocumentServer"]
+        }
+    })
+}
+function getGoServer(shareKey,func){
+    let _this=this;
+    _this.$axios.get(_this.$globalConfig.goServer + "share/getShareUrl?preShareKey="+shareKey).then((response) => {
+        if (response.data.code == 0) {
+            let shareServer=response.data.data;
+            func && func(shareServer)
+        }
+    })
+}
 export default{
     loadTemplateGroup,
     loadTemplate,
@@ -81,5 +101,7 @@ export default{
     loadSubNode,
     collectFavorite,
     searchFavorite,
-    cancelFavorite
+    cancelFavorite,
+    initGoServer,
+    getGoServer
 }

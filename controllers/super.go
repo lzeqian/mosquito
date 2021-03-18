@@ -98,7 +98,7 @@ func CheckSharePrivileges(ctx *context.Context, shareKeyString string) models.Re
 		//检查权限，获取当前路径需要权限
 
 		//仅仅允许自己访问，找到token和共享用户比较
-		if userLink.ShareMode == 0 {
+		if *userLink.ShareMode == 0 {
 			authorization := GetAuthorization(ctx)
 			if authorization != "" {
 				myCustomClaims, _ := tools.GetTokenInfo(authorization)
@@ -108,7 +108,7 @@ func CheckSharePrivileges(ctx *context.Context, shareKeyString string) models.Re
 					return result
 				}
 			}
-		} else if userLink.ShareMode == 1 {
+		} else if *userLink.ShareMode == 1 {
 			actList := service.GetPathRequirePerm(requestPath)
 			if actList.Len() != 0 {
 				//1表示所有用户只读
@@ -119,13 +119,13 @@ func CheckSharePrivileges(ctx *context.Context, shareKeyString string) models.Re
 					return result
 				}
 			}
-		} else if userLink.ShareMode == 2 {
+		} else if *userLink.ShareMode == 2 {
 			//表示所有用户可编辑
 			result.Code = 0
 			return result
-		} else if userLink.ShareMode == 3 {
+		} else if *userLink.ShareMode == 3 {
 			//0表示可查看
-			if userLink.AssignUserMode == 0 {
+			if *userLink.AssignUserMode == 0 {
 				actList := service.GetPathRequirePerm(requestPath)
 				if actList.Len() != 0 {
 					//1表示所有用户只读

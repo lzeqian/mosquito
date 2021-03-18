@@ -42,7 +42,7 @@
             return {
                 loading: true,
                 contentTitle: '',
-                shareKey: window.shareKey || '1a0459ed'
+                shareKey: window.shareKey || '5b76930c'
             }
         },
         watch: {},
@@ -54,6 +54,11 @@
                     this.$store.state.isLogin = true
                 }
                 vueThis.loadEditorContentByShareKey(vueThis.shareKey, (vueThis, shareData) => {
+                    if (shareData.IsPublic != 0) {
+                        vueThis.$globalConfig.goServer = vueThis.$globalConfig.externGoServer
+                        debugger
+                        vueThis.$globalConfig.documentServer = vueThis.$globalConfig.externDocumentServer
+                    }
                     if (shareData.ID == 0) {
                         vueThis.$Message.error({
                             content: "分享key不存在，请尝试其他key"
@@ -73,9 +78,8 @@
                         let re;
                         eval("re=/^.+(" + key + ")$/")
                         if (re.test(node.title)) {
-                            debugger
                             this.routePush(node, ...mapping[key])
-                            if(node.title.endsWith(".pdf")){
+                            if (node.title.endsWith(".pdf")) {
                                 return;
                             }
                         }
@@ -97,12 +101,24 @@
                     })
                 })
 
+            },
+            initGoServer() {
+                let _this = this;
+                _this.$axios.get(_this.$globalConfig.goServer + "share/getShareUrl").then((response) => {
+                    if (response.data.code == 0) {
+                        let serverJson = response.data.data;
+                        _this.$globalConfig.goServer = serverJson["goServer"]
+                        _this.$globalConfig.externGoServer = serverJson["externGoServer"]
+                        _this.$globalConfig.documentServer=serverJson["documentServer"]
+                        _this.$globalConfig.externDocumentServer=serverJson["externDocumentServer"]
+                    }
+                })
             }
-
         },
         mounted() {
             window.vueComponents = this;
             this.initData()
+            this.initGoServer()
         }
     }
 </script>

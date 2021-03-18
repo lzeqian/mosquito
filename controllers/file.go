@@ -78,12 +78,52 @@ func (this *FileController) UploadFile() {
 	f, h, _ := this.GetFile("myfile") //获取上传的文件
 	fileName := h.Filename
 	fileByte, _ := ioutil.ReadAll(f)
-	err := GetFileSystem(this.Ctx).SaveByte(fileDir, fileName, fileByte, 0777)
+	err := GetFileSystem(this.Ctx).SaveByte(fileDir, fileName, fileByte, os.ModePerm)
 	if err != nil {
 		ServeJSON(this.Controller, err)
 		return
 	}
 	fmt.Print(fileDir, fileName)
+	ServeJSON(this.Controller, "")
+}
+
+/**
+  将文件从当前位置拖动到到另外一个位置
+*/
+func (this *FileController) MoveFile() {
+	data := this.Ctx.Input.RequestBody
+	paramData := make(map[string]string)
+	json.Unmarshal(data, &paramData)
+	fileDir := paramData["fileDir"]
+	fileName := paramData["fileName"]
+	targetDir := paramData["targetDir"]
+	token := this.Ctx.Input.Header("Authorization")
+	workspace := this.Ctx.Input.Header("Workspace")
+	clwas, _ := tools.GetTokenInfo(token)
+	//个人不需要检查权限，公共文档库需要检查
+	if workspace == "0" {
+		if !service.CheckUserMulAct(clwas.Name, fileDir, []string{service.ActRead}) {
+			ServeJSON(this.Controller, errors.New("请确保当前用户拥有以下权限："+service.ActRead))
+			return
+		}
+		if !service.CheckUserMulAct(clwas.Name, targetDir, []string{service.ActCreateFile, service.ActWrite}) {
+			ServeJSON(this.Controller, errors.New("请确保当前用户拥有以下权限："+strings.Join([]string{service.ActCreateFile, service.ActWrite}, ",")))
+			return
+		}
+	} else {
+		userInfo := service.GetUser(clwas.Name)
+		targetDir = tools.PathSeparator + userInfo["userFullName"].(string) + targetDir
+	}
+	srcByte, err := GetFileSystem(this.Ctx).ReadByte(fileDir, fileName)
+	if err != nil {
+		ServeJSON(this.Controller, err)
+		return
+	}
+	err = GetFileSystem(this.Ctx).SaveByte(targetDir, fileName, srcByte, os.ModePerm)
+	if err != nil {
+		ServeJSON(this.Controller, err)
+		return
+	}
 	ServeJSON(this.Controller, "")
 }
 
@@ -266,16 +306,20 @@ func (c *FileController) CreateDir() {
 func (c *FileController) DeleteDir() {
 	fileDir := c.GetString("fileDir")
 	fileName := c.GetString("fileName")
-	listFileDir := ""
-	if strings.HasSuffix(fileDir, tools.PathSeparator) {
-		listFileDir = fileDir + fileName
-	} else {
-		listFileDir = fileDir + tools.PathSeparator + fileName
-	}
-	nodeList, _ := GetFileSystem(c.Ctx).ListDir(listFileDir, "")
-	if len(nodeList) > 0 {
-		ServeJSON(c.Controller, errors.New("存在多个子元素，请删除后继续"))
-		return
+	workspace := c.Ctx.Input.Header("Workspace")
+	//公共文档库存在子目录不允许删除
+	if workspace == "0" {
+		listFileDir := ""
+		if strings.HasSuffix(fileDir, tools.PathSeparator) {
+			listFileDir = fileDir + fileName
+		} else {
+			listFileDir = fileDir + tools.PathSeparator + fileName
+		}
+		nodeList, _ := GetFileSystem(c.Ctx).ListDir(listFileDir, "")
+		if len(nodeList) > 0 {
+			ServeJSON(c.Controller, errors.New("存在多个子元素，请删除后继续"))
+			return
+		}
 	}
 	err := GetFileSystem(c.Ctx).RmDir(fileDir, fileName)
 	if err != nil {

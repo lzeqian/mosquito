@@ -19,7 +19,8 @@ var IgnoreList = []string{
 	"/console",
 	"/login",
 	"/file/viewerFromServer",
-	"/share/getShareFile",
+	"/share/getShareUrl",
+	//"/share/getShareFile",
 	"/docs/.*",
 	".*/.*\\.[css|js|png|PNG|jpg|JPG|html|xml|txt|woff|woff2|ttf|eot|svg|map]",
 	"/favicon.ico",
@@ -140,6 +141,8 @@ func checkShare(ctx *context.Context) models.Result {
 		shareKeyParam := ctx.Request.FormValue("shareKey")
 		if shareKeyParam != "" {
 			shareKeyString = shareKeyParam
+		} else {
+			shareKeyString = ctx.Input.Query("shareKey")
 		}
 	}
 	//应该该接口在office插件启动时就需要检查状态，必须先放过到实际接口中去验证

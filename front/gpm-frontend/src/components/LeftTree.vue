@@ -76,6 +76,7 @@
                 title="分享"
                 @on-ok="sharePersonFile"
                 :z-index="10002">
+            <hr/>
             谁可以查看/编辑文档<br/>
             <RadioGroup v-model="shareObject.shareMode">
                 <Radio :label="0">仅仅我自己</Radio>
@@ -96,6 +97,15 @@
                 <Radio :label="2">所有人可编辑</Radio>
                 <br/>
             </RadioGroup>
+            <br/>
+            <hr/>
+            访问范围<br/>
+            <RadioGroup v-model="shareObject.isPublic">
+                <Radio :label="0">内网</Radio>
+                <br/>
+                <Radio :label="1">外网</Radio>
+            </RadioGroup>
+            <hr/>
             <br/><br/>
             <div v-if="preShareKey==null || preShareKey==''">文档url: <a :href="shareObject.shareUrl">{{shareObject.shareUrl}}</a>
             </div>
@@ -192,18 +202,31 @@
                     fileDir:""
                 },
                 shareObject: {
+                    isPublic:0,
                     shareMode: 2,
                     shareKey: "",
                     joinKey: "",
                     assignUserMode: 0,
                     shareUrl: "",
-                    joinUrl: ""
+                    joinUrl: "",
+                    locationUrl:""
                 },
                 preShareKey: null,
                 isSpinShow: false,
                 isImgShow: false,
                 data5: [],
+                dragstartNode:null,
+                dragstartData:null,
+                goServer:null,
+                externGoServer:null
             }
+        },
+        watch:{
+            "shareObject.isPublic"(){
+                this.getShareUrl().then((re)=> {
+                    this.shareObject.shareUrl = re;
+                });
+            },
         },
         computed: {
             selectNode() {
@@ -235,28 +258,40 @@
                     _this.$Message.info('发送成功');
                 });
             },
-            getShareUrl() {
-                this.shareObject.shareKey = randomUuid(8);
-                return window.location.protocol + this.$globalConfig.goServer + "docs/" + this.shareObject.shareKey;
+            async getShareUrl() {
+                let _this=this;
+                if(this.shareObject.isPublic==0){
+                   return window.location.protocol + this.$globalConfig.goServer + "docs/" + this.shareObject.shareKey;
+                }else{
+                    return window.location.protocol + this.$globalConfig.externGoServer + "docs/" + this.shareObject.shareKey;
+                }
             },
             getJoinUrl() {
-                this.shareObject.joinKey = randomUuid(8);
                 return window.location.protocol + this.$globalConfig.goServer + "docJoin/" + this.shareObject.joinKey;
             },
             getPreShareUrl() {
-                return window.location.protocol + this.$globalConfig.goServer + "docs/" + this.preShareKey;
+                let curLocationUrl=null;
+                if(this.shareObject.isPublic==0){
+                    return window.location.protocol + this.$globalConfig.goServer + "docs/" + this.preShareKey;
+                }else{
+                    return window.location.protocol + this.$globalConfig.externGoServer + "docs/" + this.preShareKey;
+                }
             },
             handleContextShare() {
                 let _this = this;
                 this.showShare = true;
-                this.shareObject.shareUrl = this.getShareUrl();
-                this.shareObject.joinUrl = this.getJoinUrl();
-                let selectNode = this.$store.getters.getSelectedNode
-                this.$axios.get(this.$globalConfig.goServer + "share/isShareFile?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.fileName).then((response) => {
-                    if (response.data.code == 0) {
-                        _this.preShareKey = response.data.data.ShareKey;
-                    }
-                })
+                this.shareObject.shareKey = randomUuid(8);
+                this.getShareUrl().then((re)=>{
+                    this.shareObject.shareUrl=re;
+                    this.shareObject.joinUrl = this.getJoinUrl();
+                    this.shareObject.joinKey = randomUuid(8);
+                    let selectNode = this.$store.getters.getSelectedNode
+                    this.$axios.get(this.$globalConfig.goServer + "share/isShareFile?fileDir=" + selectNode.dirPath + "&fileName=" + selectNode.fileName).then((response) => {
+                        if (response.data.code == 0) {
+                            _this.preShareKey = response.data.data.ShareKey;
+                        }
+                    })
+                });
             },
             changeTemplateGroup() {
                 let _this = this;
@@ -419,7 +454,7 @@
                 let _this = this;
                 let selectNodes = this.$refs.tree.getSelectedNodes()
                 if (selectNodes.length == 0) {
-                    this.$Message.error("请选选择展开子目录");
+                    this.$Message.error("请选择节点");
                     return;
                 }
                 let selectNode = selectNodes[0];
@@ -627,6 +662,14 @@
                     style: {
                         display: 'inline-block',
                         width: '100%'
+                    },attrs: {
+                        draggable:'true'
+                    },
+                    on:{
+                        dragstart: () => this.handleDragStart(root, node, data),
+                        dragover: () => this.handleDragOver(root, node, data),
+                        dragend: () => this.handleDragEnd(root, node, data),
+                        drop: ()=> this.handleDrop(root, node, data),
                     }
                 }, [
                     h('span', [
@@ -688,6 +731,53 @@
 
                 ]);
             },
+            handleDragStart(root, node, data){
+                const event = window.event||arguments[0];
+                this.dragstartNode = node
+                this.dragstartData = data
+            },
+            handleDragOver(root, node, data){
+                const event = window.event||arguments[0];
+                event.preventDefault();
+
+            },
+            handleDragEnd(root, node, data){
+                const event = window.event||arguments[0];
+                event.preventDefault();
+            },
+            handleDrop(root, node, data){
+                let _this=this;
+                let fileList = event.dataTransfer.files; //获取文件对象
+                //检测是否是拖拽文件到页面的操作
+                if (fileList.length > 0) {
+                    return false;
+                }
+                event.preventDefault();
+                if(!this.dragstartNode){
+                    this.$Message.error("请选择移动文件");
+                    return;
+                }
+                if(node === this.dragstartNode) return
+                this.moveFile(this.dragstartNode.node,node.node,()=>{
+                    const source_parentKey = root.find(el => el === this.dragstartNode).parent;
+                    const source_parent = root.find(el => el.nodeKey === source_parentKey).node;
+                    const source_index = source_parent.children.indexOf(this.dragstartData);
+                    source_parent.children.splice(source_index, 1);
+                    _this.selectChange([node.node])
+                })
+                // const target_parentKey = root.find(el => el === node).parent;
+                // const target_parent = root.find(el => el.nodeKey === target_parentKey).node;
+                // const target_index = target_parent.children.indexOf(data);
+                // const target_children = data.children || [];
+                // target_children.push(this.dragstartData);
+                // this.$set(data, 'children', target_children);
+                //
+                // const source_parentKey = root.find(el => el === this.dragstartNode).parent;
+                // const source_parent = root.find(el => el.nodeKey === source_parentKey).node;
+                // const source_index = source_parent.children.indexOf(this.dragstartData);
+                // source_parent.children.splice(source_index, 1);
+                // console.log(this.data5,"data5")
+            },
             /**
              * 树节点被选中时触发的编辑器打开和父节点展开事件
              * @param selectedList
@@ -701,7 +791,9 @@
                 if (node) {
                     //取消选择
                     for(let sn of this.$refs.tree.getSelectedNodes()){
-                        this.$set(sn, 'selected', false)
+                        if(sn) {
+                            this.$set(sn, 'selected', false)
+                        }
                     }
                     this.$store.commit("setSelecedNode", node)
                     var vueThis = this;
@@ -748,14 +840,17 @@
                 let _this = this;
                 if (entry.isFile) {
                     console.log("开始上传文件："+parentDir+"-"+entry.name)
-                   await entry.file(await async function (file) {
+                    await new Promise((resolve, reject) => entry.file(resolve, reject)).then(async function(file) {
                         const param = new FormData();
                         param.append('myfile', file)
                         param.append('fileDir', parentDir)
                         _this.$store.commit("setLoadingText",_this.$store.state.spinShowText+"<br/>上传文件："+entry.name)
+                        console.log("开始上传文件ajax："+parentDir+"-"+entry.name)
                         await _this.$axios.post(_this.$globalConfig.goServer + "/file/upload", param).then(res => {
+                            console.log("上传文件ajax回调完成："+parentDir+"-"+entry.name)
                         })
-                    })
+                        console.log("结束上传文件ajax："+parentDir+"-"+entry.name)
+                    });
                     console.log("上传完成"+parentDir+"-"+entry.name)
                 } else {
                     //服务器创建目录
@@ -767,7 +862,7 @@
                     }).then((response) => {
                     });
                     let dirReader = entry.createReader()
-                    await dirReader.readEntries(await async function (entries) {
+                    await new Promise((resolve, reject) => dirReader.readEntries(resolve, reject)).then(async function(entries) {
                         for (let centry of entries) {
                             await _this.uploadEntry(parentDir + "/" + name, centry)
                         }
@@ -775,6 +870,11 @@
                 }
             },
             async dropUpload(e) {
+                let fileList = e.dataTransfer.files; //获取文件对象
+                //检测是否是拖拽文件到页面的操作
+                if (fileList.length == 0) {
+                    return false;
+                }
                 let _this=this;
                 e.preventDefault(); //取消默认浏览器拖拽效果
                 let selectNode = this.$store.getters.getSelectedNode
@@ -784,19 +884,16 @@
                 }
                 _this.$store.commit('showLoading')
                 _this.$store.commit("setLoadingText",`上传文件中。。`)
-                var fileDir = selectNode.dirPath + "/" + selectNode.title;
-                let fileList = e.dataTransfer.files; //获取文件对象
-                //检测是否是拖拽文件到页面的操作
-                if (fileList.length == 0) {
-                    return false;
-                }
-                for (var i = 0; i < fileList.length; i++) {
-                    let item = e.dataTransfer.items[i]
-                    let entry = item.webkitGetAsEntry()
-                    await this.uploadEntry(fileDir, entry)
-                    _this.selectChange([selectNode])
-                }
-                _this.$store.commit('hideLoading')
+                _this.$nextTick(async function(){
+                    let fileDir = selectNode.dirPath + "/" + selectNode.title;
+                    for (let i = 0; i < fileList.length; i++) {
+                        let item = e.dataTransfer.items[i]
+                        let entry = item.webkitGetAsEntry()
+                        await this.uploadEntry(fileDir, entry)
+                        _this.selectChange([selectNode])
+                        _this.$store.commit('hideLoading')
+                    }
+                })
             },
             initWorkspace(workspace,func){
 

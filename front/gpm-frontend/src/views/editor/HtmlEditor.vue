@@ -124,6 +124,7 @@
         created() {
         },
         mounted() {
+            vueThis=this;
         }
     }
 </script>

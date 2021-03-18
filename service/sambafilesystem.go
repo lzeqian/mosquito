@@ -152,7 +152,47 @@ func (s *SambaFileSystem) SaveTextFile(parentDir string, fileName string, conten
 	return s.SaveByte(parentDir, fileName, []byte(content), policyType)
 }
 func (s *SambaFileSystem) SaveByte(parentDir string, fileName string, content []byte, policyType os.FileMode) error {
-	return s.fs.WriteFile(s.getTargetPath(parentDir, fileName), content, policyType)
+	//return s.fs.WriteFile(, content, policyType)
+	//超过8M会出现eof写入异常，分批写入，每次5M
+	buffer := 5 * 1024 * 1024
+	targetFileName := s.getTargetPath(parentDir, fileName)
+	//创建文件写入缓冲区大小数据
+	f, err := s.fs.OpenFile(targetFileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, policyType)
+	if err != nil {
+		return err
+	}
+	startIndex := 0
+	if len(content) <= buffer {
+		_, err = f.Write(content)
+		startIndex = -1
+	} else {
+		_, err = f.Write(content[0:buffer])
+		startIndex = buffer
+	}
+	if err1 := f.Close(); err == nil {
+		err = err1
+	}
+	//如果有多余数据追加写入
+	if startIndex != -1 {
+		fa, err := s.fs.OpenFile(targetFileName, os.O_APPEND, policyType)
+		if err != nil {
+			return err
+		}
+		for {
+			if len(content)-startIndex <= buffer {
+				fa.Write(content[startIndex:])
+				break
+			} else {
+				fa.Write(content[startIndex : startIndex+buffer])
+				startIndex = startIndex + buffer
+			}
+		}
+		if err1 := fa.Close(); err == nil {
+			err = err1
+		}
+	}
+	return err
+
 }
 func (s *SambaFileSystem) Rename(srcDir string, src string, dest string) error {
 	srcPath := s.getTargetPath(srcDir, src)

@@ -87,6 +87,51 @@ func (c *ShareController) CancelShareFile() {
    :param fileDir 当前文件目录。
    :param fileName 当前文件名。
 */
+func (c *ShareController) GetShareUrl() {
+	shareKey := c.GetString("preShareKey")
+	isPublic := c.GetString("isPublic")
+	var goServer string
+	var shareUrl string
+	if isPublic != "" {
+		if isPublic == "0" {
+			goServer = beego.AppConfig.String("front.goServer")
+		} else {
+			goServer = beego.AppConfig.String("front.externGoServer")
+			if goServer == "" {
+				goServer = beego.AppConfig.String("front.goServer")
+			}
+		}
+		shareUrl = goServer
+	} else {
+		if shareKey != "" {
+			userLink := database.GetLink(shareKey)
+			if *userLink.IsPublic == 0 {
+				goServer = beego.AppConfig.String("front.goServer")
+			} else {
+				goServer = beego.AppConfig.String("front.externGoServer")
+				if goServer == "" {
+					goServer = beego.AppConfig.String("front.goServer")
+				}
+			}
+			shareUrl = goServer
+		} else {
+			returnJson := make(map[string]string)
+			returnJson["goServer"] = beego.AppConfig.String("front.goServer")
+			returnJson["externGoServer"] = beego.AppConfig.String("front.externGoServer")
+			returnJson["documentServer"] = beego.AppConfig.String("front.documentServer")
+			returnJson["externDocumentServer"] = beego.AppConfig.String("front.externDocumentServer")
+			ServeJSON(c.Controller, returnJson)
+			return
+		}
+	}
+	ServeJSON(c.Controller, shareUrl)
+}
+
+/**
+  查看分享file
+   :param fileDir 当前文件目录。
+   :param fileName 当前文件名。
+*/
 func (c *ShareController) GetShareFile() {
 	shareKey := c.GetString("shareKey")
 	ServeJSON(c.Controller, database.GetLink(shareKey))
@@ -127,8 +172,22 @@ func (c *ShareController) IsShareFile() {
 */
 func (c *ShareController) ShareStatic() {
 	shareKey := c.Ctx.Input.Param(":shareKey")
-	goServer := beego.AppConfig.String("front.goServer")
-	documentServer := beego.AppConfig.String("front.documentServer")
+	userLink := database.GetLink(shareKey)
+	var goServer string
+	var documentServer string
+	if *userLink.IsPublic == 0 {
+		goServer = beego.AppConfig.String("front.goServer")
+		documentServer = beego.AppConfig.String("front.documentServer")
+	} else {
+		goServer = beego.AppConfig.String("front.externGoServer")
+		if goServer == "" {
+			goServer = beego.AppConfig.String("front.goServer")
+		}
+		documentServer = beego.AppConfig.String("front.externDocumentServer")
+		if documentServer == "" {
+			documentServer = beego.AppConfig.String("front.documentServer")
+		}
+	}
 	injectJs := "<script type=\"text/javascript\">window.goServer='" + goServer + "'</script>"
 	injectJs += "<script type=\"text/javascript\">window.documentServer='" + documentServer + "'</script>"
 	injectJs += "<script type=\"text/javascript\">window.shareKey='" + shareKey + "'</script>"

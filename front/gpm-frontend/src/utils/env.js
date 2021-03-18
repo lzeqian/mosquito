@@ -1,5 +1,5 @@
 export const GlobalConfig={
-    goServer:window.goServer||"//192.168.20.13:8089/",
+    goServer:window.goServer||"//192.168.20.23:8089/",
     supportFile:/^.+(\.txt|\.md|\.flow|\.html|\.js|\.css|\.json|\.yaml|\.yml|\.xml|\.java|\.py|\.vue|\.mind|\.sh|\.cmd)$/,
     documentServer:window.documentServer||"http://10.10.0.100",
     editorMapping:{

@@ -38,7 +38,9 @@ Vue.prototype.$axios.interceptors.request.use(
         if(localStorage.getItem("token")) {
             config.headers['Authorization'] = localStorage.getItem("token");
         }
-        config.headers['Share-Key'] =  window.vueComponents.$store.getters.getShareData.ShareKey
+        if(window.vueComponents.$store.getters.getShareData && window.vueComponents.$store.getters.getShareData.ShareKey) {
+            config.headers['Share-Key'] = window.vueComponents.$store.getters.getShareData.ShareKey
+        }
         return config
     }, function (error) {
         return Promise.reject(error)
