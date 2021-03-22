@@ -100,6 +100,9 @@
                                         value: vueThis.contentEditor.getValue(),
                                     })
                                 }
+                            }, {
+                                name: "upload",
+                                tip: "上传word转换为md"
                             },
                             {
                                 name: "more",
@@ -117,7 +120,7 @@
                             },
                             ],
                         upload: {
-                            accept: 'image/*',
+                            accept: 'image/*,application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                             multiple: false,
                             url: this.$globalConfig.goServer + "file/uploadToServer",
                             linkToImgUrl: 'file/uploadToServer',
@@ -128,19 +131,29 @@
                             },
                             handler(files) {
                                 let selectedNode=vueThis.$store.getters.getSelectedNode
+                                let fileName=files[0].name
                                 const param = new FormData();
                                 param.append('myfile', files[0])
                                 param.append('projectName', selectedNode.fileName)
-                                vueThis.$axios.post(vueThis.$globalConfig.goServer + "file/uploadToServer", param).then(res => {
-                                    let imageData=res.data.data;
-                                    let name = files[0] && files[0].name;
-                                    let succFileText = "";
-                                    if (vueThis.contentEditor && vueThis.contentEditor.currentMode === "wysiwyg") {
-                                        succFileText += `\n <img alt=${name} src="${imageData}">`;
-                                    } else {
-                                        succFileText += `  \n![${name}](${imageData})`;
+                                let requestUrl=vueThis.$globalConfig.goServer + "file/uploadToServer";
+                                if (fileName.endsWith("doc") || fileName.endsWith("docx")){
+                                    requestUrl=vueThis.$globalConfig.goServer + "file/translateToMarkdown";
+                                }
+                                vueThis.$axios.post(requestUrl, param).then(res => {
+                                    if (fileName.endsWith("doc") || fileName.endsWith("docx")){
+                                        let mdData = res.data.data;
+                                        vueThis.contentEditor.setValue(mdData)
+                                    }else {
+                                        let imageData = res.data.data;
+                                        let name = files[0] && files[0].name;
+                                        let succFileText = "";
+                                        if (vueThis.contentEditor && vueThis.contentEditor.currentMode === "wysiwyg") {
+                                            succFileText += `\n <img alt=${name} src="${imageData}">`;
+                                        } else {
+                                            succFileText += `  \n![${name}](${imageData})`;
+                                        }
+                                        document.execCommand("insertHTML", false, succFileText);
                                     }
-                                    document.execCommand("insertHTML", false, succFileText);
 
                                 })
                             },

@@ -26,6 +26,7 @@ func init() {
 	beego.Router("/file/rename", &controllers.FileController{}, "post:RenameFile")
 	beego.Router("/file/uploadToBase64Img", &controllers.FileController{}, "post:UploadToBase64Img")
 	beego.Router("/file/transDoc", &controllers.FileController{}, "get:TranslateDoc")
+	beego.Router("/file/translateToMarkdown", &controllers.FileController{}, "post:TranslateToMarkdown")
 	beego.Router("/file/transPdf", &controllers.FileController{}, "get:TranslatePdf")
 	beego.Router("/file/uploadToServer", &controllers.FileController{}, "post:UploadToServer")
 	beego.Router("/file/viewerFromServer", &controllers.FileController{}, "get:ViewerFromServer")

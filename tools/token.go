@@ -8,7 +8,7 @@ import (
 
 const (
 	KEY                    string = "JWT-ARY-STARK"
-	DEFAULT_EXPIRE_SECONDS int    = 600 // default 10 minutes
+	DEFAULT_EXPIRE_SECONDS int    = 24 * 3600 // default 10 minutes
 
 )
 

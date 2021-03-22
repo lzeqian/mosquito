@@ -56,7 +56,6 @@
                 vueThis.loadEditorContentByShareKey(vueThis.shareKey, (vueThis, shareData) => {
                     if (shareData.IsPublic != 0) {
                         vueThis.$globalConfig.goServer = vueThis.$globalConfig.externGoServer
-                        debugger
                         vueThis.$globalConfig.documentServer = vueThis.$globalConfig.externDocumentServer
                     }
                     if (shareData.ID == 0) {

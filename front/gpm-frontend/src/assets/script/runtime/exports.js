@@ -39,7 +39,45 @@ define(function (require, exports, module) {
         })
       }
     });
+    var main1 = hotbox.state('main');
+    main1.button({
+      position: 'top',
+      label: '保存为图片',
+      key: 'S',
+      enable: canExp,
+      action: function() {
+        minder.exportData("png").then((imgUrl)=>{
+          // 这里是获取到的图片base64编码,这里只是个例子哈，要自行编码图片替换这里才能测试看到效果
+          // 如果浏览器支持msSaveOrOpenBlob方法（也就是使用IE浏览器的时候），那么调用该方法去下载图片
+            debugger
+            var bstr = atob(imgUrl.split(',')[1])
+            var n = bstr.length
+            var u8arr = new Uint8Array(n)
+            while (n--) {
+              u8arr[n] = bstr.charCodeAt(n)
+            }
+            let blobData = new Blob([u8arr])
+            let selectedNode=window.vueThis.$store.getters.getSelectedNode
+            let fileName=selectedNode.fileName;
+            let formData = new FormData();
+            fileName=fileName.substring(0,fileName.indexOf("."))+".png"
+            formData.append('myfile',blobData,fileName)
+            window.vueThis.$axios({
+              url: window.vueThis.$globalConfig.goServer +'file/upload?fileDir='+selectedNode.dirPath,
+              method: 'post',
+              processData:  {"Content-Type":"multipart/form-data",},
+              data: formData
+            }).then(()=>{
+              if(window.vueThis.$root.$children[0].$refs.home && window.vueThis.$root.$children[0].$refs.home.$refs.leftTree){
+                let leftTree=window.vueThis.$root.$children[0].$refs.home.$refs.leftTree;
+                let {index, parentNode} = leftTree.getParent(leftTree.$refs.tree.data[0], selectedNode)
+                leftTree.selectChange([parentNode])
+              }
 
+            })
+        })
+      }
+    });
     var exp = hotbox.state('exp');
     exps.forEach(item => {
       exp.button({

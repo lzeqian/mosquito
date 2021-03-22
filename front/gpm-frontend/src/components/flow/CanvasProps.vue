@@ -5,6 +5,24 @@
             <div class="title">欢迎使用饺子编辑器！</div>
 
         </div>
+        <div v-if="props.line" class="title">样式</div>
+        <div v-if="props.line" class="items">
+            <div class="flex grid">
+                <div>线条样式</div>
+            </div>
+            <div class="flex grid">
+                <div>
+                    <el-select v-model="lineDash" placeholder="请选择" @change="onSelectChangeDash">
+                        <el-option
+                                v-for="item in options"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </div>
+            </div>
+        </div>
         <!-- 选中节点 -->
         <div v-if="props.node">
             <div class="title">位置和大小</div>
@@ -179,6 +197,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="items">
                 <div class="flex grid">
                     <div title="padding-top">线条颜色</div>
@@ -378,6 +397,7 @@
                 nodeIsJson: false,
                 nodeData: '',
                 lineStyle: null,
+                lineDash:null,
                 bkType: "0",
                 options: [{
                     value: '[1,0]',
@@ -472,6 +492,10 @@
             onSelectChange(value) {
                 this.props.node.lineDash = eval(value)
                 this.$emit('change', this.props.node);
+            },
+            onSelectChangeDash(value) {
+                this.props.line.lineDash = eval(value)
+                this.$emit('change', this.props.line);
             },
             onChange(value) {
                 if (this.props.node) {

@@ -711,5 +711,8 @@
     .body {
         height: calc(100vh - 0.4rem);
     }
+    .icon-mind{
+        content: "\e629";
+    }
 </style>
 

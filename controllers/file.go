@@ -441,12 +441,45 @@ func (this *FileController) TranslateDoc() {
 		cmd = "/bin/bash"
 		param1 = "-c"
 	}
-
+	//pandoc -f markdown -t docx ./test.md -o test.docx
 	pandocPath := beego.AppConfig.String("pandocpath")
 	commandParam := pandocPath + " " + destPath + " -o " + genDestFileName
 	if tools.ExecCommand(cmd, []string{param1, commandParam}) {
 		readBytes, _ := ioutil.ReadFile(genDestFileName)
 		this.Ctx.ResponseWriter.Write(readBytes)
+	}
+}
+
+/**
+  获取子目录结构
+   :param fileDir 当前文件目录。
+   :param fileName 当前文件名。
+*/
+func (this *FileController) TranslateToMarkdown() {
+	_, fs, _ := this.GetFile("myfile") //返回文件，文件信息头，错误信息
+	uploadFileName := fs.Filename
+	uploadExt := strings.TrimLeft(path.Ext(uploadFileName), ".")
+	uploadFileNamePath := os.TempDir() + tools.PathSeparator + uuid.NewV4().String()
+	this.SaveToFile("myfile", uploadFileNamePath)
+	genDestFileNamePath := os.TempDir() + tools.PathSeparator + uuid.NewV4().String() + ".markdown"
+	defer os.Remove(uploadFileNamePath)
+	defer os.Remove(genDestFileNamePath)
+	os := runtime.GOOS
+	cmd := ""
+	param1 := ""
+	if os == "windows" {
+		cmd = "cmd"
+		param1 = "/C"
+	} else {
+		cmd = "/bin/bash"
+		param1 = "-c"
+	}
+	//pandoc -f markdown -t docx ./test.md -o test.docx
+	pandocPath := beego.AppConfig.String("pandocpath")
+	commandParam := pandocPath + " -f " + uploadExt + " -t markdown " + uploadFileNamePath + " -o " + genDestFileNamePath
+	if tools.ExecCommand(cmd, []string{param1, commandParam}) {
+		readBytes, _ := ioutil.ReadFile(genDestFileNamePath)
+		ServeJSON(this.Controller, string(readBytes))
 	}
 }
 
