@@ -69,7 +69,7 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
  - go-smb2 [教程](https://github.com/hirochachacha/go-smb2)
  - goftp [教程](https://github.com/dutchcoders/goftp)
  ## 版本更新
-# 1.0.2[2021-03-23]
+### 1.0.2[2021-03-23]
 - change：支持图片在线预览,在线涂鸦，保存功能暂时关闭[jiaozi]
 - change：支持所见即所得markdown [jiaozi]
 - change：拖拽上传文件功能增强（上传进度条） [jiaozi]
@@ -82,7 +82,7 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
 - Feature：支持权限控制 [jiaozi]
 - Feature：支持内外网共享功能 [jiaozi]
 - Feature：支持office在线编辑 [jiaozi]
-# 1.0.1 [2020-12-7]
+### 1.0.1 [2020-12-7]
 - Feature： 支持文档系统基本功能[jiaozi]
  ## 相关文档
  1. [用户操作手册](doc/user.md)
