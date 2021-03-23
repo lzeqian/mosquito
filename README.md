@@ -86,7 +86,7 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
 - Feature： 支持文档系统基本功能[jiaozi]
  ## 相关文档
  1. [用户操作手册](doc/user.md)
- 2. [运维手册](doc/oper.md)
+ 2. [安装手册](doc/oper.md)
  3. [二次开发引导手册](doc/dev.md) <br/>
  3.1. [前端关联编辑器](doc/devf.md)<br/>
  3.2. [后端文件系统开发](doc/devb.md)

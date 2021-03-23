@@ -1,4 +1,55 @@
 # mosquito
+
+## docker安装
+
+拷贝源代码目录下的.envfile和run.sh到任意工作目录，修改.envfile对应的参数，[参考](conf.md)
+```
+httpport=80
+runmode=prod
+frontGoServer=//docs.jieztech-internal.com/
+externFrontGoServer=//docs.kldidi.com/
+frontDocumentServer=http://10.10.0.100
+externFrontDocumentServer=http://xxx.xxx.com
+pandocpath=/usr/bin/pandoc
+libreofficepath=/usr/bin/libreoffice
+libreofficeTmpPath=/tmp
+uploadDir=/upload
+uploadAccessAdress=http://xxx.xxxx.com
+rootpath=${rootpath||/}
+sambahost=192.168.1.xxx
+sambaport=445
+sambauser=share
+sambapassword=xxxxxxx
+personRootpath=/person/
+personSambahost=192.168.1.xxx
+personSambaport=445
+personSambauser=personshare
+personSambapassword=xxxx
+emailSmtpHost=smtp.exmail.qq.com:25
+emailSmtpPassword=app@xxx.com
+emailSmtpPassword=xxxx
+```
+
+run.sh脚本内容：
+
+```
+mkdir -p /etc/mosquito
+setenforce 0
+docker run -d -p 80:80  -v /etc/mosquito:/application/rbac --env-file ./.envfile --name mosquito liaomin789/mosquito:1.0.0
+```
+
+>  注意docs.jieztech-internal.com域名指定到要部署的docker服务器的ip地址
+
+执行脚本
+
+```
+chmod +x ./run.sh && ./run.sh
+```
+用户权限相关文件：/etc/mosquito/rbac.yml ，添加用户权限参考：[参考](conf.md)
+```javascript
+
+```
+
 ## 普通安装
 
 ### 系统依赖项目
@@ -94,43 +145,4 @@ http://localhost:8080/console
 
 
 
-## docker安装
 
-拷贝源代码目录下的.envfile和run.sh到任意工作目录，修改.envfile对应的参数
-
-```
-httpport=80
-runmode=prod
-frontGoServer=//docs.jieztech-internal.com/
-frontDocumentServer=http://10.10.0.100
-pandocpath=/usr/bin/pandoc
-libreofficepath=/usr/bin/libreoffice
-uploadDir=/upload
-uploadAccessAdress=http://docs.jieztech-internal.com
-sambahost=192.168.1.250
-sambaport=445
-sambauser=share
-sambapassword=s[2]AV%E
-personRootpath=/person/
-personSambahost=192.168.1.250
-personSambaport=445
-personSambauser=share
-personSambapassword=s[2]AV%E
-```
-
-run.sh脚本内容：
-
-```
-mkdir -p /etc/mosquito
-setenforce 0
-docker run -d -p 80:80  -v /etc/mosquito:/application/rbac --env-file ./.envfile --name mosquito liaomin789/mosquito:1.0.0
-```
-
->  注意docs.jieztech-internal.com域名指定到要部署的docker服务器的ip地址
-
-执行脚本
-
-```
-chmod +x ./run.sh && ./run.sh
-```
-修改密码在：/etc/mosquito/rbac.yml
