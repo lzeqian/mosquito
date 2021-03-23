@@ -54,7 +54,8 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
  ![系统拓扑图](doc/images/topology.png)
  ### 前端依赖插件
  - pdfjs（pdf预览器）[教程](http://mozilla.github.io/pdf.js/)
- - mavon-editor（markdown编辑器）[教程](https://github.com/hinesboy/mavonEditor)
+ - mavon-editor（废弃，markdown编辑器）[教程](https://github.com/hinesboy/mavonEditor)
+ - vditor (类typro编辑器)[教程](https://github.com/Vanessa219/vditor)
  - codemirror（代码编辑工具）[教程](https://github.com/surmon-china/vue-codemirror)
  - wangeditor（html文本编辑器）[教程](http://www.wangeditor.com/)
  - x-data-spreadsheet（废弃，excel预览工具）[教程](https://github.com/myliang/x-spreadsheet)
@@ -62,6 +63,7 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
  - mxgraph(废弃，流程图，无导出功能) [教程](https://jgraph.github.io/mxgraph/javascript/examples/grapheditor/www/index.html)
  - 乐吾乐 Topology（正方形错误，其他图形待绘制）[教程](https://www.yuque.com/alsmile/topology/make-shape)
  - kityminder-core（思维导图）[教程](https://github.com/fex-team/kityminder-core/wiki/command)
+ - literallycanvas(图片涂鸦)[教程](http://literallycanvas.com/)
 ### 后端依赖插件
  - beego [教程](https://beego.me/docs/intro/)
  - go-smb2 [教程](https://github.com/hirochachacha/go-smb2)
