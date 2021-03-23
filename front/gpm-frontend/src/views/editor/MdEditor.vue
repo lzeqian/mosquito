@@ -102,7 +102,8 @@
                                 }
                             }, {
                                 name: "upload",
-                                tip: "上传word转换为md"
+                                tip: "上传word转换为md",
+                                icon: `<img style="height: 16px" src='/img/updoc.png'/>`,
                             }, {
                                 name: "downloadDoc",
                                 tip: "转换为doc下载",

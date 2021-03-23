@@ -29,7 +29,8 @@ func (_ *UserLink) InitDatabase(gdb *gorm.DB) {
 func InsertLink(link UserLink) {
 	link.ID, _ = snowFake.NextID()
 	link.CreatedAt = time.Now()
-	*link.Status = 1
+	status := 1
+	link.Status = &status
 	db.Model(&UserLink{}).Create(link)
 }
 func UpdateLink(link UserLink) {
