@@ -56,7 +56,8 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
  - mavon-editor（markdown编辑器）[教程](https://github.com/hinesboy/mavonEditor)
  - codemirror（代码编辑工具）[教程](https://github.com/surmon-china/vue-codemirror)
  - wangeditor（html文本编辑器）[教程](http://www.wangeditor.com/)
- - x-data-spreadsheet（excel预览工具）[教程](https://github.com/myliang/x-spreadsheet)
+ - x-data-spreadsheet（废弃，excel预览工具）[教程](https://github.com/myliang/x-spreadsheet)
+ - onlyoffice(office协作)[教程](https://api.onlyoffice.com/)
  - mxgraph(废弃，流程图，无导出功能) [教程](https://jgraph.github.io/mxgraph/javascript/examples/grapheditor/www/index.html)
  - 乐吾乐 Topology（正方形错误，其他图形待绘制）[教程](https://www.yuque.com/alsmile/topology/make-shape)
  - kityminder-core（思维导图）[教程](https://github.com/fex-team/kityminder-core/wiki/command)
@@ -65,9 +66,21 @@ mosquito是一款以文件系统作为基础的在线文档管理系统，
  - go-smb2 [教程](https://github.com/hirochachacha/go-smb2)
  - goftp [教程](https://github.com/dutchcoders/goftp)
  ## 版本更新
- 1. 1.0.0：版本支持全局的文档管理基建。
- 2. 1.0.1：权限+个人文档+在线photoshop作图（暂未开发）+showdoc集成+docker简易部署。
- 3. 1.0.2：其他文件系统支持(sftp+oss等)。
+# 1.0.2[2021-03-23]
+- change：支持图片在线预览,在线涂鸦，保存功能暂时关闭[jiaozi]
+- change：支持所见即所得markdown [jiaozi]
+- change：拖拽上传文件功能增强（上传进度条） [jiaozi]
+- change： vuepress支持个人和公共编译 [jiaozi]
+- Feature：支持模板创建文件 [jiaozi]
+- Feature：支持跨空间拷贝 [jiaozi]
+- Feature：支持流程图和思维导图生成图片 [jiaozi]
+- Feature：支持文档发送邮件 [jiaozi]
+- Feature：支持文件拖拽功能 [jiaozi]
+- Feature：支持权限控制 [jiaozi]
+- Feature：支持内外网共享功能 [jiaozi]
+- Feature：支持office在线编辑 [jiaozi]
+# 1.0.1 [2020-12-7]
+- Feature： 支持文档系统基本功能[jiaozi]
  ## 相关文档
  1. [用户操作手册](doc/user.md)
  2. [运维手册](doc/oper.md)
