@@ -511,7 +511,17 @@
                         if(_this.$root.$children[0].$refs.home && _this.$root.$children[0].$refs.home.$refs.leftTree){
                             let leftTree=_this.$root.$children[0].$refs.home.$refs.leftTree;
                             let {index, parentNode} = leftTree.getParent(leftTree.$refs.tree.data[0], selectedNode)
-                            leftTree.selectChange([parentNode])
+                            parentNode.children.push({
+                                title: fileName,
+                                fileName: fileName,
+                                expand: false,
+                                dirPath: parentNode.dirPath+(parentNode.root?"":"/")+parentNode.fileName,
+                                contextmenu: true,
+                                isDir: false,
+                                root: false,
+                                children: null
+                            })
+                            //leftTree.selectChange([parentNode])
                         }
 
                     })

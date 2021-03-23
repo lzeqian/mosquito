@@ -49,7 +49,6 @@ define(function (require, exports, module) {
         minder.exportData("png").then((imgUrl)=>{
           // 这里是获取到的图片base64编码,这里只是个例子哈，要自行编码图片替换这里才能测试看到效果
           // 如果浏览器支持msSaveOrOpenBlob方法（也就是使用IE浏览器的时候），那么调用该方法去下载图片
-            debugger
             var bstr = atob(imgUrl.split(',')[1])
             var n = bstr.length
             var u8arr = new Uint8Array(n)
@@ -71,7 +70,17 @@ define(function (require, exports, module) {
               if(window.vueThis.$root.$children[0].$refs.home && window.vueThis.$root.$children[0].$refs.home.$refs.leftTree){
                 let leftTree=window.vueThis.$root.$children[0].$refs.home.$refs.leftTree;
                 let {index, parentNode} = leftTree.getParent(leftTree.$refs.tree.data[0], selectedNode)
-                leftTree.selectChange([parentNode])
+                // leftTree.selectChange([parentNode])
+                parentNode.children.push({
+                  title: fileName,
+                  fileName: fileName,
+                  expand: false,
+                  dirPath: parentNode.dirPath+(parentNode.root?"":"/")+parentNode.fileName,
+                  contextmenu: true,
+                  isDir: false,
+                  root: false,
+                  children: null
+                })
               }
 
             })
