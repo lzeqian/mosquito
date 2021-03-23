@@ -103,6 +103,21 @@
                             }, {
                                 name: "upload",
                                 tip: "上传word转换为md"
+                            }, {
+                                name: "downloadDoc",
+                                tip: "转换为doc下载",
+                                className: "right",
+                                icon: `<img style="height: 16px" src='/img/doc.png'/>`,
+                                click() {
+                                    let selectedNode=vueThis.$store.getters.getSelectedNode
+                                    let token=localStorage.getItem("token")
+                                    if(vueThis.$store.getters.getEditorMode=="share") {
+                                        let shareKey = vueThis.$store.getters.getShareData["ShareKey"]
+                                        window.location = vueThis.$globalConfig.goServer + "file/transDoc?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName + (token ? "&token=" + token : "") + "&shareKey=" + shareKey
+                                    }else {
+                                        window.location = vueThis.$globalConfig.goServer + "file/transDoc?fileDir=" + selectedNode.dirPath + "&fileName=" + selectedNode.fileName + (token ? "&token=" + token : "") + "&Workspace=" + vueThis.$store.getters.currentWorkspace
+                                    }
+                                }
                             },
                             {
                                 name: "more",
