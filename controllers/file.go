@@ -100,6 +100,7 @@ func (this *FileController) CopyFileTo() {
 	globalFileSystem, personFileSystem := InitFileSystem()
 	var sourFileSystem service.FileSystem = personFileSystem
 	var targetFileSystem service.FileSystem = globalFileSystem
+
 	token := this.Ctx.Input.Header("Authorization")
 	clwas, _ := tools.GetTokenInfo(token)
 	//从公共空间复制到个人空间，个人空间路径需带上用户名
@@ -109,7 +110,8 @@ func (this *FileController) CopyFileTo() {
 		userInfo := service.GetUser(clwas.Name)
 		targetDir = tools.PathSeparator + userInfo["userFullName"].(string) + targetDir
 	}
-
+	defer sourFileSystem.Close()
+	defer targetFileSystem.Close()
 	//公共目录需要检查是否有读的权限
 	if sourceWorkspace == "0" && !service.CheckUserMulAct(clwas.Name, fileDir, []string{service.ActRead}) {
 		ServeJSON(this.Controller, errors.New("请确保当前用户拥有以下权限："+service.ActRead))

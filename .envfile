@@ -1,7 +1,9 @@
 httpport=80
 runmode=prod
 frontGoServer=//docs.jieztech-internal.com/
+externFrontGoServer=//docs.kldidi.com/
 frontDocumentServer=http://10.10.0.100
+externFrontDocumentServer=http://only.kldidi.com
 pandocpath=/usr/bin/pandoc
 libreofficepath=/usr/bin/libreoffice
 libreofficeTmpPath=/tmp
@@ -16,3 +18,6 @@ personSambahost=192.168.1.250
 personSambaport=445
 personSambauser=share
 personSambapassword=s[2]AV%E
+emailSmtpHost=smtp.exmail.qq.com:25
+emailSmtpPassword=app@jieztech.com
+emailSmtpPassword=xxxxxxxx

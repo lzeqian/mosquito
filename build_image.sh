@@ -1,3 +1,4 @@
 #!/bin/bash
 go build -x
-docker build -t liaomin789/mosquito:1.0.1 .
+source ./version.sh
+docker build -t liaomin789/mosquito:${MOS_VERSION} .
