@@ -7,6 +7,8 @@
                 </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuCopy" v-if="selectNode!=null && !selectNode.isDir">复制
                 </DropdownItem>
+                <DropdownItem @click.native="handleContextMenuCopyTo" v-if="selectNode!=null && !selectNode.isDir">复制到
+                </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuDelete" v-if="selectNode!=null && !selectNode.isDir">删除
                 </DropdownItem>
                 <DropdownItem @click.native="handleContextMenuUpload" v-if="selectNode!=null && selectNode.isDir">
@@ -155,6 +157,15 @@
                 </FormItem>
             </Form>
         </Modal>
+        <Modal
+                v-model="showCopyWindow"
+                title="复制到选择"
+                @on-ok="copyToOther"
+                :z-index="10002">
+            <Tree :data="copyWindowData" ref="copyToTree" :render="renderContent" v-if="!isCollapsed" @on-select-change="copyToSelectChage"
+                  class="demo-tree-render" >
+            </Tree>
+        </Modal>
         <div style="position: absolute;top:0px;right:5px">
             <a @click="gotoDesktop">
                 <svg class="icon" aria-hidden="true">
@@ -184,6 +195,8 @@
         },
         data() {
             return {
+                showCopyWindow:false,
+                copyWindowData:[],
                 showSendEmail:false,
                 emailObject:{
                     subject:"",
@@ -519,6 +532,54 @@
                     _this.selectChange([parentNode])
                 })
             },
+            copyToOther(){
+                let _this=this;
+                let curSelectNodes = this.$refs.copyToTree.getSelectedNodes()
+                if (curSelectNodes.length > 0) {
+                    let curSelectNode = curSelectNodes[0];
+                    if(!curSelectNode.isDir){
+                        this.$Message.error("请选择一个目录");
+                        return;
+                    }
+                    this.copyFileTo(_this.$store.getters.getSelectedNode,curSelectNode, ()=>{
+                        _this.showCopyWindow=false;
+                        _this.$Message.info("复制成功");
+                    })
+
+                }else{
+                    this.$Message.error("请选择一个目录");
+                }
+            },
+            loadCopyOtherData(func){
+                let _this=this;
+                let workspace = this.$store.getters.currentWorkspace == "1"  ? "0" : "1";
+                let title = workspace == "0" ? "公共文档库" : "个人文档库";
+                this.$axios.get(this.$globalConfig.goServer + "home/listSub?root=true&fileDir=/",{
+                    headers: {
+                        'Workspace': workspace
+                    }}).then((response) => {
+                    _this.copyWindowData = [
+                        {
+                            title: title,
+                            fileName: "",
+                            expand: true,
+                            dirPath: '/',
+                            contextmenu: false,
+                            isDir: true,
+                            root: true,
+                            children: response.data.data
+                        }];
+                    func && func();
+
+                })
+            },
+            handleContextMenuCopyTo(){
+                let _this=this
+                _this.loadCopyOtherData(()=>{
+                    _this.showCopyWindow=true;
+                })
+
+            },
             /**
              * 创建vuepress项目
              */
@@ -777,6 +838,24 @@
                 // const source_index = source_parent.children.indexOf(this.dragstartData);
                 // source_parent.children.splice(source_index, 1);
                 // console.log(this.data5,"data5")
+            },
+            /*
+              复制到只有目录展开
+             */
+            copyToSelectChage(selectedList,func){
+                let _this=this;
+                const node = selectedList[selectedList.length - 1]
+                let workspace = this.$store.getters.currentWorkspace == "1"  ? "0" : "1";
+                if (node && node.isDir) {
+                    _this.$axios.get(_this.$globalConfig.goServer + "home/listSub?fileDir=" + node.dirPath + "&fileName=" + node.fileName + "&root=" + node.root,{
+                        headers: {
+                            'Workspace': workspace
+                        }}).then((response) => {
+                        node.children = response.data.data //挂载子节点
+                        node.expand = true    //展开子节点
+                        func && typeof(func)=="function" && func();
+                    })
+                }
             },
             /**
              * 树节点被选中时触发的编辑器打开和父节点展开事件

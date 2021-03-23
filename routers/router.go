@@ -18,6 +18,7 @@ func init() {
 	beego.Router("/file/uploadOfficeFile", &controllers.FileController{}, "post:UploadOfficeFile")
 	beego.Router("/file/save", &controllers.FileController{}, "post:SaveFile")
 	beego.Router("/file/copy", &controllers.FileController{}, "post:CopyFile")
+	beego.Router("/file/copyTo", &controllers.FileController{}, "post:CopyFileTo")
 	beego.Router("/file/delete", &controllers.FileController{}, "delete:DeleteFile")
 	beego.Router("/file/query", &controllers.FileController{}, "get:QueryFile")
 	beego.Router("/file/create", &controllers.FileController{}, "post:CreateFile")

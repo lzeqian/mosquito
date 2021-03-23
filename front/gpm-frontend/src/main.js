@@ -44,7 +44,8 @@ Vue.prototype.$axios.interceptors.request.use(
             return Promise.reject("您尚未登录请先登录");
         }
         config.headers['Authorization'] = localStorage.getItem("token");
-        config.headers['Workspace'] =  window.vueComponents.$store.getters.currentWorkspace
+        if(!config.headers.hasOwnProperty("Workspace"))
+             config.headers['Workspace'] =  window.vueComponents.$store.getters.currentWorkspace
         return config
     }, function (error) {
         return Promise.reject(error)

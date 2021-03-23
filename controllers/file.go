@@ -86,6 +86,53 @@ func (this *FileController) UploadFile() {
 	fmt.Print(fileDir, fileName)
 	ServeJSON(this.Controller, "")
 }
+func (this *FileController) CopyFileTo() {
+	data := this.Ctx.Input.RequestBody
+	paramData := make(map[string]string)
+	json.Unmarshal(data, &paramData)
+	//原始空间类型 0表示公共 1表示个人
+	sourceWorkspace := this.Ctx.Input.Header("Workspace")
+	//原始空间文件目录和文件名
+	fileDir := paramData["fileDir"]
+	fileName := paramData["fileName"]
+	//目标空间的目录名称
+	targetDir := paramData["targetDir"]
+	globalFileSystem, personFileSystem := InitFileSystem()
+	var sourFileSystem service.FileSystem = personFileSystem
+	var targetFileSystem service.FileSystem = globalFileSystem
+	token := this.Ctx.Input.Header("Authorization")
+	clwas, _ := tools.GetTokenInfo(token)
+	//从公共空间复制到个人空间，个人空间路径需带上用户名
+	if sourceWorkspace == "0" {
+		sourFileSystem = globalFileSystem
+		targetFileSystem = personFileSystem
+		userInfo := service.GetUser(clwas.Name)
+		targetDir = tools.PathSeparator + userInfo["userFullName"].(string) + targetDir
+	}
+
+	//公共目录需要检查是否有读的权限
+	if sourceWorkspace == "0" && !service.CheckUserMulAct(clwas.Name, fileDir, []string{service.ActRead}) {
+		ServeJSON(this.Controller, errors.New("请确保当前用户拥有以下权限："+service.ActRead))
+		return
+	}
+
+	//从个人空间复制到公共空间需要检测公共空间目录是否有权限
+	if sourceWorkspace == "1" && !service.CheckUserMulAct(clwas.Name, targetDir, []string{service.ActCreateFile, service.ActWrite}) {
+		ServeJSON(this.Controller, errors.New("请确保当前用户拥有以下权限："+strings.Join([]string{service.ActCreateFile, service.ActWrite}, ",")))
+		return
+	}
+	srcByte, err := sourFileSystem.ReadByte(fileDir, fileName)
+	if err != nil {
+		ServeJSON(this.Controller, err)
+		return
+	}
+	err = targetFileSystem.SaveByte(targetDir, fileName, srcByte, os.ModePerm)
+	if err != nil {
+		ServeJSON(this.Controller, err)
+		return
+	}
+	ServeJSON(this.Controller, "")
+}
 
 /**
   将文件从当前位置拖动到到另外一个位置

@@ -289,7 +289,24 @@ function copyFile(func) {
         _this.$Message.error("请选择文件");
     }
 }
+function copyFileTo(srcNode,destNode,func) {
+    let _this = this;
+    if (!srcNode.isDir) {
+        let fileName = srcNode.fileName;
+        let fileDir = srcNode.dirPath;
+        let targetDir=destNode.dirPath+"/"+destNode.fileName
+        this.$axios.post(this.$globalConfig.goServer + "file/copyTo", {
+            fileDir: fileDir,
+            fileName: fileName,
+            targetDir:targetDir
+        }).then((response) => {
+            func && func()
+        })
 
+    } else {
+        _this.$Message.error("请选择文件");
+    }
+}
 function moveFile(srcNode, destNode, func) {
     let _this = this;
     if (srcNode.isDir) {
@@ -341,6 +358,7 @@ export default {
     loadEditorContentByShareKey,
     saveEditorContent,
     copyFile,
+    copyFileTo,
     createDir,
     _createDir,
     deleteDir,
