@@ -1,13 +1,20 @@
 # mosquito
 ## 背景
- 对比目前市面所有文档系统，发现功能过于单一，对公司的共享目录文档管理方式无法兼容，共享文档安全性低
+ 1.对比目前市面所有文档系统，发现功能过于单一，如 互联网文档编辑工具，钉钉，processon，金山文档，百度网盘，功能过于单一，文档过于分散。
+ 2.pc机器安装的软件过多过咋，企业版本费用过高，比如office，亿图等。
+ 3.对公司的共享目录文档管理方式无法兼容，共享文档安全性低
  同时互联网对文档管理更加偏向文本化（markdown,html,docx），平台间更易兼容。
+ 
  
 目前市面上文档管理系统比较：
  - wookteam：支持在线文档（markdown+流程图），不支持其他文档，不支持备份导出转换，[文档](https://gitee.com/aipaw/wookteam)。
  - wiki(confluence+MediaWiki+Docsify+vuepress)：支持富客户端+markdown，不支持其他文档管理[文档](https://www.jianshu.com/p/f79236289793)。
  - showdoc:支持在线接口api定制，markdown格式，无法支持其他文档[文档](https://www.showdoc.com.cn/demo?page_id=7)。
  - vuepress: 支持markdown写作，需要安装辅助和熟悉前端语言，必须线下操作，部署麻烦[文档](https://www.vuepress.cn/guide/getting-started.html)。
+ -。
+
+
+
 ## 简介
 mosquito是一款以文件系统作为基础的在线文档管理系统，
 在线文档管理系统功能包括：
